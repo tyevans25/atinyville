@@ -3,52 +3,47 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
   try {
-    const { username, score } = await request.json()
+    const { userId, username, score } = await request.json()
 
-    // Validate input
-    if (!username || typeof score !== 'number') {
+    if (!userId || typeof score !== 'number') {
       return NextResponse.json(
-        { error: 'Username and score are required' },
+        { error: 'User ID and score are required' },
         { status: 400 }
       )
     }
 
-    // Clean username (lowercase, trim)
-    const cleanUsername = username.toLowerCase().trim()
-
-    // Get today's date (YYYY-MM-DD format)
     const today = new Date().toISOString().split('T')[0]
-    const playKey = `played:${cleanUsername}:${today}`
+    const playKey = `played:${userId}:${today}`
 
-    // Check if user already played today
+    // Check if already played
     const hasPlayed = await kv.get(playKey)
     if (hasPlayed) {
       return NextResponse.json(
-        { error: 'You already played today! Come back tomorrow.' },
+        { error: 'Already played today' },
         { status: 403 }
       )
     }
 
-    // Get user's current best score
-    const currentBestKey = `score:${cleanUsername}`
+    // Get current best score
+    const currentBestKey = `score:${userId}`
     const currentBest = await kv.get<number>(currentBestKey)
 
-    // Only save if it's their best score
+    // Save if it's their best
     if (!currentBest || score > currentBest) {
       await kv.set(currentBestKey, score)
       
-      // Add to sorted leaderboard (sorted set by score)
+      // Update leaderboard with username for display
       await kv.zadd('leaderboard', {
         score: score,
-        member: cleanUsername
+        member: `${userId}:${username}` // Store both for display
       })
     }
 
-    // Mark that they played today (expires in 24 hours)
+    // Mark as played today
     await kv.set(playKey, true, { ex: 86400 })
 
-    // Get user's rank
-    const rank = await kv.zrevrank('leaderboard', cleanUsername)
+    // Get rank
+    const rank = await kv.zrevrank('leaderboard', `${userId}:${username}`)
 
     return NextResponse.json({
       success: true,

@@ -11,7 +11,7 @@ import Navigation from "@/components/Navigation"
 const campaignUpdates = [
   {
     id: 1,
-    title: "🎵 Pre-Save GOLDEN HOUR: Part.4",
+    title: "🫧 Pre-Save GOLDEN HOUR: Part.4",
     description: "Pre-save the highly anticipated album on Spotify & Apple Music!",
     spotifyUrl: "https://open.spotify.com/embed/prerelease/2Mnno3uSsiVdOpKJL4Vz5b?utm_source=generator",
     links: [
@@ -158,7 +158,7 @@ export default function Home() {
       setQuizStarted(true)
     }
   }, [])
-  
+
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % campaignUpdates.length)
   }

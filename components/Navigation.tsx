@@ -3,12 +3,13 @@
 import Link from "next/link"
 import { useState } from "react"
 import { Menu, X, Trophy, TrendingUp, ShoppingBag, Map, Play } from "lucide-react"
+import { UserButton, SignInButton, useUser } from "@clerk/nextjs"
 
 export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { isSignedIn, user } = useUser()
 
   const navItems = [
-    { name: "Home", href: "/", icon: null },
     { name: "Streaming Hub", href: "/streaming", icon: TrendingUp },
     { name: "Shop", href: "/shop", icon: ShoppingBag },
     { name: "Lore", href: "/lore", icon: Map },
@@ -30,7 +31,7 @@ export default function Navigation() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
-            {navItems.slice(1).map((item) => {
+            {navItems.map((item) => {
               const Icon = item.icon
               return (
                 <Link
@@ -43,6 +44,31 @@ export default function Navigation() {
                 </Link>
               )
             })}
+            
+            {/* Auth Section */}
+            <div className="ml-4 pl-4 border-l border-white/10">
+              {isSignedIn ? (
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-gray-300">
+                    {user.firstName || user.username || 'ATINY'}
+                  </span>
+                  <UserButton 
+                    afterSignOutUrl="/"
+                    appearance={{
+                      elements: {
+                        avatarBox: "w-8 h-8"
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <SignInButton mode="modal">
+                  <button className="px-4 py-2 bg-white hover:bg-gray-200 text-gray-800 rounded-lg font-medium transition-all">
+                    Sign In
+                  </button>
+                </SignInButton>
+              )}
+            </div>
           </div>
 
           {/* Mobile Menu Button */}
@@ -58,7 +84,7 @@ export default function Navigation() {
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-white/10">
             <div className="flex flex-col gap-4">
-              {navItems.slice(1).map((item) => {
+              {navItems.map((item) => {
                 const Icon = item.icon
                 return (
                   <Link
@@ -72,6 +98,24 @@ export default function Navigation() {
                   </Link>
                 )
               })}
+              
+              {/* Mobile Auth */}
+              <div className="pt-4 border-t border-white/10">
+                {isSignedIn ? (
+                  <div className="flex items-center gap-3">
+                    <UserButton afterSignOutUrl="/" />
+                    <span className="text-gray-300">
+                      {user.firstName || user.username || 'ATINY'}
+                    </span>
+                  </div>
+                ) : (
+                  <SignInButton mode="modal">
+                    <button className="w-full px-4 py-2 bg-white hover:bg-gray-200 text-gray-800 rounded-lg font-medium transition-all">
+                      Sign In
+                    </button>
+                  </SignInButton>
+                )}
+              </div>
             </div>
           </div>
         )}

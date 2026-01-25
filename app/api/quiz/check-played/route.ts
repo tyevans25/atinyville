@@ -3,28 +3,22 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
   try {
-    const { username } = await request.json()
+    const { userId } = await request.json()
 
-    if (!username) {
+    if (!userId) {
       return NextResponse.json(
-        { error: 'Username is required' },
+        { error: 'User ID is required' },
         { status: 400 }
       )
     }
 
-    // Clean username
-    const cleanUsername = username.toLowerCase().trim()
-
-    // Get today's date
     const today = new Date().toISOString().split('T')[0]
-    const playKey = `played:${cleanUsername}:${today}`
-
-    // Check if user played today
+    const playKey = `played:${userId}:${today}`
     const hasPlayed = await kv.get(playKey)
 
     return NextResponse.json({
       hasPlayed: !!hasPlayed,
-      username: cleanUsername
+      userId
     })
 
   } catch (error) {

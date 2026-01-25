@@ -5,17 +5,14 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { quizQuestions, type Question } from "@/data/questions"
-import { Clock, Trophy, Play, User } from "lucide-react"
+import { Clock, Trophy, User } from "lucide-react"
+import { useUser, SignInButton } from "@clerk/nextjs"
 import Link from "next/link"
 
 export default function Quiz() {
-  // Username state
-  const [username, setUsername] = useState("")
-  const [usernameSubmitted, setUsernameSubmitted] = useState(false)
-  const [usernameError, setUsernameError] = useState("")
-  const [checkingUsername, setCheckingUsername] = useState(false)
-
-  // Quiz state management
+  const { isSignedIn, user, isLoaded } = useUser()
+  
+  // Quiz state
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [score, setScore] = useState(0)
@@ -23,24 +20,48 @@ export default function Quiz() {
   const [isAnswered, setIsAnswered] = useState(false)
   const [quizCompleted, setQuizCompleted] = useState(false)
   const [speedBonus, setSpeedBonus] = useState(0)
+  const [hasPlayedToday, setHasPlayedToday] = useState(false)
+  const [checkingPlayStatus, setCheckingPlayStatus] = useState(true)
 
   // Results state
-  const [submittingScore, setSubmittingScore] = useState(false)
   const [userRank, setUserRank] = useState<number | null>(null)
   const [isNewBest, setIsNewBest] = useState(false)
 
   const currentQuestion = quizQuestions[currentQuestionIndex]
   const progress = ((currentQuestionIndex + 1) / quizQuestions.length) * 100
 
-  // Timer logic - counts UP instead of down
+  // Check if user already played today
   useEffect(() => {
-    if (!isAnswered && usernameSubmitted) {
+    if (isSignedIn && user) {
+      checkPlayStatus()
+    }
+  }, [isSignedIn, user])
+
+  const checkPlayStatus = async () => {
+    try {
+      const response = await fetch('/api/quiz/check-played', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user?.id })
+      })
+      const data = await response.json()
+      setHasPlayedToday(data.hasPlayed)
+    } catch (error) {
+      console.error('Error checking play status:', error)
+    } finally {
+      setCheckingPlayStatus(false)
+    }
+  }
+
+  // Timer logic
+  useEffect(() => {
+    if (!isAnswered && isSignedIn && !hasPlayedToday) {
       const timer = setTimeout(() => setTimeElapsed(timeElapsed + 1), 1000)
       return () => clearTimeout(timer)
     }
-  }, [timeElapsed, isAnswered, usernameSubmitted])
+  }, [timeElapsed, isAnswered, isSignedIn, hasPlayedToday])
 
-  // Calculate speed bonus - decreases by 10 points every 3 seconds
+  // Calculate speed bonus
   const calculateSpeedBonus = () => {
     if (timeElapsed <= 3) return 50
     if (timeElapsed <= 6) return 40
@@ -50,56 +71,9 @@ export default function Quiz() {
     return 0
   }
 
-  // Get current bonus to show in UI
   const getCurrentBonus = () => {
     if (isAnswered) return speedBonus
     return calculateSpeedBonus()
-  }
-
-  const handleUsernameSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!username.trim()) {
-      setUsernameError("Please enter a username")
-      return
-    }
-
-    if (username.length < 3) {
-      setUsernameError("Username must be at least 3 characters")
-      return
-    }
-
-    if (username.length > 20) {
-      setUsernameError("Username must be less than 20 characters")
-      return
-    }
-
-    setCheckingUsername(true)
-    setUsernameError("")
-
-    try {
-      // Check if user already played today
-      const response = await fetch('/api/quiz/check-played', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: username.trim() })
-      })
-
-      const data = await response.json()
-
-      if (data.hasPlayed) {
-        setUsernameError("You already played today! Come back tomorrow for a new attempt. 🏴‍☠️")
-        setCheckingUsername(false)
-        return
-      }
-
-      setUsernameSubmitted(true)
-    } catch (error) {
-      console.error('Error checking username:', error)
-      setUsernameError("Something went wrong. Please try again.")
-    } finally {
-      setCheckingUsername(false)
-    }
   }
 
   const handleAnswerSelect = (answerIndex: number) => {
@@ -110,10 +84,8 @@ export default function Quiz() {
 
   const handleSubmitAnswer = () => {
     if (isAnswered) return
-
     setIsAnswered(true)
-
-    // Check if answer is correct
+    
     if (selectedAnswer === currentQuestion.correctAnswer) {
       const bonus = calculateSpeedBonus()
       setSpeedBonus(bonus)
@@ -135,79 +107,94 @@ export default function Quiz() {
   }
 
   const submitScoreToLeaderboard = async () => {
-    setSubmittingScore(true)
-
     try {
       const response = await fetch('/api/quiz/submit-score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: username.trim(), score })
+        body: JSON.stringify({ 
+          userId: user?.id,
+          username: user?.username || user?.firstName || 'ATINY',
+          score 
+        })
       })
 
       const data = await response.json()
-
       if (data.success) {
         setUserRank(data.rank)
         setIsNewBest(data.isNewBest)
       }
     } catch (error) {
       console.error('Error submitting score:', error)
-    } finally {
-      setSubmittingScore(false)
     }
   }
 
-  // Username entry screen
-  if (!usernameSubmitted) {
+  // Loading state
+  if (!isLoaded || checkingPlayStatus) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center">
+        <p className="text-white">Loading...</p>
+      </div>
+    )
+  }
+
+  // Not signed in
+  if (!isSignedIn) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center p-4">
         <Card className="glass-card w-full max-w-md">
           <CardHeader className="glass-header-blue text-white text-center">
-            <div className="mx-auto mb-4 w-20 h-20 bg-primary rounded-full flex items-center justify-center">
-              <User className="w-10 h-10 text-white" />
+            <div className="mx-auto mb-4 w-20 h-20 bg-blue-500/30 rounded-full flex items-center justify-center">
+              <Trophy className="w-10 h-10 text-white" />
             </div>
-            <CardTitle className="text-3xl">Enter Your Username</CardTitle>
-            <CardDescription>
-              Choose a username to compete on the leaderboard!
+            <CardTitle className="text-3xl">Sign In Required</CardTitle>
+            <CardDescription className="text-gray-300">
+              Create a free account to take the quiz and compete on the leaderboard!
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleUsernameSubmit} className="space-y-4">
-              <div>
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="ATINYfan123"
-                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
-                  maxLength={20}
-                  disabled={checkingUsername}
-                />
-                {usernameError && (
-                  <p className="text-red-500 text-sm mt-2">{usernameError}</p>
-                )}
-                <p className="text-xs text-gray-500 mt-2">
-                  3-20 characters • You can only play once per day
-                </p>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full"
-                size="lg"
-                disabled={checkingUsername}
-              >
-                {checkingUsername ? 'Checking...' : 'Start Quiz'}
+          <CardContent className="p-6 space-y-4">
+            <SignInButton mode="modal">
+              <Button className="w-full bg-white hover:bg-gray-200 text-gray-800" size="lg">
+                Sign In / Sign Up
               </Button>
+            </SignInButton>
+            <Link href="/">
+              <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10">
+                Back to Hub
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
-              <div className="text-center pt-4">
-                <Link href="/leaderboard">
-                  <Button variant="ghost" className="text-purple-600">
-                    View Leaderboard
-                  </Button>
-                </Link>
-              </div>
-            </form>
+  // Already played today
+  if (hasPlayedToday) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center p-4">
+        <Card className="glass-card w-full max-w-md">
+          <CardHeader className="glass-header-blue text-white text-center">
+            <CardTitle className="text-3xl">Come Back Tomorrow!</CardTitle>
+            <CardDescription className="text-gray-300">
+              You've already played today, {user.firstName || user.username || 'ATINY'} 🏴‍☠️
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-6 space-y-4">
+            <p className="text-gray-300 text-center">
+              You can play once per day. Check back tomorrow to improve your score!
+            </p>
+            <div className="flex gap-3">
+              <Link href="/leaderboard" className="flex-1">
+                <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10">
+                  View Leaderboard
+                </Button>
+              </Link>
+              <Link href="/" className="flex-1">
+                <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10">
+                  Back to Hub
+                </Button>
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -218,16 +205,18 @@ export default function Quiz() {
   if (quizCompleted) {
     const maxScore = quizQuestions.reduce((sum, q) => sum + q.points + 50, 0)
     const percentage = Math.round((score / maxScore) * 100)
-
+    
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center p-4">
         <Card className="glass-card w-full max-w-2xl">
           <CardHeader className="glass-header-blue text-white text-center">
-            <div className="mx-auto mb-4 w-20 h-20 bg-primary rounded-full flex items-center justify-center">
+            <div className="mx-auto mb-4 w-20 h-20 bg-blue-500/30 rounded-full flex items-center justify-center">
               <Trophy className="w-10 h-10 text-white" />
             </div>
             <CardTitle className="text-3xl">Quiz Complete!</CardTitle>
-            <CardDescription>Great job, {username}! 🏴‍☠️</CardDescription>
+            <CardDescription className="text-gray-300">
+              Great job, {user.firstName || user.username || 'ATINY'}! 🏴‍☠️
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-8 p-8">
             <div className="text-center py-4">
@@ -237,17 +226,26 @@ export default function Quiz() {
                 <p className="text-green-400 font-semibold mt-4">🎉 New Personal Best!</p>
               )}
             </div>
-
+            
             {userRank && (
-              <div className="bg-blue-500/20 border border-blue-400/30 rounded-lg p-6 text-center">                <p className="text-sm text-purple-600 font-semibold mb-1">Your Rank</p>
-                <p className="text-4xl font-bold text-purple-600">#{userRank}</p>
+              <div className="bg-blue-500/20 border border-blue-400/30 rounded-lg p-6 text-center">
+                <p className="text-sm text-blue-300 font-semibold mb-1">Your Rank</p>
+                <p className="text-4xl font-bold text-white">#{userRank}</p>
               </div>
             )}
 
-            <div className="bg-secondary p-4 rounded-lg space-y-2">
-              <p className="text-sm font-semibold">Share your score on Twitter!</p>
-              <Button
-                className="w-full"
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm text-gray-400">
+                <span>Accuracy</span>
+                <span className="font-semibold text-white">{percentage}%</span>
+              </div>
+              <Progress value={percentage} max={100} className="bg-white/10" />
+            </div>
+
+            <div className="bg-white/5 border border-white/10 p-4 rounded-lg space-y-2">
+              <p className="text-sm font-semibold text-white">Share your score on Twitter!</p>
+              <Button 
+                className="w-full bg-white hover:bg-gray-200 text-gray-800"
                 onClick={() => {
                   const text = `I just scored ${score} points on the ATEEZ Streaming Quiz! 🏴‍☠️${userRank ? ` Ranked #${userRank}!` : ''} Can you beat my score, ATINY?\n\n#ATEEZ #에이티즈`
                   window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank')
@@ -259,12 +257,12 @@ export default function Quiz() {
 
             <div className="flex gap-3">
               <Link href="/leaderboard" className="flex-1">
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10">
                   View Leaderboard
                 </Button>
               </Link>
               <Link href="/" className="flex-1">
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10">
                   Back to Hub
                 </Button>
               </Link>
@@ -288,7 +286,7 @@ export default function Quiz() {
           <div className="flex justify-between items-center text-white">
             <div className="flex items-center gap-2">
               <User className="w-5 h-5" />
-              <span className="font-semibold">{username}</span>
+              <span className="font-semibold">{user.firstName || user.username || 'ATINY'}</span>
             </div>
             <div className="flex items-center gap-2">
               <Trophy className="w-5 h-5" />
@@ -314,12 +312,12 @@ export default function Quiz() {
         <Card className="glass-card">
           <CardHeader className="glass-header-blue text-white">
             <CardTitle>{currentQuestion.question}</CardTitle>
-            <CardDescription>
+            <CardDescription className="text-gray-300">
               Worth {currentQuestion.points} points + speed bonus (50 pts max, decreases every 3 sec)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Video Embed */}
+            {/* Video/Spotify Embeds */}
             {currentQuestion.videoUrl && (
               <div className="aspect-video rounded-lg overflow-hidden bg-black">
                 <iframe
@@ -334,7 +332,6 @@ export default function Quiz() {
               </div>
             )}
 
-            {/* Spotify Embed */}
             {currentQuestion.spotifyUrl && (
               <div className="rounded-lg overflow-hidden">
                 <iframe
@@ -354,7 +351,7 @@ export default function Quiz() {
                 const isSelected = selectedAnswer === index
                 const isCorrect = index === currentQuestion.correctAnswer
                 const showResult = isAnswered
-
+                
                 let buttonClass = ""
                 if (showResult) {
                   if (isCorrect) {
@@ -363,14 +360,14 @@ export default function Quiz() {
                     buttonClass = "bg-red-500 text-white border-red-600 hover:bg-red-500"
                   }
                 } else if (isSelected) {
-                  buttonClass = "bg-primary text-white"
+                  buttonClass = "bg-white text-gray-800 hover:bg-gray-200"
                 }
 
                 return (
                   <Button
                     key={index}
                     variant={isSelected && !showResult ? "default" : "outline"}
-                    className={`h-auto py-4 text-left justify-start ${buttonClass}`}
+                    className={`h-auto py-4 text-left justify-start border-white/20 text-white hover:bg-white/10 ${buttonClass}`}
                     onClick={() => handleAnswerSelect(index)}
                     disabled={isAnswered}
                   >
@@ -381,17 +378,17 @@ export default function Quiz() {
               })}
             </div>
 
-            {/* Show explanation after answering */}
+            {/* Explanation */}
             {isAnswered && currentQuestion.explanation && (
-              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-                <p className="text-sm font-semibold mb-1">
+              <div className="bg-blue-500/10 border border-blue-400/20 rounded-lg p-4">
+                <p className="text-sm font-semibold mb-1 text-white">
                   {selectedAnswer === currentQuestion.correctAnswer ? "Correct! 🎉" : "Not quite!"}
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-gray-300">
                   {currentQuestion.explanation}
                 </p>
                 {speedBonus > 0 && (
-                  <p className="text-sm font-semibold text-primary mt-2">
+                  <p className="text-sm font-semibold text-yellow-400 mt-2">
                     Speed Bonus: +{speedBonus} points! ⚡
                   </p>
                 )}
@@ -401,18 +398,18 @@ export default function Quiz() {
             {/* Action Buttons */}
             <div className="flex gap-3">
               {!isAnswered ? (
-                <Button
+                <Button 
                   onClick={handleSubmitAnswer}
                   disabled={selectedAnswer === null}
-                  className="flex-1"
+                  className="flex-1 bg-white hover:bg-gray-200 text-gray-800"
                   size="lg"
                 >
                   Submit Answer
                 </Button>
               ) : (
-                <Button
+                <Button 
                   onClick={handleNextQuestion}
-                  className="flex-1"
+                  className="flex-1 bg-white hover:bg-gray-200 text-gray-800"
                   size="lg"
                 >
                   {currentQuestionIndex < quizQuestions.length - 1 ? "Next Question" : "See Results"}

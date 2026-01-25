@@ -3,18 +3,19 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
   try {
-    // Get top 20 scores (sorted by score, descending)
     const topScores = await kv.zrange('leaderboard', 0, 19, {
       rev: true,
       withScores: true
     })
 
-    // Format the response
     const leaderboard = []
     for (let i = 0; i < topScores.length; i += 2) {
+      const userIdAndName = topScores[i] as string
+      const username = userIdAndName.split(':')[1] || 'ATINY'
+      
       leaderboard.push({
         rank: (i / 2) + 1,
-        username: topScores[i],
+        username: username,
         score: topScores[i + 1]
       })
     }
