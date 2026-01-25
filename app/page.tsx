@@ -152,6 +152,13 @@ export default function Home() {
     return () => clearInterval(interval)
   }, [carouselPaused])
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('startQuiz') === 'true') {
+      setQuizStarted(true)
+    }
+  }, [])
+  
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % campaignUpdates.length)
   }
@@ -159,6 +166,8 @@ export default function Home() {
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + campaignUpdates.length) % campaignUpdates.length)
   }
+
+
 
   // Filter out past events and sort by date
   const futureEvents = upcomingEvents

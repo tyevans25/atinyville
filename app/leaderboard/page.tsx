@@ -51,14 +51,14 @@ export default function LeaderboardPage() {
       <Navigation />
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 pt-24 px-4">
         <div className="max-w-4xl mx-auto">
-          
+
           {/* Header */}
           <div className="mb-6 text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 glow-text">
               🏆 Leaderboard
             </h1>
             <p className="text-gray-300">
-              Top ATINYs by Quiz Score
+              Can you claim your spot among the top ATINYs?
             </p>
           </div>
 
@@ -67,7 +67,7 @@ export default function LeaderboardPage() {
             <CardHeader className="glass-header-blue text-white">
               <CardTitle className="flex items-center gap-2 justify-center">
                 <Trophy className="w-6 h-6" />
-                Top 20 Scores
+                TOP 20 ATINYs
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
@@ -86,11 +86,10 @@ export default function LeaderboardPage() {
                   {leaderboard.map((entry) => (
                     <div
                       key={entry.rank}
-                      className={`flex items-center justify-between p-4 rounded-lg transition-all ${
-                        entry.rank <= 3
+                      className={`flex items-center justify-between p-4 rounded-lg transition-all ${entry.rank <= 3
                           ? 'bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border-2 border-blue-400/50'
                           : 'bg-white/5 hover:bg-white/10'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-4 flex-1">
                         <div className="flex-shrink-0">
@@ -115,11 +114,15 @@ export default function LeaderboardPage() {
 
               {/* Single Take Quiz Button */}
               <div className="mt-6 pt-6 border-t border-white/10">
-                <Link href="/">
-                  <Button className="w-full bg-white hover:bg-gray-200 text-gray-800">
-                    Take the Quiz
-                  </Button>
-                </Link>
+                <Button
+                  className="w-full bg-white hover:bg-gray-200 text-gray-800"
+                  onClick={() => {
+                    window.location.href = '/'
+                    // Then user clicks "Start Quiz" from carousel
+                  }}
+                >
+                  Take the Quiz
+                </Button>
               </div>
             </CardContent>
           </Card>
