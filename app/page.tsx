@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Quiz from "@/components/Quiz"
 import { Trophy, Calendar, Music, ShoppingCart, ExternalLink, ChevronLeft, ChevronRight, Play, Zap } from "lucide-react"
+import Navigation from "@/components/Navigation"
 
 // EDIT THIS: Add your campaign updates here!
 const campaignUpdates = [
@@ -12,6 +13,7 @@ const campaignUpdates = [
     id: 1,
     title: "🎵 Pre-Save GOLDEN HOUR: Part.4",
     description: "Pre-save the highly anticipated album on Spotify & Apple Music!",
+    spotifyUrl: "https://open.spotify.com/embed/prerelease/2Mnno3uSsiVdOpKJL4Vz5b?utm_source=generator",
     links: [
       { url: "https://open.spotify.com/prerelease/2Mnno3uSsiVdOpKJL4Vz5b?si=a70b8c79107d4aa5", label: "Spotify", color: "green" },
       { url: "https://ateez.sng.to/golden-hour-part-4", label: "Apple Music", color: "pink" }
@@ -20,8 +22,9 @@ const campaignUpdates = [
   },
   {
     id: 2,
-    title: "🛒 Album Pre-Order",
-    description: "Pre-order physical albums now - limited edition available!",
+    title: "GOLDEN HOUR: Part.4 Album Teaser",
+    description: "Get a sneak peek of the upcoming album!",
+    videoUrl: "https://www.youtube.com/embed/hPdS8GVb_9w?si=6QaxkRWpqqY7eNkG", // GOLDEN HOUR: Part.4 Album Teaser
     links: [
       { url: "https://linktr.ee/atzinfo", label: "Pre-Order", color: "purple" }
     ],
@@ -29,15 +32,26 @@ const campaignUpdates = [
   },
   {
     id: 3,
+    title: "🛒 Pre-Order GOLDEN HOUR: Part.4",
+    description: "Pre-order physical albums!",
+    imageUrl: "https://image.static.bstage.in/cdn-cgi/image/metadata=none,dpr=1,f=auto,width=640/ateez/dea14100-3e72-4fd3-9303-67a3201448c0/072b473d-4b13-458d-8375-783ba2ccac0f/ori.jpg",
+    links: [
+      { url: "https://linktr.ee/atzinfo", label: "Pre-Order", color: "purple" }
+    ],
+    urgent: false
+  },
+  {
+    id: 4,
     title: "📹 Stream 'In Your Fantasy' MV",
     description: "Let's get to 40M views!",
+    videoUrl: "https://www.youtube.com/embed/JOF2ZTqvzwY?si=3k_W7mXWz7mU4pEh", // In Your Fantasy MV
     links: [
       { url: "https://youtu.be/JOF2ZTqvzwY?si=NnH7BohnhSPyBDQ9", label: "Watch on YouTube", color: "orange" }
     ],
     urgent: false
   },
   {
-    id: 4,
+    id: 5,
     title: "🏆 Daily ATEEZ Quiz",
     description: "Can you top the leaderboard?",
     links: [
@@ -125,15 +139,18 @@ export default function Home() {
   const [quizStarted, setQuizStarted] = useState(false)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [showAllEvents, setShowAllEvents] = useState(false)
+  const [carouselPaused, setCarouselPaused] = useState(false)
 
-  // Auto-advance carousel
+  // Auto-advance carousel (only when not paused)
   useEffect(() => {
+    if (carouselPaused) return
+
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % campaignUpdates.length)
-    }, 5000) // Change slide every 5 seconds
+    }, 5000)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [carouselPaused])
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % campaignUpdates.length)
@@ -161,58 +178,87 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800">
-      <div className="container mx-auto px-4 py-8 md:py-16">
-        <div className="max-w-6xl mx-auto space-y-8">
-          
-          {/* Header */}
-          <div className="text-center space-y-2">
-            <h1 className="text-5xl md:text-7xl font-bold text-white">
-              ATINYTOWN
-            </h1>
-            <p className="text-xl md:text-2xl text-purple-100">
-              ATINYs Hub for ATEEZ 🏴‍☠️
-            </p>
-          </div>
+    <>
+      <Navigation />
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 pt-16">
+        <div className="container mx-auto px-4 py-4 md:py-8">
 
           {/* Campaign Updates Carousel */}
-          <Card className="bg-white/95 backdrop-blur overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-gray-800 to-gray-900 border-b border-white/10 text-white">
               <CardTitle className="flex items-center gap-2">
                 <Music className="w-5 h-5" />
-                Active Campaigns
+                Overview
               </CardTitle>
-              <CardDescription className="text-purple-100">
-                Help ATEEZ by participating in current streaming campaigns
-              </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               <div className="relative">
                 {/* Carousel content */}
-                <div className="p-6 md:p-8">
+                <div className="p-6 md:p-8 carousel-smooth">
                   <div className="flex items-start gap-4">
                     <div className="flex-1">
                       {campaignUpdates[currentSlide].urgent && (
                         <span className="inline-block bg-red-500 text-white text-xs font-bold px-2 py-1 rounded mb-2">
-                          URGENT
+                          Available Now
                         </span>
                       )}
-                      <h3 className="text-2xl font-bold mb-2 text-gray-900">
+                      <h3 className="text-2xl font-bold mb-2 text-white">
                         {campaignUpdates[currentSlide].title}
                       </h3>
-                      <p className="text-gray-600 mb-4">
+                      <p className="text-gray-300 mb-4">
                         {campaignUpdates[currentSlide].description}
                       </p>
+                      <div
+                        onMouseEnter={() => setCarouselPaused(true)}
+                        onMouseLeave={() => setCarouselPaused(false)}
+                        onClick={() => setCarouselPaused(true)}
+                      >
+                        {campaignUpdates[currentSlide].videoUrl && (
+                          <div className="aspect-video rounded-lg overflow-hidden bg-black mb-4">
+                            <iframe
+                              width="100%"
+                              height="100%"
+                              src={campaignUpdates[currentSlide].videoUrl}
+                              title="Campaign video"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                              className="w-full h-full"
+                            />
+                          </div>
+                        )}
+                      </div>
+                      {campaignUpdates[currentSlide].imageUrl && (
+                        <div className="aspect-video rounded-lg overflow-hidden bg-black mb-4">
+                          <img
+                            src={campaignUpdates[currentSlide].imageUrl}
+                            alt={campaignUpdates[currentSlide].title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      {campaignUpdates[currentSlide].spotifyUrl && (
+                        <div className="rounded-lg overflow-hidden mb-4">
+                          <iframe
+                            src={campaignUpdates[currentSlide].spotifyUrl}
+                            width="100%"
+                            height="152"
+                            frameBorder="0"
+                            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                            loading="lazy"
+                            style={{ borderRadius: '12px' }}
+                          />
+                        </div>
+                      )}
                       <div className="flex flex-wrap gap-3">
                         {campaignUpdates[currentSlide].links.map((link, index) => {
                           const colorClasses: Record<string, string> = {
-                            green: "bg-green-600 hover:bg-green-700",
-                            pink: "bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600",
-                            purple: "bg-purple-600 hover:bg-purple-700",
-                            blue: "bg-blue-600 hover:bg-blue-700",
-                            orange: "bg-orange-600 hover:bg-orange-700"
+                            green: "bg-white hover:bg-gray-200 text-gray-800 hover:text-gray-900",
+                            pink: "bg-white hover:bg-gray-200 text-gray-800 hover:text-gray-900",
+                            purple: "bg-white hover:bg-gray-200 text-gray-800 hover:text-gray-900",
+                            blue: "bg-white hover:bg-gray-200 text-gray-800 hover:text-gray-900",
+                            orange: "bg-white hover:bg-gray-200 text-gray-800 hover:text-gray-900"
                           }
-                          
+
                           return (
                             <Button
                               key={index}
@@ -223,7 +269,7 @@ export default function Home() {
                                   window.open(link.url, '_blank')
                                 }
                               }}
-                              className={`${colorClasses[link.color]} text-white`}
+                              className={`${colorClasses[link.color]}`}
                             >
                               {link.label}
                               <ExternalLink className="w-4 h-4 ml-2" />
@@ -239,15 +285,15 @@ export default function Home() {
                 <div className="absolute top-1/2 left-4 right-4 flex justify-between items-center -translate-y-1/2 pointer-events-none">
                   <button
                     onClick={prevSlide}
-                    className="pointer-events-auto bg-white/80 hover:bg-white rounded-full p-2 shadow-lg transition"
+                    className="pointer-events-auto bg-white/20 hover:bg-white/30 backdrop-blur border border-white/30 rounded-full p-2 shadow-lg transition"
                   >
-                    <ChevronLeft className="w-6 h-6 text-purple-600" />
+                    <ChevronLeft className="w-6 h-6 text-white" />
                   </button>
                   <button
                     onClick={nextSlide}
-                    className="pointer-events-auto bg-white/80 hover:bg-white rounded-full p-2 shadow-lg transition"
+                    className="pointer-events-auto bg-white/20 hover:bg-white/30 backdrop-blur border border-white/30 rounded-full p-2 shadow-lg transition"
                   >
-                    <ChevronRight className="w-6 h-6 text-purple-600" />
+                    <ChevronRight className="w-6 h-6 text-white" />
                   </button>
                 </div>
 
@@ -257,11 +303,10 @@ export default function Home() {
                     <button
                       key={index}
                       onClick={() => setCurrentSlide(index)}
-                      className={`h-2 rounded-full transition-all ${
-                        index === currentSlide 
-                          ? 'w-8 bg-purple-600' 
-                          : 'w-2 bg-gray-300'
-                      }`}
+                      className={`h-2 rounded-full transition-all ${index === currentSlide
+                        ? 'w-8 bg-blue-600'
+                        : 'w-2 bg-white/40'
+                        }`}
                     />
                   ))}
                 </div>
@@ -270,11 +315,11 @@ export default function Home() {
           </Card>
 
           {/* Two Column Layout */}
-          <div className="grid md:grid-cols-2 gap-6">
-            
+          <div className="grid md:grid-cols-2 gap-6 mt-8">
+
             {/* Schedule Calendar */}
-            <Card className="bg-white/95 backdrop-blur">
-              <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+            <Card className="glass-card">
+              <CardHeader className="glass-header-blue text-white">
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="w-5 h-5" />
                   Schedule
@@ -290,21 +335,21 @@ export default function Home() {
                         const eventDate = new Date(event.date)
                         const today = new Date()
                         const daysUntil = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-                        
+
                         return (
-                          <div key={event.id} className="flex gap-4 border-l-4 border-purple-600 pl-4 py-2">
+                          <div key={event.id} className="flex gap-4 border-l-4 border-white/50 pl-4 py-2">
                             <div className="flex-shrink-0 text-center">
-                              <div className="text-2xl font-bold text-purple-600">
+                              <div className="text-2xl font-bold text-white">
                                 {eventDate.getDate()}
                               </div>
-                              <div className="text-xs text-gray-600 uppercase">
+                              <div className="text-xs text-gray-300 uppercase">
                                 {eventDate.toLocaleDateString('en-US', { month: 'short' })}
                               </div>
                             </div>
                             <div className="flex-1">
-                              <h4 className="font-semibold text-gray-900">{event.title}</h4>
-                              <p className="text-sm text-gray-600">{event.description}</p>
-                              <p className="text-xs text-purple-600 font-medium mt-1">
+                              <h4 className="font-semibold text-white">{event.title}</h4>
+                              <p className="text-sm text-gray-300">{event.description}</p>
+                              <p className="text-xs text-white font-medium mt-1">
                                 {daysUntil === 0 ? 'TODAY!' : daysUntil === 1 ? 'Tomorrow' : `In ${daysUntil} days`}
                               </p>
                             </div>
@@ -312,11 +357,11 @@ export default function Home() {
                         )
                       })}
                     </div>
-                    
+
                     {futureEvents.length > 6 && (
                       <button
                         onClick={() => setShowAllEvents(!showAllEvents)}
-                        className="w-full mt-4 text-purple-600 hover:text-purple-700 font-medium text-sm py-2 transition"
+                        className="w-full mt-4 text-white hover:text-gray-400 font-medium text-sm py-2 transition"
                       >
                         {showAllEvents ? '← Show Less' : `View All ${futureEvents.length} Events →`}
                       </button>
@@ -326,9 +371,9 @@ export default function Home() {
               </CardContent>
             </Card>
 
-{/* Watch Next - Embedded Playlists */}
-            <Card className="bg-white/95 backdrop-blur">
-              <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+            {/* Watch Next - Embedded Playlists */}
+            <Card className="glass-card">
+              <CardHeader className="glass-header-blue text-white">
                 <CardTitle className="flex items-center gap-2">
                   <Play className="w-5 h-5" />
                   What's Next?
@@ -337,42 +382,42 @@ export default function Home() {
               <CardContent className="p-6 space-y-4">
                 {/* YouTube MV */}
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2 text-sm">📺 ATEEZ Present</h4>
-                  <iframe 
+                  <h4 className="font-semibold text-white mb-2 text-sm">📺 ATEEZ Present</h4>
+                  <iframe
                     style={{ borderRadius: '12px' }}
-                    width="100%" 
-                    height="200" 
-                    src="https://www.youtube.com/embed/XP7zqLMu-mM?si=cEYGaCq_xHdE1Ngi" 
-                    frameBorder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    width="100%"
+                    height="200"
+                    src="https://www.youtube.com/embed/XP7zqLMu-mM?si=cEYGaCq_xHdE1Ngi"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                   />
                 </div>
 
                 {/* Spotify Playlist */}
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2 text-sm">🎵 ATEEZ on Spotify</h4>
-                  <iframe 
+                  <h4 className="font-semibold text-white mb-2 text-sm">🎵 ATEEZ on Spotify</h4>
+                  <iframe
                     style={{ borderRadius: '12px' }}
-                    src="https://open.spotify.com/embed/playlist/37i9dQZF1DXdlpBrO6fF3s?utm_source=generator&theme=0" 
-                    width="100%" 
-                    height="152" 
-                    frameBorder="0" 
-                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                    src="https://open.spotify.com/embed/playlist/37i9dQZF1DXdlpBrO6fF3s?utm_source=generator&theme=0"
+                    width="100%"
+                    height="152"
+                    frameBorder="0"
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                     loading="lazy"
                   />
                 </div>
 
                 {/* YouTube Playlist */}
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2 text-sm">📺 WANTEEZ</h4>
-                  <iframe 
+                  <h4 className="font-semibold text-white mb-2 text-sm">📺 WANTEEZ</h4>
+                  <iframe
                     style={{ borderRadius: '12px' }}
-                    width="100%" 
-                    height="200" 
-                    src="https://www.youtube.com/embed/videoseries?si=506tvL7Jdx0S40eQ&amp;list=PL_G3lYLGW-D_yqkYBZgIhCTYrN18POCdQ" 
-                    frameBorder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    width="100%"
+                    height="200"
+                    src="https://www.youtube.com/embed/videoseries?si=506tvL7Jdx0S40eQ&amp;list=PL_G3lYLGW-D_yqkYBZgIhCTYrN18POCdQ"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                   />
                 </div>
@@ -381,26 +426,25 @@ export default function Home() {
           </div>
 
           {/* Quiz Feature Highlight */}
-          <Card className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+          <Card className="bg-gradient-to-r from-gray-800 to-gray-900 border-b border-white/10 text-white">
             <CardContent className="p-8">
               <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="flex-1">
                   <h3 className="text-2xl font-bold mb-2">
                     🎮 ATEEZ Streaming Quiz
                   </h3>
-                  <p className="text-purple-100 mb-4">
-                    Test your knowledge while streaming! Answer questions with embedded MVs 
+                  <p className="text-gray-300 mb-4">
+                    Test your knowledge while streaming! Answer questions with embedded MVs
                     and songs. Earn points, get speed bonuses, and challenge other ATINYs!
                   </p>
                   <div className="flex flex-wrap gap-2 text-sm">
-                    <span className="bg-white/20 px-3 py-1 rounded-full">30s per question</span>
                     <span className="bg-white/20 px-3 py-1 rounded-full">Speed bonuses</span>
                     <span className="bg-white/20 px-3 py-1 rounded-full">Share on Twitter</span>
                   </div>
                 </div>
-                <Button 
+                <Button
                   size="lg"
-                  className="bg-white text-purple-700 hover:bg-purple-50 text-lg px-8 py-6"
+                  className="bg-white text-gray-400 hover:bg-purple-50 text-lg px-8 py-6"
                   onClick={() => setQuizStarted(true)}
                 >
                   <Trophy className="w-5 h-5 mr-2" />
@@ -415,13 +459,13 @@ export default function Home() {
 
       {/* Footer */}
       <div className="text-center pb-8">
-        <p className="text-purple-200 text-sm">
-          Made with 💜 by ATINYs, for ATINYs
+        <p className="text-gray-400 text-sm">
+          Made for ATINYs
         </p>
-        <p className="text-purple-300 text-xs mt-2">
+        <p className="text-gray-500 text-xs mt-2">
           Not affiliated with KQ Entertainment
         </p>
       </div>
-    </div>
+    </>
   )
 }
