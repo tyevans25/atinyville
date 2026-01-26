@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/check-streams",
+      "schedule": "0 0,4,8,12,16,20 * * *"
+    },
+    {
+      "path": "/api/cron/check-streams",
+      "schedule": "0 22,23 * * *"
+    }
+  ]
+}

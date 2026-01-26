@@ -63,7 +63,7 @@ export default function Navigation() {
                 </div>
               ) : (
                 <SignInButton mode="modal">
-                  <button className="px-4 py-2 bg-white hover:bg-gray-200 text-gray-800 rounded-lg font-medium transition-all">
+                  <button className="px-6 py-0.5 bg-white hover:bg-gray-200 text-gray-800 rounded-lg text-sm transition-all whitespace-nowrap">
                     Sign In
                   </button>
                 </SignInButton>

@@ -1,0 +1,86 @@
+import { kv } from '@vercel/kv'
+import { NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
+
+// GET: Fetch today's goal and user's streams
+export async function GET() {
+  try {
+    const { userId } = await auth()
+    const today = new Date().toISOString().split('T')[0]
+    
+    // Get today's goal
+    const goalKey = `daily:goal:${today}`
+    const goal = await kv.get<{
+      song: string
+      target: number
+      current: number
+    }>(goalKey)
+
+    if (!goal) {
+      return NextResponse.json(null)
+    }
+
+    // Get user's personal streams if logged in
+    let userStreams = 0
+    if (userId) {
+      const userStreamsKey = `daily:streams:${userId}:${today}`
+      userStreams = await kv.get<number>(userStreamsKey) || 0
+    }
+
+    return NextResponse.json({
+      song: goal.song,
+      target: goal.target,
+      current: goal.current,
+      userStreams
+    })
+
+  } catch (error) {
+    console.error('Error fetching daily goal:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch goal' },
+      { status: 500 }
+    )
+  }
+}
+
+// POST: Set today's goal (admin only - you'll call this manually or via admin panel)
+export async function POST(request: Request) {
+  try {
+    const { song, target } = await request.json()
+
+    if (!song || !target) {
+      return NextResponse.json(
+        { error: 'Song and target are required' },
+        { status: 400 }
+      )
+    }
+
+    const today = new Date().toISOString().split('T')[0]
+    const goalKey = `daily:goal:${today}`
+
+    // Check if goal already exists
+    const existingGoal = await kv.get(goalKey)
+    const current = existingGoal ? (existingGoal as any).current : 0
+
+    // Set today's goal (expires in 24 hours)
+    await kv.set(goalKey, {
+      song,
+      target,
+      current
+    }, { ex: 86400 })
+
+    return NextResponse.json({
+      success: true,
+      song,
+      target,
+      current
+    })
+
+  } catch (error) {
+    console.error('Error setting daily goal:', error)
+    return NextResponse.json(
+      { error: 'Failed to set goal' },
+      { status: 500 }
+    )
+  }
+}

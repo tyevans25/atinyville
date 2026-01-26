@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Quiz from "@/components/Quiz"
 import { Trophy, Calendar, Music, ShoppingCart, ExternalLink, ChevronLeft, ChevronRight, Play, Zap } from "lucide-react"
 import Navigation from "@/components/Navigation"
+import DailyGoalSlide from "@/components/DailyGoalSlide"
 
 // EDIT THIS: Add your campaign updates here!
 const campaignUpdates = [
@@ -24,7 +25,7 @@ const campaignUpdates = [
     id: 2,
     title: "GOLDEN HOUR: Part.4 Album Teaser",
     description: "Get a sneak peek of the upcoming album!",
-    videoUrl: "https://www.youtube.com/embed/hPdS8GVb_9w?si=6QaxkRWpqqY7eNkG", // GOLDEN HOUR: Part.4 Album Teaser
+    videoUrl: "https://www.youtube.com/embed/hPdS8GVb_9w?si=6QaxkRWpqqY7eNkG",
     links: [
       { url: "https://linktr.ee/atzinfo", label: "Pre-Order", color: "purple" }
     ],
@@ -44,7 +45,7 @@ const campaignUpdates = [
     id: 4,
     title: "📹 Stream 'In Your Fantasy' MV",
     description: "Let's get to 40M views!",
-    videoUrl: "https://www.youtube.com/embed/JOF2ZTqvzwY?si=3k_W7mXWz7mU4pEh", // In Your Fantasy MV
+    videoUrl: "https://www.youtube.com/embed/JOF2ZTqvzwY?si=3k_W7mXWz7mU4pEh",
     links: [
       { url: "https://youtu.be/JOF2ZTqvzwY?si=NnH7BohnhSPyBDQ9", label: "Watch on YouTube", color: "orange" }
     ],
@@ -58,6 +59,10 @@ const campaignUpdates = [
       { url: "#quiz", label: "Start Quiz", color: "purple" }
     ],
     urgent: false
+  },
+  {
+    id: 6,
+    component: <DailyGoalSlide />
   }
 ]
 
@@ -167,19 +172,16 @@ export default function Home() {
     setCurrentSlide((prev) => (prev - 1 + campaignUpdates.length) % campaignUpdates.length)
   }
 
-
-
   // Filter out past events and sort by date
   const futureEvents = upcomingEvents
     .filter(event => {
       const eventDate = new Date(event.date)
       const today = new Date()
-      today.setHours(0, 0, 0, 0) // Reset time to start of day
+      today.setHours(0, 0, 0, 0)
       return eventDate >= today
     })
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
-  // Show only first 6 events unless "show all" is clicked
   const displayedEvents = showAllEvents ? futureEvents : futureEvents.slice(0, 6)
 
   if (quizStarted) {
@@ -204,90 +206,100 @@ export default function Home() {
               <div className="relative">
                 {/* Carousel content */}
                 <div className="p-6 md:p-8 carousel-smooth">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-1">
-                      {campaignUpdates[currentSlide].urgent && (
-                        <span className="inline-block bg-red-500 text-white text-xs font-bold px-2 py-1 rounded mb-2">
-                          Available Now
-                        </span>
-                      )}
-                      <h3 className="text-2xl font-bold mb-2 text-white">
-                        {campaignUpdates[currentSlide].title}
-                      </h3>
-                      <p className="text-gray-300 mb-4">
-                        {campaignUpdates[currentSlide].description}
-                      </p>
-                      <div
-                        onMouseEnter={() => setCarouselPaused(true)}
-                        onMouseLeave={() => setCarouselPaused(false)}
-                        onClick={() => setCarouselPaused(true)}
-                      >
-                        {campaignUpdates[currentSlide].videoUrl && (
+                  {campaignUpdates[currentSlide].component ? (
+                    // Render custom component
+                    campaignUpdates[currentSlide].component
+                  ) : (
+                    // Render regular campaign
+                    <div className="flex items-start gap-4">
+                      <div className="flex-1">
+                        {campaignUpdates[currentSlide].urgent && (
+                          <span className="inline-block bg-red-500 text-white text-xs font-bold px-2 py-1 rounded mb-2">
+                            URGENT
+                          </span>
+                        )}
+                        <h3 className="text-2xl font-bold mb-2 text-white">
+                          {campaignUpdates[currentSlide].title}
+                        </h3>
+                        <p className="text-gray-300 mb-4">
+                          {campaignUpdates[currentSlide].description}
+                        </p>
+                        
+                        <div
+                          onMouseEnter={() => setCarouselPaused(true)}
+                          onMouseLeave={() => setCarouselPaused(false)}
+                          onClick={() => setCarouselPaused(true)}
+                        >
+                          {campaignUpdates[currentSlide].videoUrl && (
+                            <div className="aspect-video rounded-lg overflow-hidden bg-black mb-4">
+                              <iframe
+                                width="100%"
+                                height="100%"
+                                src={campaignUpdates[currentSlide].videoUrl}
+                                title="Campaign video"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                                className="w-full h-full"
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        {campaignUpdates[currentSlide].imageUrl && (
                           <div className="aspect-video rounded-lg overflow-hidden bg-black mb-4">
-                            <iframe
-                              width="100%"
-                              height="100%"
-                              src={campaignUpdates[currentSlide].videoUrl}
-                              title="Campaign video"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                              className="w-full h-full"
+                            <img
+                              src={campaignUpdates[currentSlide].imageUrl}
+                              alt={campaignUpdates[currentSlide].title}
+                              className="w-full h-full object-cover"
                             />
                           </div>
                         )}
-                      </div>
-                      {campaignUpdates[currentSlide].imageUrl && (
-                        <div className="aspect-video rounded-lg overflow-hidden bg-black mb-4">
-                          <img
-                            src={campaignUpdates[currentSlide].imageUrl}
-                            alt={campaignUpdates[currentSlide].title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      )}
-                      {campaignUpdates[currentSlide].spotifyUrl && (
-                        <div className="rounded-lg overflow-hidden mb-4">
-                          <iframe
-                            src={campaignUpdates[currentSlide].spotifyUrl}
-                            width="100%"
-                            height="152"
-                            frameBorder="0"
-                            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                            loading="lazy"
-                            style={{ borderRadius: '12px' }}
-                          />
-                        </div>
-                      )}
-                      <div className="flex flex-wrap gap-3">
-                        {campaignUpdates[currentSlide].links.map((link, index) => {
-                          const colorClasses: Record<string, string> = {
-                            green: "bg-white hover:bg-gray-200 text-gray-800 hover:text-gray-900",
-                            pink: "bg-white hover:bg-gray-200 text-gray-800 hover:text-gray-900",
-                            purple: "bg-white hover:bg-gray-200 text-gray-800 hover:text-gray-900",
-                            blue: "bg-white hover:bg-gray-200 text-gray-800 hover:text-gray-900",
-                            orange: "bg-white hover:bg-gray-200 text-gray-800 hover:text-gray-900"
-                          }
 
-                          return (
-                            <Button
-                              key={index}
-                              onClick={() => {
-                                if (link.url === "#quiz") {
-                                  setQuizStarted(true)
-                                } else {
-                                  window.open(link.url, '_blank')
-                                }
-                              }}
-                              className={`${colorClasses[link.color]}`}
-                            >
-                              {link.label}
-                              <ExternalLink className="w-4 h-4 ml-2" />
-                            </Button>
-                          )
-                        })}
+                        {campaignUpdates[currentSlide].spotifyUrl && (
+                          <div className="rounded-lg overflow-hidden mb-4">
+                            <iframe
+                              src={campaignUpdates[currentSlide].spotifyUrl}
+                              width="100%"
+                              height="152"
+                              frameBorder="0"
+                              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                              loading="lazy"
+                              style={{ borderRadius: '12px' }}
+                            />
+                          </div>
+                        )}
+
+                        <div className="flex flex-wrap gap-3">
+                          {campaignUpdates[currentSlide].links?.map((link, index) => {
+                            const colorClasses: Record<string, string> = {
+                              green: "bg-white hover:bg-gray-200 text-gray-800 hover:text-gray-900",
+                              pink: "bg-white hover:bg-gray-200 text-gray-800 hover:text-gray-900",
+                              purple: "bg-white hover:bg-gray-200 text-gray-800 hover:text-gray-900",
+                              blue: "bg-white hover:bg-gray-200 text-gray-800 hover:text-gray-900",
+                              orange: "bg-white hover:bg-gray-200 text-gray-800 hover:text-gray-900"
+                            }
+
+                            return (
+                              <Button
+                                key={index}
+                                onClick={() => {
+                                  if (link.url === "#quiz") {
+                                    setQuizStarted(true)
+                                  } else {
+                                    window.open(link.url, '_blank')
+                                  }
+                                }}
+                                className={`${colorClasses[link.color]}`}
+                              >
+                                {link.label}
+                                <ExternalLink className="w-4 h-4 ml-2" />
+                              </Button>
+                            )
+                          })}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Carousel controls */}
@@ -312,10 +324,11 @@ export default function Home() {
                     <button
                       key={index}
                       onClick={() => setCurrentSlide(index)}
-                      className={`h-2 rounded-full transition-all ${index === currentSlide
-                        ? 'w-8 bg-blue-600'
-                        : 'w-2 bg-white/40'
-                        }`}
+                      className={`h-2 rounded-full transition-all ${
+                        index === currentSlide
+                          ? 'w-8 bg-blue-600'
+                          : 'w-2 bg-white/40'
+                      }`}
                     />
                   ))}
                 </div>
@@ -325,7 +338,6 @@ export default function Home() {
 
           {/* Two Column Layout */}
           <div className="grid md:grid-cols-2 gap-6 mt-8">
-
             {/* Schedule Calendar */}
             <Card className="glass-card">
               <CardHeader className="glass-header-blue text-white">
@@ -435,7 +447,7 @@ export default function Home() {
           </div>
 
           {/* Quiz Feature Highlight */}
-          <Card className="bg-gradient-to-r from-gray-800 to-gray-900 border-b border-white/10 text-white">
+          <Card className="bg-gradient-to-r from-gray-800 to-gray-900 border-b border-white/10 text-white mt-8">
             <CardContent className="p-8">
               <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="flex-1">
