@@ -8,10 +8,17 @@ import { useUser } from "@clerk/nextjs"
 import Link from "next/link"
 
 interface DailyGoalData {
-  song: string
-  target: number
-  current: number
-  userStreams: number
+  song?: unknown
+  target?: unknown
+  current?: unknown
+  userStreams?: unknown
+}
+
+// 🔒 Runtime-safe number sanitizer
+const safeNumber = (value: unknown, fallback = 0): number => {
+  return typeof value === "number" && !Number.isNaN(value)
+    ? value
+    : fallback
 }
 
 export default function DailyGoalSlide() {
@@ -21,18 +28,20 @@ export default function DailyGoalSlide() {
 
   useEffect(() => {
     fetchGoalData()
-    // Refresh every 5 minutes
     const interval = setInterval(fetchGoalData, 5 * 60 * 1000)
     return () => clearInterval(interval)
   }, [isSignedIn])
 
   const fetchGoalData = async () => {
     try {
-      const response = await fetch('/api/daily-goal')
+      const response = await fetch("/api/daily-goal")
       const data = await response.json()
-      setGoalData(data)
+
+      // Accept ANY shape, sanitize later
+      setGoalData(data ?? {})
     } catch (error) {
-      console.error('Error fetching goal:', error)
+      console.error("Error fetching goal:", error)
+      setGoalData({})
     } finally {
       setLoading(false)
     }
@@ -64,8 +73,17 @@ export default function DailyGoalSlide() {
     )
   }
 
-  const progress = (goalData.current / goalData.target) * 100
-  const remaining = goalData.target - goalData.current
+  // 🧮 SANITIZED VALUES (USED EVERYWHERE)
+  const target = safeNumber(goalData.target)
+  const current = safeNumber(goalData.current)
+  const userStreams = safeNumber(goalData.userStreams)
+  const song =
+    typeof goalData.song === "string" && goalData.song.trim().length > 0
+      ? goalData.song
+      : "Unknown Song"
+
+  const progress = target > 0 ? (current / target) * 100 : 0
+  const remaining = Math.max(target - current, 0)
 
   return (
     <div className="p-6 md:p-8">
@@ -73,15 +91,17 @@ export default function DailyGoalSlide() {
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
             <Target className="w-5 h-5 text-yellow-400" />
-            <span className="text-yellow-400 font-semibold text-sm">TODAY'S GOAL</span>
+            <span className="text-yellow-400 font-semibold text-sm">
+              TODAY'S GOAL
+            </span>
           </div>
 
           <h3 className="text-2xl font-bold mb-2 text-white">
-            Stream "{goalData.song}"
+            Stream "{song}"
           </h3>
-          
+
           <p className="text-gray-300 mb-4">
-            Let's hit {goalData.target.toLocaleString()} community streams today!
+            Let's hit {target.toLocaleString()} community streams today!
           </p>
 
           {/* Progress Bar */}
@@ -89,25 +109,31 @@ export default function DailyGoalSlide() {
             <div className="flex justify-between text-sm">
               <span className="text-gray-400">Community Progress</span>
               <span className="text-white font-semibold">
-                {goalData.current.toLocaleString()} / {goalData.target.toLocaleString()}
+                {current.toLocaleString()} / {target.toLocaleString()}
               </span>
             </div>
+
             <Progress value={progress} className="h-3 bg-white/10" />
+
             <div className="flex justify-between text-xs">
               <span className="text-gray-400">
-                {remaining > 0 ? `${remaining.toLocaleString()} to go!` : '🎉 Goal reached!'}
+                {remaining > 0
+                  ? `${remaining.toLocaleString()} to go!`
+                  : "🎉 Goal reached!"}
               </span>
-              <span className="text-green-400">{Math.round(progress)}%</span>
+              <span className="text-green-400">
+                {Math.round(progress)}%
+              </span>
             </div>
           </div>
 
           {/* User Contribution */}
-          {isSignedIn && goalData.userStreams !== undefined && (
+          {isSignedIn && (
             <div className="bg-blue-500/10 border border-blue-400/20 rounded-lg p-3 mb-4">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-blue-400" />
                 <span className="text-sm text-blue-300 font-semibold">
-                  Your contribution: {goalData.userStreams} streams ✨
+                  Your contribution: {userStreams} streams ✨
                 </span>
               </div>
             </div>
@@ -122,7 +148,7 @@ export default function DailyGoalSlide() {
                   <ExternalLink className="w-4 h-4 ml-2" />
                 </Button>
               </Link>
-            ) : goalData.userStreams === 0 || goalData.userStreams === undefined ? (
+            ) : userStreams === 0 ? (
               <Link href="/streaming">
                 <Button className="bg-white hover:bg-gray-200 text-gray-800">
                   Set Up Tracking
@@ -130,17 +156,26 @@ export default function DailyGoalSlide() {
                 </Button>
               </Link>
             ) : (
-              <Button 
+              <Button
                 className="bg-white hover:bg-gray-200 text-gray-800"
-                onClick={() => window.open('https://open.spotify.com/search/' + encodeURIComponent(goalData.song), '_blank')}
+                onClick={() =>
+                  window.open(
+                    "https://open.spotify.com/search/" +
+                      encodeURIComponent(song),
+                    "_blank"
+                  )
+                }
               >
                 Stream on Spotify
                 <ExternalLink className="w-4 h-4 ml-2" />
               </Button>
             )}
-            
+
             <Link href="/streaming">
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+              <Button
+                variant="outline"
+                className="border-white/30 text-white hover:bg-white/10"
+              >
                 View Details
               </Button>
             </Link>

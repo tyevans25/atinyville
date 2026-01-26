@@ -1,85 +1,102 @@
-import { kv } from '@vercel/kv'
-import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { kv } from "@vercel/kv"
+import { NextResponse } from "next/server"
+import { auth } from "@clerk/nextjs/server"
+
+// Runtime-safe helpers
+const isValidNumber = (v: unknown): v is number =>
+  typeof v === "number" && !Number.isNaN(v)
+
+const todayKey = () =>
+  new Date().toISOString().split("T")[0]
 
 // GET: Fetch today's goal and user's streams
 export async function GET() {
   try {
     const { userId } = await auth()
-    const today = new Date().toISOString().split('T')[0]
-    
-    // Get today's goal
-    const goalKey = `daily:goal:${today}`
-    const goal = await kv.get<{
-      song: string
-      target: number
-      current: number
-    }>(goalKey)
+    const today = todayKey()
 
-    if (!goal) {
+    const goalKey = `daily:goal:${today}`
+    const rawGoal = await kv.get<any>(goalKey)
+
+    // 🔒 HARD GUARD
+    if (
+      !rawGoal ||
+      typeof rawGoal.song !== "string" ||
+      !isValidNumber(rawGoal.target) ||
+      !isValidNumber(rawGoal.current)
+    ) {
       return NextResponse.json(null)
     }
 
-    // Get user's personal streams if logged in
     let userStreams = 0
     if (userId) {
       const userStreamsKey = `daily:streams:${userId}:${today}`
-      userStreams = await kv.get<number>(userStreamsKey) || 0
+      const rawUserStreams = await kv.get<any>(userStreamsKey)
+      userStreams = isValidNumber(rawUserStreams) ? rawUserStreams : 0
     }
 
     return NextResponse.json({
-      song: goal.song,
-      target: goal.target,
-      current: goal.current,
-      userStreams
+      song: rawGoal.song,
+      target: rawGoal.target,
+      current: rawGoal.current,
+      userStreams,
     })
-
   } catch (error) {
-    console.error('Error fetching daily goal:', error)
+    console.error("Error fetching daily goal:", error)
     return NextResponse.json(
-      { error: 'Failed to fetch goal' },
+      { error: "Failed to fetch goal" },
       { status: 500 }
     )
   }
 }
 
-// POST: Set today's goal (admin only - you'll call this manually or via admin panel)
+// POST: Set today's goal (admin only)
 export async function POST(request: Request) {
   try {
-    const { song, target } = await request.json()
+    const body = await request.json()
+    const { song, target } = body ?? {}
 
-    if (!song || !target) {
+    // 🔒 STRICT VALIDATION
+    if (
+      typeof song !== "string" ||
+      song.trim().length === 0 ||
+      !isValidNumber(target) ||
+      target <= 0
+    ) {
       return NextResponse.json(
-        { error: 'Song and target are required' },
+        { error: "Valid song and positive numeric target are required" },
         { status: 400 }
       )
     }
 
-    const today = new Date().toISOString().split('T')[0]
+    const today = todayKey()
     const goalKey = `daily:goal:${today}`
 
-    // Check if goal already exists
-    const existingGoal = await kv.get(goalKey)
-    const current = existingGoal ? (existingGoal as any).current : 0
+    const existingGoal = await kv.get<any>(goalKey)
+    const current = isValidNumber(existingGoal?.current)
+      ? existingGoal.current
+      : 0
 
-    // Set today's goal (expires in 24 hours)
-    await kv.set(goalKey, {
-      song,
-      target,
-      current
-    }, { ex: 86400 })
+    await kv.set(
+      goalKey,
+      {
+        song: song.trim(),
+        target,
+        current,
+      },
+      { ex: 86400 }
+    )
 
     return NextResponse.json({
       success: true,
-      song,
+      song: song.trim(),
       target,
-      current
+      current,
     })
-
   } catch (error) {
-    console.error('Error setting daily goal:', error)
+    console.error("Error setting daily goal:", error)
     return NextResponse.json(
-      { error: 'Failed to set goal' },
+      { error: "Failed to set goal" },
       { status: 500 }
     )
   }
