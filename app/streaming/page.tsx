@@ -8,20 +8,11 @@ import Navigation from "@/components/Navigation"
 import StatsFmCard from "@/components/StatsFmCard"
 import { useUser } from "@clerk/nextjs"
 
-// Playlist generator song database
-const ateezSongs = [
-  "WORK", "Ice On My Teeth", "Crazy Form", "Bouncy", "Guerrilla",
-  "Halazia", "Wonderland", "Answer", "Say My Name", "HALA HALA",
-  "Inception", "Deja Vu", "Eternal Sunshine", "Silver Light", "Matz"
-]
-
 export default function StreamingHub() {
   const { isSignedIn } = useUser()
   const [stationheadLive, setStationheadLive] = useState(false)
-  const [selectedSong, setSelectedSong] = useState("")
-  const [generatedPlaylist, setGeneratedPlaylist] = useState<string[]>([])
-  const [playlistLength, setPlaylistLength] = useState(10)
   const [todayStreams, setTodayStreams] = useState<number | null>(null)
+  const [goalStreams, setGoalStreams] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
 
   // Check if Stationhead is live
@@ -43,28 +34,16 @@ export default function StreamingHub() {
       const response = await fetch("/api/user-streams")
       if (response.ok) {
         const data = await response.json()
-        setTodayStreams(data.streams ?? 0)
+        setTodayStreams(data.totalStreams ?? 0)
+        setGoalStreams(data.goalStreams ?? 0)
       }
     } catch (error) {
       console.error("Error fetching streams:", error)
       setTodayStreams(null)
+      setGoalStreams(null)
     } finally {
       setLoading(false)
     }
-  }
-
-  const generatePlaylist = () => {
-    if (!selectedSong) return
-
-    // Simple algorithm: prioritize selected song and add variety
-    const playlist = [selectedSong]
-    const remaining = ateezSongs.filter(s => s !== selectedSong)
-    
-    // Shuffle and add songs
-    const shuffled = remaining.sort(() => Math.random() - 0.5)
-    playlist.push(...shuffled.slice(0, playlistLength - 1))
-
-    setGeneratedPlaylist(playlist)
   }
 
   return (
@@ -95,13 +74,19 @@ export default function StreamingHub() {
                       <p className="text-gray-300 text-sm">Keep streaming to reach today's goal!</p>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="flex gap-6">
                     {loading ? (
                       <p className="text-gray-400 text-sm">Loading...</p>
                     ) : todayStreams !== null ? (
                       <>
-                        <p className="text-4xl font-bold text-blue-400">{todayStreams}</p>
-                        <p className="text-gray-400 text-sm">streams</p>
+                        <div className="text-center">
+                          <p className="text-3xl font-bold text-blue-400">{todayStreams}</p>
+                          <p className="text-gray-400 text-xs">Total ATEEZ</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-3xl font-bold text-green-400">{goalStreams}</p>
+                          <p className="text-gray-400 text-xs">Daily Goal Song</p>
+                        </div>
                       </>
                     ) : (
                       <Button
@@ -146,7 +131,9 @@ export default function StreamingHub() {
           )}
 
           {/* stats.fm Integration */}
-          <StatsFmCard />
+          <div data-statsfm-card>
+            <StatsFmCard />
+          </div>
 
           {/* Quick Links */}
           <Card className="glass-card">
@@ -189,90 +176,43 @@ export default function StreamingHub() {
             </CardContent>
           </Card>
 
-          {/* Playlist Generator */}
+          {/* Curated Streaming Playlist */}
           <Card className="glass-card">
             <CardHeader className="glass-header-blue text-white">
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5" />
-                Playlist Generator
+                ATINYTOWN Streaming Playlist
               </CardTitle>
               <CardDescription className="text-gray-300">
-                Generate a custom streaming playlist based on your favorite song
+                Curated ATEEZ playlist optimized for streaming
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="md:col-span-2">
-                  <label className="text-sm text-gray-300 mb-2 block">
-                    Pick your favorite ATEEZ song:
-                  </label>
-                  <select
-                    value={selectedSong}
-                    onChange={(e) => setSelectedSong(e.target.value)}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Select a song...</option>
-                    {ateezSongs.map((song) => (
-                      <option key={song} value={song} className="bg-gray-900">
-                        {song}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="text-sm text-gray-300 mb-2 block">
-                    Playlist length:
-                  </label>
-                  <select
-                    value={playlistLength}
-                    onChange={(e) => setPlaylistLength(Number(e.target.value))}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value={10} className="bg-gray-900">10 songs</option>
-                    <option value={15} className="bg-gray-900">15 songs</option>
-                    <option value={20} className="bg-gray-900">20 songs</option>
-                    <option value={30} className="bg-gray-900">30 songs</option>
-                  </select>
-                </div>
+              <p className="text-gray-300">
+                Follow our official ATINYTOWN playlist on Spotify! Updated regularly with streaming priorities and comeback tracks.
+              </p>
+              
+              {/* Placeholder - Replace with your playlist embed when ready */}
+              <div className="bg-white/5 border border-white/10 rounded-lg p-6 text-center">
+                <Sparkles className="w-12 h-12 text-blue-400 mx-auto mb-4" />
+                <p className="text-white font-semibold mb-2">Playlist Coming Soon!</p>
+                <p className="text-sm text-gray-400 mb-4">
+                  We're curating the perfect streaming playlist for you
+                </p>
+                {/* Uncomment and add your playlist link when ready:
+                <Button 
+                  className="w-full bg-white hover:bg-gray-200 text-gray-800"
+                  onClick={() => window.open('YOUR_SPOTIFY_PLAYLIST_LINK', '_blank')}
+                >
+                  <Music className="w-4 h-4 mr-2" />
+                  Open in Spotify
+                </Button>
+                */}
               </div>
 
-              <Button 
-                onClick={generatePlaylist}
-                disabled={!selectedSong}
-                className="w-full bg-white hover:bg-gray-200 text-gray-800"
-                size="lg"
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                Generate Playlist
-              </Button>
-
-              {generatedPlaylist.length > 0 && (
-                <div className="bg-white/5 border border-white/10 rounded-lg p-4 mt-4">
-                  <h3 className="text-white font-semibold mb-3">Your Streaming Playlist:</h3>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {generatedPlaylist.map((song, index) => (
-                      <div 
-                        key={index}
-                        className="flex items-center gap-3 text-gray-300 hover:text-white transition-colors"
-                      >
-                        <span className="text-blue-400 font-mono text-sm w-8">
-                          {String(index + 1).padStart(2, '0')}
-                        </span>
-                        <span>{song}</span>
-                        {index === 0 && (
-                          <span className="ml-auto text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded">
-                            Your pick
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs text-gray-400 mt-3">
-                    💡 Tip: Loop this playlist while studying or working to boost streams!
-                  </p>
-                </div>
-              )}
+              <p className="text-xs text-gray-400">
+                💡 Feel free to share your own playlists on X! @ATINYTOWN1024 so it can be shared!
+              </p>
             </CardContent>
           </Card>
 
@@ -282,11 +222,11 @@ export default function StreamingHub() {
               <CardContent className="p-6">
                 <h3 className="text-white font-semibold mb-2">📻 Stationhead</h3>
                 <p className="text-gray-300 text-sm mb-3">
-                  Join group streaming parties with other ATINYs
+                  Join streaming parties with other ATINYs
                 </p>
                 <Button 
                   variant="outline"
-                  className="w-full border-white/20 text-white hover:bg-white/10"
+                  className="w-full border-white/20 text-black hover:bg-white/10"
                   onClick={() => window.open('https://stationhead.com', '_blank')}
                 >
                   Learn More
@@ -302,7 +242,7 @@ export default function StreamingHub() {
                 </p>
                 <Button 
                   variant="outline"
-                  className="w-full border-white/20 text-white hover:bg-white/10"
+                  className="w-full border-white/20 text-black hover:bg-white/10"
                 >
                   View Guide
                 </Button>

@@ -10,7 +10,7 @@ export async function GET() {
     const { userId } = await auth()
     
     if (!userId) {
-      return NextResponse.json({ streams: 0 }, { status: 200 })
+      return NextResponse.json({ totalStreams: 0, goalStreams: 0 }, { status: 200 })
     }
 
     // Get user's stats.fm username
@@ -18,22 +18,23 @@ export async function GET() {
     
     if (!statsfmUsername) {
       return NextResponse.json({ 
-        streams: 0,
+        totalStreams: 0,
+        goalStreams: 0,
         message: "No stats.fm username linked" 
       })
     }
 
-    // Check cache first (cache for 5 minutes to avoid rate limits)
+    // Get today's goal to check for specific song
     const today = new Date().toISOString().split('T')[0]
-    const cacheKey = `streams:cache:${userId}:${today}`
-    const cached = await kv.get<number>(cacheKey)
+    const goalKey = `daily:goal:${today}`
+    const goal = await kv.get<any>(goalKey)
 
-    if (cached !== null) {
-      return NextResponse.json({
-        streams: cached,
-        cached: true,
-        username: statsfmUsername
-      })
+    // Check cache
+    const cacheKey = `user:streams:cache:${userId}:${today}`
+    const cached = await kv.get<any>(cacheKey)
+    
+    if (cached) {
+      return NextResponse.json(cached)
     }
 
     // Fetch streams from stats.fm API
@@ -49,45 +50,54 @@ export async function GET() {
     if (!response.ok) {
       console.error('stats.fm API error:', response.status)
       return NextResponse.json({ 
-        streams: 0,
+        totalStreams: 0,
+        goalStreams: 0,
         error: "Could not fetch streams from stats.fm" 
       })
     }
 
     const data = await response.json()
     
-    // Get today's date range in UTC
+    // Get today's date range
     const todayStart = new Date()
     todayStart.setUTCHours(0, 0, 0, 0)
-    
-    // Filter for ATEEZ streams from today only
-    let ateezStreams = 0
+
+    let totalAteezStreams = 0
+    let goalSongStreams = 0
+
     if (data.items && Array.isArray(data.items)) {
-      ateezStreams = data.items.filter((stream: any) => {
-        // Check if stream is from today
+      data.items.forEach((stream: any) => {
         const streamDate = new Date(stream.endTime)
         const isToday = streamDate >= todayStart
+        const isAteez = stream.artistIds?.includes(ATEEZ_ARTIST_ID)
         
-        // Check if artist is ATEEZ (164828)
-        const isAteez = stream.artistIds && stream.artistIds.includes(ATEEZ_ARTIST_ID)
-        
-        return isToday && isAteez
-      }).length
+        if (isToday && isAteez) {
+          totalAteezStreams++
+          
+          // Check if it matches the goal song
+          if (goal && stream.trackName?.toLowerCase().includes(goal.song.toLowerCase())) {
+            goalSongStreams++
+          }
+        }
+      })
+    }
+
+    const result = {
+      totalStreams: totalAteezStreams,
+      goalStreams: goalSongStreams,
+      username: statsfmUsername,
+      date: today
     }
 
     // Cache for 5 minutes
-    await kv.set(cacheKey, ateezStreams, { ex: 300 })
+    await kv.set(cacheKey, result, { ex: 300 })
 
-    return NextResponse.json({
-      streams: ateezStreams,
-      username: statsfmUsername,
-      date: today
-    })
+    return NextResponse.json(result)
 
   } catch (error) {
     console.error("Error fetching user streams:", error)
     return NextResponse.json(
-      { streams: 0, error: "Failed to fetch streams" },
+      { totalStreams: 0, goalStreams: 0, error: "Failed to fetch streams" },
       { status: 500 }
     )
   }

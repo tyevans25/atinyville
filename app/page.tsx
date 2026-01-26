@@ -8,6 +8,15 @@ import { Trophy, Calendar, Music, ShoppingCart, ExternalLink, ChevronLeft, Chevr
 import Navigation from "@/components/Navigation"
 import DailyGoalSlide from "@/components/DailyGoalSlide"
 
+// Helper function to convert KST to local timezone
+const convertKSTtoLocal = (kstDateString: string, kstTime?: string) => {
+  // If time is provided, use it; otherwise default to midnight
+  const timeString = kstTime || '00:00:00'
+  // Parse as KST (UTC+9)
+  const date = new Date(kstDateString + 'T' + timeString + '+09:00')
+  return date
+}
+
 // EDIT THIS: Add your campaign updates here!
 const campaignUpdates = [
   {
@@ -66,11 +75,12 @@ const campaignUpdates = [
   }
 ]
 
-// EDIT THIS: Add upcoming events here!
+// EDIT THIS: Add upcoming events here (dates in KST)
 const upcomingEvents = [
   {
     id: 1,
     date: "2026-01-26",
+    time: "00:00:00", // Optional: KST time (6 PM KST)
     title: "Album Preview",
     description: "Album Preview Teaser!",
     type: "teaser"
@@ -78,6 +88,7 @@ const upcomingEvents = [
   {
     id: 2,
     date: "2026-01-27",
+    time: "00:00:00",
     title: "Concept Photo 3",
     description: "3rd set of concept photos released",
     type: "promotion"
@@ -85,6 +96,7 @@ const upcomingEvents = [
   {
     id: 3,
     date: "2026-01-28",
+    time: "00:00:00",
     title: "Concept Photo 3",
     description: "3rd set of concept photos released",
     type: "promotion"
@@ -92,6 +104,7 @@ const upcomingEvents = [
   {
     id: 4,
     date: "2026-01-29",
+    time: "00:00:00",
     title: "Concept Photo 3",
     description: "3rd set of concept photos released",
     type: "promotion"
@@ -106,6 +119,7 @@ const upcomingEvents = [
   {
     id: 6,
     date: "2026-02-02",
+    time: "00:00:00",
     title: "Character Poster",
     description: "Character poster released",
     type: "promotion"
@@ -113,6 +127,7 @@ const upcomingEvents = [
   {
     id: 7,
     date: "2026-02-03",
+    time: "00:00:00",
     title: "MV Poster",
     description: "MV poster released",
     type: "promotion"
@@ -120,6 +135,7 @@ const upcomingEvents = [
   {
     id: 8,
     date: "2026-02-04",
+    time: "00:00:00",
     title: "MV Teaser 1",
     description: "MV teaser 1 released",
     type: "teaser"
@@ -127,6 +143,7 @@ const upcomingEvents = [
   {
     id: 9,
     date: "2026-02-05",
+    time: "00:00:00",
     title: "MV Teaser 2",
     description: "MV teaser 2 released",
     type: "teaser"
@@ -134,6 +151,7 @@ const upcomingEvents = [
   {
     id: 10,
     date: "2026-02-06",
+    time: "14:00:00", // 6 PM KST release
     title: "GOLDEN HOUR Part.4 Album Release",
     description: "GOLDEN HOUR Part.4 album released",
     type: "release"
@@ -150,12 +168,15 @@ export default function Home() {
   useEffect(() => {
     if (carouselPaused) return
 
+    // Give daily goal slide (index 5) more time - 10 seconds vs 7 seconds for others
+    const slideTime = currentSlide === 5 ? 10000 : 7000
+
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % campaignUpdates.length)
-    }, 5000)
+    }, slideTime)
 
     return () => clearInterval(interval)
-  }, [carouselPaused])
+  }, [carouselPaused, currentSlide])
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -172,15 +193,14 @@ export default function Home() {
     setCurrentSlide((prev) => (prev - 1 + campaignUpdates.length) % campaignUpdates.length)
   }
 
-  // Filter out past events and sort by date
+  // Filter out past events and sort by date (with KST conversion)
   const futureEvents = upcomingEvents
     .filter(event => {
-      const eventDate = new Date(event.date)
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      return eventDate >= today
+      const eventDate = convertKSTtoLocal(event.date, event.time)
+      const now = new Date()
+      return eventDate >= now
     })
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .sort((a, b) => convertKSTtoLocal(a.date, a.time).getTime() - convertKSTtoLocal(b.date, b.time).getTime())
 
   const displayedEvents = showAllEvents ? futureEvents : futureEvents.slice(0, 6)
 
@@ -203,7 +223,11 @@ export default function Home() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="relative">
+              <div 
+                className="relative"
+                onMouseEnter={() => setCarouselPaused(true)}
+                onMouseLeave={() => setCarouselPaused(false)}
+              >
                 {/* Carousel content */}
                 <div className="p-6 md:p-8 carousel-smooth">
                   {campaignUpdates[currentSlide].component ? (
@@ -225,25 +249,19 @@ export default function Home() {
                           {campaignUpdates[currentSlide].description}
                         </p>
                         
-                        <div
-                          onMouseEnter={() => setCarouselPaused(true)}
-                          onMouseLeave={() => setCarouselPaused(false)}
-                          onClick={() => setCarouselPaused(true)}
-                        >
-                          {campaignUpdates[currentSlide].videoUrl && (
-                            <div className="aspect-video rounded-lg overflow-hidden bg-black mb-4">
-                              <iframe
-                                width="100%"
-                                height="100%"
-                                src={campaignUpdates[currentSlide].videoUrl}
-                                title="Campaign video"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                                className="w-full h-full"
-                              />
-                            </div>
-                          )}
-                        </div>
+                        {campaignUpdates[currentSlide].videoUrl && (
+                          <div className="aspect-video rounded-lg overflow-hidden bg-black mb-4">
+                            <iframe
+                              width="100%"
+                              height="100%"
+                              src={campaignUpdates[currentSlide].videoUrl}
+                              title="Campaign video"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                              className="w-full h-full"
+                            />
+                          </div>
+                        )}
 
                         {campaignUpdates[currentSlide].imageUrl && (
                           <div className="aspect-video rounded-lg overflow-hidden bg-black mb-4">
@@ -353,9 +371,25 @@ export default function Home() {
                   <>
                     <div className="space-y-4">
                       {displayedEvents.map((event) => {
-                        const eventDate = new Date(event.date)
-                        const today = new Date()
-                        const daysUntil = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+                        const eventDate = convertKSTtoLocal(event.date, event.time)
+                        const now = new Date()
+                        const msUntil = eventDate.getTime() - now.getTime()
+                        const hoursUntil = Math.floor(msUntil / (1000 * 60 * 60))
+                        const daysUntil = Math.floor(hoursUntil / 24)
+                        
+                        // Format time display with timezone
+                        let timeDisplay = ''
+                        if (event.time) {
+                          const localTime = eventDate.toLocaleTimeString('en-US', {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                          })
+                          const timezone = eventDate.toLocaleTimeString('en-US', {
+                            timeZoneName: 'short'
+                          }).split(' ').pop()
+                          timeDisplay = `${localTime} ${timezone}`
+                        }
 
                         return (
                           <div key={event.id} className="flex gap-4 border-l-4 border-white/50 pl-4 py-2">
@@ -370,9 +404,22 @@ export default function Home() {
                             <div className="flex-1">
                               <h4 className="font-semibold text-white">{event.title}</h4>
                               <p className="text-sm text-gray-300">{event.description}</p>
-                              <p className="text-xs text-white font-medium mt-1">
-                                {daysUntil === 0 ? 'TODAY!' : daysUntil === 1 ? 'Tomorrow' : `In ${daysUntil} days`}
-                              </p>
+                              <div className="flex flex-wrap gap-2 items-center mt-1">
+                                <p className="text-xs text-white font-medium">
+                                  {hoursUntil < 1 
+                                    ? 'Happening now!' 
+                                    : hoursUntil < 24 
+                                      ? `In ${hoursUntil} hours` 
+                                      : daysUntil === 1 
+                                        ? 'Tomorrow' 
+                                        : `In ${daysUntil} days`}
+                                </p>
+                                {timeDisplay && (
+                                  <p className="text-xs text-blue-400 font-semibold">
+                                    • {timeDisplay}
+                                  </p>
+                                )}
+                              </div>
                             </div>
                           </div>
                         )
