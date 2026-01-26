@@ -1,33 +1,43 @@
 import { kv } from '@vercel/kv'
 import { NextResponse } from 'next/server'
 
+// Helper to get current week key
+function getCurrentWeekKey(): string {
+  const now = new Date()
+  const year = now.getFullYear()
+  const startOfYear = new Date(year, 0, 1)
+  const days = Math.floor((now.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000))
+  const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7)
+  return `${year}-W${String(weekNumber).padStart(2, '0')}`
+}
+
 export async function GET(request: Request) {
   try {
-    // Verify this is actually a cron job (Vercel adds this header)
+    // Verify this is actually a cron job
     const authHeader = request.headers.get('authorization')
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const today = new Date().toISOString().split('T')[0]
+    const weekKey = getCurrentWeekKey()
     
-    // Get today's goal
-    const goalKey = `daily:goal:${today}`
-    const goal = await kv.get<{
-      song: string
-      target: number
-      current: number
-    }>(goalKey)
-
-    if (!goal) {
-      console.log('No goal set for today')
-      return NextResponse.json({ message: 'No goal set' })
-    }
+    // Get today's goals and missions
+    const dailyGoalKey = `daily:goal:${today}`
+    const weeklyGoalKey = `weekly:goal:${weekKey}`
+    const missionsKey = `daily:missions:${today}`
+    
+    const [dailyGoal, weeklyGoal, missions] = await Promise.all([
+      kv.get<{ song: string; target: number; current: number }>(dailyGoalKey),
+      kv.get<{ song: string; target: number; current: number }>(weeklyGoalKey),
+      kv.get<Array<{ id: string; song: string; target: number }>>(missionsKey)
+    ])
 
     // Get all users with stats.fm usernames
     const userKeys = await kv.keys('user:*:statsfm')
     
-    let totalStreamsToday = 0
+    let dailyTotal = 0
+    let weeklyTotal = 0
     let usersChecked = 0
 
     for (const key of userKeys) {
@@ -46,22 +56,63 @@ export async function GET(request: Request) {
 
         const data = await response.json()
 
-        // Filter for today's streams of the target song
-        const todayStreams = data.items.filter((stream: any) => {
-          const streamDate = new Date(stream.endTime).toISOString().split('T')[0]
-          return streamDate === today && stream.trackName === goal.song
-        })
+        // === DAILY GOAL ===
+        if (dailyGoal) {
+          const todayStreams = data.items.filter((stream: any) => {
+            const streamDate = new Date(stream.endTime).toISOString().split('T')[0]
+            return streamDate === today && stream.trackName === dailyGoal.song
+          })
 
-        const userStreamCount = todayStreams.length
+          const userDailyCount = todayStreams.length
+          await kv.set(
+            `daily:streams:${userId}:${today}`,
+            userDailyCount,
+            { ex: 86400 }
+          )
+          dailyTotal += userDailyCount
+        }
 
-        // Save user's stream count
-        await kv.set(
-          `daily:streams:${userId}:${today}`,
-          userStreamCount,
-          { ex: 86400 }
-        )
+        // === WEEKLY GOAL ===
+        if (weeklyGoal) {
+          // Get start of week (Monday)
+          const now = new Date()
+          const dayOfWeek = now.getDay()
+          const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1
+          const startOfWeek = new Date(now)
+          startOfWeek.setDate(now.getDate() - daysToMonday)
+          startOfWeek.setHours(0, 0, 0, 0)
 
-        totalStreamsToday += userStreamCount
+          const weekStreams = data.items.filter((stream: any) => {
+            const streamDate = new Date(stream.endTime)
+            return streamDate >= startOfWeek && stream.trackName === weeklyGoal.song
+          })
+
+          const userWeeklyCount = weekStreams.length
+          await kv.set(
+            `weekly:streams:${userId}:${weekKey}`,
+            userWeeklyCount,
+            { ex: 604800 }
+          )
+          weeklyTotal += userWeeklyCount
+        }
+
+        // === INDIVIDUAL MISSIONS ===
+        if (missions && missions.length > 0) {
+          for (const mission of missions) {
+            const missionStreams = data.items.filter((stream: any) => {
+              const streamDate = new Date(stream.endTime).toISOString().split('T')[0]
+              return streamDate === today && stream.trackName === mission.song
+            })
+
+            const userMissionCount = missionStreams.length
+            await kv.set(
+              `mission:progress:${userId}:${today}:${mission.id}`,
+              userMissionCount,
+              { ex: 86400 }
+            )
+          }
+        }
+
         usersChecked++
 
       } catch (error) {
@@ -70,21 +121,31 @@ export async function GET(request: Request) {
       }
     }
 
-    // Update goal with new total
-    await kv.set(goalKey, {
-      song: goal.song,
-      target: goal.target,
-      current: totalStreamsToday
-    }, { ex: 86400 })
+    // Update goal totals
+    if (dailyGoal) {
+      await kv.set(dailyGoalKey, {
+        song: dailyGoal.song,
+        target: dailyGoal.target,
+        current: dailyTotal
+      }, { ex: 86400 })
+    }
 
-    console.log(`Checked ${usersChecked} users, found ${totalStreamsToday} total streams`)
+    if (weeklyGoal) {
+      await kv.set(weeklyGoalKey, {
+        song: weeklyGoal.song,
+        target: weeklyGoal.target,
+        current: weeklyTotal
+      }, { ex: 604800 })
+    }
+
+    console.log(`Checked ${usersChecked} users - Daily: ${dailyTotal}, Weekly: ${weeklyTotal}`)
 
     return NextResponse.json({
       success: true,
       usersChecked,
-      totalStreams: totalStreamsToday,
-      goal: goal.song,
-      progress: `${totalStreamsToday}/${goal.target}`
+      dailyTotal,
+      weeklyTotal,
+      missionsCount: missions?.length || 0
     })
 
   } catch (error) {

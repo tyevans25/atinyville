@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Music, Radio, Sparkles, ExternalLink, TrendingUp } from "lucide-react"
 import Navigation from "@/components/Navigation"
 import StatsFmCard from "@/components/StatsFmCard"
+import DailyMissions from "@/components/DailyMissions"
+import DailyGoalCard from "@/components/DailyGoalCard"
+import WeeklyGoalCard from "@/components/WeeklyGoalCard"
 import { useUser } from "@clerk/nextjs"
 
 export default function StreamingHub() {
@@ -58,7 +61,7 @@ export default function StreamingHub() {
               🎵 Streaming Hub
             </h1>
             <p className="text-gray-300">
-              Track streams, generate playlists, and join the party!
+              Complete missions, track goals, and stream with ATINYs!
             </p>
           </div>
 
@@ -135,46 +138,26 @@ export default function StreamingHub() {
             <StatsFmCard />
           </div>
 
-          {/* Quick Links */}
-          <Card className="glass-card">
-            <CardHeader className="glass-header-blue text-white">
-              <CardTitle className="flex items-center gap-2">
-                <Music className="w-5 h-5" />
-                Quick Links
-              </CardTitle>
-              <CardDescription className="text-gray-300">
-                Stream ATEEZ on your favorite platforms
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="grid md:grid-cols-3 gap-4">
-                <Button
-                  variant="outline"
-                  className="w-full border-white/20 text-white hover:bg-white/10 h-auto py-4 flex flex-col items-center gap-2"
-                  onClick={() => window.open('https://open.spotify.com/artist/68KmkJeZGfwe1OUaivBa2L', '_blank')}
-                >
-                  <Music className="w-6 h-6" />
-                  <span>Stream on Spotify</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full border-white/20 text-white hover:bg-white/10 h-auto py-4 flex flex-col items-center gap-2"
-                  onClick={() => window.open('https://youtube.com/@ateez_official', '_blank')}
-                >
-                  <ExternalLink className="w-6 h-6" />
-                  <span>Watch on YouTube</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full border-white/20 text-white hover:bg-white/10 h-auto py-4 flex flex-col items-center gap-2"
-                  onClick={() => window.open('https://music.apple.com/us/artist/ateez/1441046989', '_blank')}
-                >
-                  <Music className="w-6 h-6" />
-                  <span>Apple Music</span>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Community Goals - 2 Column Grid */}
+          <div>
+            <h2 className="text-2xl font-bold text-white mb-4">Community Goals</h2>
+            <p className="text-gray-300 text-sm mb-4">
+              Work together with all ATINYs! These goals track the combined streams from everyone in the community.
+            </p>
+            <div className="grid md:grid-cols-2 gap-6">
+              <DailyGoalCard />
+              <WeeklyGoalCard />
+            </div>
+          </div>
+
+          {/* Daily Missions */}
+          <div>
+            <h2 className="text-2xl font-bold text-white mb-4">Your Daily Missions</h2>
+            <p className="text-gray-300 text-sm mb-4">
+              Personal streaming goals just for you! Complete these to check them off your list.
+            </p>
+            <DailyMissions />
+          </div>
 
           {/* Curated Streaming Playlist */}
           <Card className="glass-card">
@@ -226,7 +209,7 @@ export default function StreamingHub() {
                 </p>
                 <Button 
                   variant="outline"
-                  className="w-full border-white/20 text-black hover:bg-white/10"
+                  className="w-full border-white/20 text-white hover:bg-white/10"
                   onClick={() => window.open('https://stationhead.com', '_blank')}
                 >
                   Learn More
@@ -242,7 +225,7 @@ export default function StreamingHub() {
                 </p>
                 <Button 
                   variant="outline"
-                  className="w-full border-white/20 text-black hover:bg-white/10"
+                  className="w-full border-white/20 text-white hover:bg-white/10"
                 >
                   View Guide
                 </Button>

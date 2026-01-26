@@ -122,7 +122,7 @@ export default function DailyGoalSlide() {
                 </div>
                 <div>
                     <h3 className="text-xl font-bold text-white">Daily Streaming Goal</h3>
-                    <p className="text-xs text-gray-400">Stream together, reach the goal 🏴‍☠️</p>
+                    <p className="text-xs text-gray-400">Let's go! 🏴‍☠️</p>
                 </div>
             </div>
 
@@ -141,7 +141,7 @@ export default function DailyGoalSlide() {
             {/* Description */}
             <p className="text-gray-300 mb-4 text-sm">
                 Complete the daily mission together with other ATINYs! When we reach {target.toLocaleString()} streams, 
-                everyone who contributed can celebrate. Teamwork makes the dream work! 💜
+                we can celebrate. (8)TINY makes 1 team! 
             </p>
 
             {/* Main Progress Card */}
