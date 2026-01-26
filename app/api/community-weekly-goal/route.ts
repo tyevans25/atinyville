@@ -18,27 +18,27 @@ export async function GET() {
     const { userId } = await auth()
     const weekKey = getCurrentWeekKey()
     
-    // Get this week's total goal
-    const goalKey = `community:weekly:${weekKey}`
+    // Get this week's total goal - MATCHES CRON KEY
+    const goalKey = `weekly:goal:${weekKey}`
     const goal = await kv.get<{
       target: number
-      current: number
+      current?: number
     }>(goalKey)
 
     if (!goal) {
       return NextResponse.json(null)
     }
 
-    // Get user's personal total ATEEZ streams if logged in
+    // Get user's personal total ATEEZ streams if logged in - MATCHES CRON KEY
     let userStreams = 0
     if (userId) {
-      const userStreamsKey = `community:weekly:user:${userId}:${weekKey}`
+      const userStreamsKey = `weekly:streams:${userId}:${weekKey}`
       userStreams = await kv.get<number>(userStreamsKey) || 0
     }
 
     return NextResponse.json({
       target: goal.target,
-      current: goal.current,
+      current: goal.current || 0,
       userStreams
     })
 
@@ -64,11 +64,11 @@ export async function POST(request: Request) {
     }
 
     const weekKey = getCurrentWeekKey()
-    const goalKey = `community:weekly:${weekKey}`
+    const goalKey = `weekly:goal:${weekKey}` // MATCHES CRON KEY
 
     // Check if goal already exists
-    const existingGoal = await kv.get(goalKey)
-    const current = existingGoal ? (existingGoal as any).current : 0
+    const existingGoal = await kv.get<{ target: number; current?: number }>(goalKey)
+    const current = existingGoal?.current || 0
 
     // Set this week's goal (expires in 7 days)
     await kv.set(goalKey, {
