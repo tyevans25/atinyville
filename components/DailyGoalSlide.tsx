@@ -50,6 +50,7 @@ export default function DailyGoalSlide() {
       if (data === null) {
         setGoalData(null)
       } else {
+        // API now returns: { song, target, current (community), userStreams }
         setGoalData(data)
       }
     } catch (error) {
@@ -99,9 +100,8 @@ export default function DailyGoalSlide() {
   const remaining = Math.max(target - current, 0)
 
   return (
-    <div className="p-6 md:p-8">
-      <div className="flex items-start gap-4">
-        <div className="flex-1">
+    <div className="flex items-start gap-4">
+      <div className="flex-1">
           {/* Badge */}
           <span className="inline-block bg-red-500 text-white text-xs font-bold px-2 py-1 rounded mb-2 uppercase">
             Today's Goal
@@ -187,6 +187,5 @@ export default function DailyGoalSlide() {
           </div>
         </div>
       </div>
-    </div>
-  )
+    )
 }
