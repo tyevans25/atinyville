@@ -7,10 +7,6 @@
     {
       "path": "/api/cron/check-streams",
       "schedule": "0 22,23 * * *"
-    },
-    {
-      "path": "/api/update-streams",
-      "schedule": "*/15 * * * *"
     }
   ]
 }

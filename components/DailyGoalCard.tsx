@@ -7,7 +7,6 @@ import { Clock, Target, TrendingUp } from "lucide-react"
 import { useUser } from "@clerk/nextjs"
 
 interface DailyGoalData {
-    song?: unknown
     target?: unknown
     current?: unknown
     userStreams?: unknown
@@ -49,7 +48,7 @@ export default function DailyGoalCard() {
 
     const fetchGoalData = async () => {
         try {
-            const response = await fetch("/api/daily-goal")
+            const response = await fetch("/api/community-daily-goal")
             if (!response.ok) {
                 setGoalData(null)
                 setLoading(false)
@@ -103,9 +102,6 @@ export default function DailyGoalCard() {
     const target = safeNumber(goalData.target)
     const current = safeNumber(goalData.current)
     const userStreams = safeNumber(goalData.userStreams)
-    const song = typeof goalData.song === "string" && goalData.song.trim().length > 0
-        ? goalData.song
-        : "Unknown Song"
 
     const progress = target > 0 ? (current / target) * 100 : 0
     const remaining = Math.max(target - current, 0)
@@ -115,7 +111,7 @@ export default function DailyGoalCard() {
             <CardHeader className="glass-header-blue text-white">
                 <CardTitle className="flex items-center gap-2">
                     <Clock className="w-5 h-5" />
-                    Daily Goal
+                    Daily Community Goal
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
@@ -125,10 +121,10 @@ export default function DailyGoalCard() {
                     <span className="text-sm font-semibold text-white">{timeRemaining}</span>
                 </div>
 
-                {/* Song Name */}
+                {/* Goal Description */}
                 <div>
-                    <p className="text-xs text-gray-400 mb-1">Today's Song</p>
-                    <h4 className="text-xl font-bold text-white">"{song}"</h4>
+                    <p className="text-xs text-gray-400 mb-1">Today's Goal</p>
+                    <h4 className="text-xl font-bold text-white">Stream ANY ATEEZ songs</h4>
                 </div>
 
                 {/* Progress Numbers */}

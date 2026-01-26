@@ -7,7 +7,6 @@ import { Calendar, Target, TrendingUp } from "lucide-react"
 import { useUser } from "@clerk/nextjs"
 
 interface WeeklyGoalData {
-    song?: unknown
     target?: unknown
     current?: unknown
     userStreams?: unknown
@@ -45,7 +44,7 @@ export default function WeeklyGoalCard() {
 
     const fetchGoalData = async () => {
         try {
-            const response = await fetch("/api/weekly-goal")
+            const response = await fetch("/api/community-weekly-goal")
             if (!response.ok) {
                 setGoalData(null)
                 setLoading(false)
@@ -99,9 +98,6 @@ export default function WeeklyGoalCard() {
     const target = safeNumber(goalData.target)
     const current = safeNumber(goalData.current)
     const userStreams = safeNumber(goalData.userStreams)
-    const song = typeof goalData.song === "string" && goalData.song.trim().length > 0
-        ? goalData.song
-        : "Unknown Song"
 
     const progress = target > 0 ? (current / target) * 100 : 0
     const remaining = Math.max(target - current, 0)
@@ -111,7 +107,7 @@ export default function WeeklyGoalCard() {
             <CardHeader className="glass-header-blue text-white">
                 <CardTitle className="flex items-center gap-2">
                     <Calendar className="w-5 h-5" />
-                    Weekly Goal
+                    Weekly Community Goal
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
@@ -123,10 +119,10 @@ export default function WeeklyGoalCard() {
                     </span>
                 </div>
 
-                {/* Song Name */}
+                {/* Goal Description */}
                 <div>
-                    <p className="text-xs text-gray-400 mb-1">This Week's Song</p>
-                    <h4 className="text-xl font-bold text-white">"{song}"</h4>
+                    <p className="text-xs text-gray-400 mb-1">This Week's Goal</p>
+                    <h4 className="text-xl font-bold text-white">Stream ANY ATEEZ songs</h4>
                 </div>
 
                 {/* Progress Numbers */}
