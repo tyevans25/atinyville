@@ -35,13 +35,26 @@ export default function DailyGoalSlide() {
   const fetchGoalData = async () => {
     try {
       const response = await fetch("/api/daily-goal")
-      const data = await response.json()
+      
+      // Check if response is ok
+      if (!response.ok) {
+        console.error("API returned error:", response.status)
+        setGoalData(null)
+        setLoading(false)
+        return
+      }
 
-      // Accept ANY shape, sanitize later
-      setGoalData(data ?? {})
+      const data = await response.json()
+      
+      // If API returns null (no goal set), treat as no goal
+      if (data === null) {
+        setGoalData(null)
+      } else {
+        setGoalData(data)
+      }
     } catch (error) {
       console.error("Error fetching goal:", error)
-      setGoalData({})
+      setGoalData(null)
     } finally {
       setLoading(false)
     }
@@ -89,75 +102,69 @@ export default function DailyGoalSlide() {
     <div className="p-6 md:p-8">
       <div className="flex items-start gap-4">
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <Target className="w-5 h-5 text-yellow-400" />
-            <span className="text-yellow-400 font-semibold text-sm">
-              TODAY'S GOAL
-            </span>
-          </div>
+          {/* Badge */}
+          <span className="inline-block bg-red-500 text-white text-xs font-bold px-2 py-1 rounded mb-2 uppercase">
+            Today's Goal
+          </span>
 
+          {/* Title */}
           <h3 className="text-2xl font-bold mb-2 text-white">
-            Stream "{song}"
+            🎯 Stream "{song}"
           </h3>
 
+          {/* Description */}
           <p className="text-gray-300 mb-4">
             Let's hit {target.toLocaleString()} community streams today!
           </p>
 
-          {/* Progress Bar */}
-          <div className="space-y-2 mb-4">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-400">Community Progress</span>
-              <span className="text-white font-semibold">
-                {current.toLocaleString()} / {target.toLocaleString()}
-              </span>
-            </div>
-
-            <Progress value={progress} className="h-3 bg-white/10" />
-
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-400">
-                {remaining > 0
-                  ? `${remaining.toLocaleString()} to go!`
-                  : "🎉 Goal reached!"}
-              </span>
-              <span className="text-green-400">
-                {Math.round(progress)}%
-              </span>
-            </div>
+          {/* Stats */}
+          <div className="text-sm text-gray-400 mb-2">Community Progress</div>
+          <div className="text-white font-semibold mb-2">
+            {current.toLocaleString()} / {target.toLocaleString()}
           </div>
 
-          {/* User Contribution */}
+          {/* Progress Bar */}
+          <Progress value={progress} className="h-2 bg-white/10 mb-2" />
+
+          <div className="flex justify-between text-xs mb-4">
+            <span className="text-gray-400">
+              {remaining > 0
+                ? `🎉 Goal reached!`
+                : `${remaining.toLocaleString()} to go!`}
+            </span>
+            <span className="text-green-400">{Math.round(progress)}%</span>
+          </div>
+
+          {/* User Contribution Box */}
           {isSignedIn && (
-            <div className="bg-blue-500/10 border border-blue-400/20 rounded-lg p-3 mb-4">
+            <div className="bg-blue-500/10 border border-blue-400/30 rounded-lg p-3 mb-4">
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-blue-400" />
-                <span className="text-sm text-blue-300 font-semibold">
-                  Your contribution: {userStreams} streams ✨
+                <span className="text-sm text-blue-300">
+                  📈 Your contribution: {userStreams} streams ✨
                 </span>
               </div>
             </div>
           )}
 
-          {/* Action Buttons */}
+          {/* Buttons */}
           <div className="flex flex-wrap gap-3">
             {!isSignedIn ? (
               <Link href="/streaming">
-                <Button className="bg-white hover:bg-gray-200 text-gray-800">
-                  Add stats.fm to Track Yours
+                <Button className="bg-white hover:bg-gray-200 text-gray-800 hover:text-gray-900">
+                  Set Up Tracking
                   <ExternalLink className="w-4 h-4 ml-2" />
                 </Button>
               </Link>
             ) : userStreams === 0 ? (
               <Link href="/streaming">
-                <Button className="bg-white hover:bg-gray-200 text-gray-800">
+                <Button className="bg-white hover:bg-gray-200 text-gray-800 hover:text-gray-900">
                   Set Up Tracking
                   <ExternalLink className="w-4 h-4 ml-2" />
                 </Button>
               </Link>
             ) : (
               <Button
-                className="bg-white hover:bg-gray-200 text-gray-800"
+                className="bg-white hover:bg-gray-200 text-gray-800 hover:text-gray-900"
                 onClick={() =>
                   window.open(
                     "https://open.spotify.com/search/" +
@@ -172,11 +179,9 @@ export default function DailyGoalSlide() {
             )}
 
             <Link href="/streaming">
-              <Button
-                variant="outline"
-                className="border-white/30 text-white hover:bg-white/10"
-              >
+              <Button className="bg-white hover:bg-gray-200 text-gray-800 hover:text-gray-900">
                 View Details
+                <ExternalLink className="w-4 h-4 ml-2" />
               </Button>
             </Link>
           </div>
