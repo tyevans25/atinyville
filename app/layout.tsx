@@ -8,8 +8,13 @@ import { Analytics } from "@vercel/analytics/next";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "ATEEZ Streaming Hub",
-  description: "Test your ATEEZ knowledge while streaming!",
+  title: "ATINYTOWN",
+  description: "ATINY comminity platform!",
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
@@ -45,6 +50,11 @@ export default function RootLayout({
       }}
     >
       <html lang="en">
+        <head>
+          <link rel="manifest" href="/manifest.json" />
+          <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+          <meta name="theme-color" content="#1f2937" />
+        </head>
         <body className={inter.className}>
           {children}
           <Analytics />
