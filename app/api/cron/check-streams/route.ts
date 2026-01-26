@@ -27,10 +27,10 @@ export async function GET(request: Request) {
     const weeklyGoalKey = `weekly:goal:${weekKey}`
     const missionsKey = `daily:missions:${today}`
 
-    // Load goals and missions
+    // --- Load goals and missions ---
     const [dailyGoal, weeklyGoal, missions] = await Promise.all([
-      kv.get<{ song: string; target: number; current: number }>(dailyGoalKey),
-      kv.get<{ song: string; target: number; current: number }>(weeklyGoalKey),
+      kv.get<{ song: string; target: number; current?: number }>(dailyGoalKey),
+      kv.get<{ song: string; target: number; current?: number }>(weeklyGoalKey),
       kv.get<Array<{ id: string; song: string; target: number }>>(missionsKey)
     ])
 
@@ -38,11 +38,13 @@ export async function GET(request: Request) {
       return NextResponse.json({ success: true, message: "No active goals today" })
     }
 
-    // --- Fetch all users ---
-    const userKeys = await kv.keys("user:*:statsfm")
+    // --- Initialize accumulators ---
     let totalDaily = 0
     let totalWeekly = 0
     let usersProcessed = 0
+
+    // --- Fetch all users with stats.fm ---
+    const userKeys = await kv.keys("user:*:statsfm")
 
     for (const key of userKeys) {
       try {
@@ -50,26 +52,28 @@ export async function GET(request: Request) {
         const statsfmUsername = await kv.get<string>(key)
         if (!statsfmUsername) continue
 
-        // Fetch streams
+        // Fetch user's streams
         const res = await fetch(`https://api.stats.fm/api/v1/users/${statsfmUsername}/streams`)
         if (!res.ok) continue
         const data = await res.json()
+        const streams: any[] = data.items || []
 
-        // --- DAILY GOAL SONG ---
+        // --- DAILY GOAL ---
         if (dailyGoal) {
-          const todayStreams = data.items.filter((s: any) => {
+          const todayStreams = streams.filter((s) => {
             const streamDate = new Date(s.endTime).toISOString().split("T")[0]
             return streamDate === today && s.trackName === dailyGoal.song
           })
 
-          // Accumulate per-user and total
-          const prevUserCount = (await kv.get<number>(`daily:streams:${userId}:${today}`)) || 0
-          const newUserCount = prevUserCount + todayStreams.length
-          await kv.set(`daily:streams:${userId}:${today}`, newUserCount, { ex: 86400 })
-          totalDaily += newUserCount
+          // Save per-user daily streams
+          const prevUserDaily = (await kv.get<number>(`daily:streams:${userId}:${today}`)) || 0
+          const newUserDaily = prevUserDaily + todayStreams.length
+          await kv.set(`daily:streams:${userId}:${today}`, newUserDaily, { ex: 86400 })
+
+          totalDaily += todayStreams.length
         }
 
-        // --- WEEKLY GOAL SONG ---
+        // --- WEEKLY GOAL ---
         if (weeklyGoal) {
           const now = new Date()
           const dayOfWeek = now.getDay()
@@ -78,21 +82,22 @@ export async function GET(request: Request) {
           startOfWeek.setDate(now.getDate() - daysToMonday)
           startOfWeek.setHours(0, 0, 0, 0)
 
-          const weekStreams = data.items.filter((s: any) => {
+          const weekStreams = streams.filter((s) => {
             const streamDate = new Date(s.endTime)
             return streamDate >= startOfWeek && s.trackName === weeklyGoal.song
           })
 
-          const prevWeekly = (await kv.get<number>(`weekly:streams:${userId}:${weekKey}`)) || 0
-          const newWeekly = prevWeekly + weekStreams.length
-          await kv.set(`weekly:streams:${userId}:${weekKey}`, newWeekly, { ex: 604800 })
-          totalWeekly += newWeekly
+          const prevUserWeekly = (await kv.get<number>(`weekly:streams:${userId}:${weekKey}`)) || 0
+          const newUserWeekly = prevUserWeekly + weekStreams.length
+          await kv.set(`weekly:streams:${userId}:${weekKey}`, newUserWeekly, { ex: 604800 })
+
+          totalWeekly += weekStreams.length
         }
 
         // --- INDIVIDUAL MISSIONS ---
         if (missions && missions.length > 0) {
           for (const mission of missions) {
-            const missionStreams = data.items.filter((s: any) => {
+            const missionStreams = streams.filter((s) => {
               const streamDate = new Date(s.endTime).toISOString().split("T")[0]
               return streamDate === today && s.trackName === mission.song
             })
@@ -111,44 +116,42 @@ export async function GET(request: Request) {
 
     // --- UPDATE DAILY GOAL TOTAL ---
     if (dailyGoal) {
-      const prevTotal = dailyGoal.current || 0
       await kv.set(dailyGoalKey, {
         song: dailyGoal.song,
         target: dailyGoal.target,
-        current: prevTotal + totalDaily
+        current: totalDaily
       }, { ex: 86400 })
     }
 
     // --- UPDATE WEEKLY GOAL TOTAL ---
     if (weeklyGoal) {
-      const prevTotal = weeklyGoal.current || 0
       await kv.set(weeklyGoalKey, {
         song: weeklyGoal.song,
         target: weeklyGoal.target,
-        current: prevTotal + totalWeekly
+        current: totalWeekly
       }, { ex: 604800 })
     }
 
-    // --- COMMUNITY MISSION TOTALS ---
+    // --- COMMUNITY MISSIONS TOTALS ---
     if (missions && missions.length > 0) {
       for (const mission of missions) {
         let missionTotal = 0
         for (const key of userKeys) {
           const userId = key.split(":")[1]
-          const userMissionCount = (await kv.get<number>(`mission:progress:${userId}:${today}:${mission.id}`)) || 0
-          missionTotal += userMissionCount
+          const count = (await kv.get<number>(`mission:progress:${userId}:${today}:${mission.id}`)) || 0
+          missionTotal += count
         }
         await kv.set(`mission:community:${today}:${mission.id}`, missionTotal, { ex: 86400 })
       }
     }
 
-    console.log(`Cron done: ${usersProcessed} users checked. Daily: ${totalDaily}, Weekly: ${totalWeekly}`)
+    console.log(`Cron done: ${usersProcessed} users processed. Daily: ${totalDaily}, Weekly: ${totalWeekly}`)
 
     return NextResponse.json({
       success: true,
       usersProcessed,
-      dailyTotal,
-      weeklyTotal,
+      dailyTotal: totalDaily,
+      weeklyTotal: totalWeekly,
       missionsCount: missions?.length || 0
     })
   } catch (error) {
