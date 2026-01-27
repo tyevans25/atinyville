@@ -24,10 +24,10 @@ export async function GET() {
       })
     }
 
-    // Get today's goal to check for specific song
+    // Get today's SONG goal (specific song) - FIXED KEY
     const today = new Date().toISOString().split('T')[0]
-    const goalKey = `daily:goal:${today}`
-    const goal = await kv.get<any>(goalKey)
+    const songGoalKey = `daily:song-goal:${today}` // Changed from daily:goal
+    const songGoal = await kv.get<{ song: string; target: number; current?: number }>(songGoalKey)
 
     // Check cache
     const cacheKey = `user:streams:cache:${userId}:${today}`
@@ -74,8 +74,8 @@ export async function GET() {
         if (isToday && isAteez) {
           totalAteezStreams++
           
-          // Check if it matches the goal song
-          if (goal && stream.trackName?.toLowerCase().includes(goal.song.toLowerCase())) {
+          // Check if it matches the song goal (specific song)
+          if (songGoal && stream.trackName === songGoal.song) {
             goalSongStreams++
           }
         }

@@ -21,7 +21,9 @@ export default function StreamingHub() {
 
   // Check if Stationhead is live
   useEffect(() => {
-    setStationheadLive(Math.random() > 0.7)
+    useEffect(() => {
+  setStationheadLive(Math.random() > 0.7)
+}, [])
   }, [])
 
   // Fetch user's stats.fm username and stream count
