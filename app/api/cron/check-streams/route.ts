@@ -63,8 +63,8 @@ export async function GET(request: Request) {
         const lastProcessedKey = `user:${userId}:last_processed`
         const lastProcessedTime = await kv.get<number>(lastProcessedKey) || 0
 
-        // Fetch user's streams
-        const res = await fetch(`https://api.stats.fm/api/v1/users/${statsfmUsername}/streams`)
+        // Fetch user's streams with higher limit
+        const res = await fetch(`https://api.stats.fm/api/v1/users/${statsfmUsername}/streams?limit=50`)
         if (!res.ok) continue
         const data = await res.json()
         const streams: any[] = data.items || []
