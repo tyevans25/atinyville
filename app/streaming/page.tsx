@@ -9,6 +9,7 @@ import StatsFmCard from "@/components/StatsFmCard"
 import DailyMissions from "@/components/DailyMissions"
 import DailyGoalCard from "@/components/DailyGoalCard"
 import WeeklyGoalCard from "@/components/WeeklyGoalCard"
+import CronCountdown from "@/components/CronCountdown"
 import { useUser } from "@clerk/nextjs"
 
 export default function StreamingHub() {
@@ -140,10 +141,15 @@ export default function StreamingHub() {
 
           {/* Community Goals - 2 Column Grid */}
           <div>
-            <h2 className="text-2xl font-bold text-white mb-4">Community Goals</h2>
-            <p className="text-gray-300 text-sm mb-4">
-              Work together with all ATINYs! These goals track the combined streams from everyone in the community.
-            </p>
+            <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-white">Community Goals</h2>
+                <p className="text-gray-300 text-sm">
+                  Work together with all ATINYs! These goals track the combined streams from everyone in the community.
+                </p>
+              </div>
+              <CronCountdown />
+            </div>
             <div className="grid md:grid-cols-2 gap-6">
               <DailyGoalCard />
               <WeeklyGoalCard />
