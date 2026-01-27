@@ -19,11 +19,9 @@ export default function StreamingHub() {
   const [goalStreams, setGoalStreams] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Check if Stationhead is live
+  // Check if Stationhead is live - FIXED: removed nested useEffect
   useEffect(() => {
-    useEffect(() => {
-  setStationheadLive(Math.random() > 0.7)
-}, [])
+    setStationheadLive(Math.random() > 0.7)
   }, [])
 
   // Fetch user's stats.fm username and stream count
