@@ -27,20 +27,20 @@ export async function GET(request: Request) {
     const cronRunTime = Date.now()
 
     // --- Keys ---
-    const dailyGoalKey = `daily:goal:${today}` // ANY ATEEZ streams
-    const dailySongGoalKey = `daily:song-goal:${today}` // SPECIFIC song
-    const weeklyGoalKey = `weekly:goal:${weekKey}`
+    const communityDailyKey = `community:daily:${today}` // ANY ATEEZ streams (streaming hub)
+    const dailySongGoalKey = `daily:goal:${today}` // SPECIFIC song (homepage)
+    const communityWeeklyKey = `community:weekly:${weekKey}` // ANY ATEEZ streams (streaming hub)
     const missionsKey = `daily:missions:${today}`
 
     // --- Load goals and missions ---
-    const [dailyGoal, dailySongGoal, weeklyGoal, missions] = await Promise.all([
-      kv.get<{ target: number; current?: number }>(dailyGoalKey),
+    const [communityDaily, dailySongGoal, communityWeekly, missions] = await Promise.all([
+      kv.get<{ target: number; current?: number }>(communityDailyKey),
       kv.get<{ song: string; target: number; current?: number }>(dailySongGoalKey),
-      kv.get<{ target: number; current?: number }>(weeklyGoalKey),
+      kv.get<{ target: number; current?: number }>(communityWeeklyKey),
       kv.get<Array<{ id: string; song: string; target: number }>>(missionsKey)
     ])
 
-    if (!dailyGoal && !dailySongGoal && !weeklyGoal && (!missions || missions.length === 0)) {
+    if (!communityDaily && !dailySongGoal && !communityWeekly && (!missions || missions.length === 0)) {
       return NextResponse.json({ success: true, message: "No active goals today" })
     }
 
@@ -77,8 +77,8 @@ export async function GET(request: Request) {
 
         if (newStreams.length === 0) continue
 
-        // --- DAILY GOAL (ANY ATEEZ streams) ---
-        if (dailyGoal) {
+        // --- COMMUNITY DAILY GOAL (ANY ATEEZ streams) ---
+        if (communityDaily) {
           const todayNewStreams = newStreams.filter((s) => {
             const streamDate = new Date(s.endTime).toISOString().split("T")[0]
             const matchesDate = streamDate === today
@@ -89,7 +89,7 @@ export async function GET(request: Request) {
 
           if (todayNewStreams.length > 0) {
             // Increment user's daily count
-            const userDailyKey = `daily:streams:${userId}:${today}`
+            const userDailyKey = `community:daily:user:${userId}:${today}`
             const prevUserDaily = (await kv.get<number>(userDailyKey)) || 0
             await kv.set(userDailyKey, prevUserDaily + todayNewStreams.length, { ex: 86400 })
 
@@ -97,7 +97,7 @@ export async function GET(request: Request) {
           }
         }
 
-        // --- DAILY SONG GOAL (SPECIFIC song) ---
+        // --- DAILY SONG GOAL (SPECIFIC song - homepage) ---
         if (dailySongGoal) {
           const todaySongStreams = newStreams.filter((s) => {
             const streamDate = new Date(s.endTime).toISOString().split("T")[0]
@@ -109,7 +109,7 @@ export async function GET(request: Request) {
 
           if (todaySongStreams.length > 0) {
             // Increment user's daily song count
-            const userDailySongKey = `daily:song-streams:${userId}:${today}`
+            const userDailySongKey = `daily:streams:${userId}:${today}`
             const prevUserDailySong = (await kv.get<number>(userDailySongKey)) || 0
             await kv.set(userDailySongKey, prevUserDailySong + todaySongStreams.length, { ex: 86400 })
 
@@ -117,8 +117,8 @@ export async function GET(request: Request) {
           }
         }
 
-        // --- WEEKLY GOAL (ANY ATEEZ streams) ---
-        if (weeklyGoal) {
+        // --- COMMUNITY WEEKLY GOAL (ANY ATEEZ streams) ---
+        if (communityWeekly) {
           const now = new Date()
           const dayOfWeek = now.getDay()
           const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1
@@ -135,7 +135,7 @@ export async function GET(request: Request) {
           })
 
           if (weekNewStreams.length > 0) {
-            const userWeeklyKey = `weekly:streams:${userId}:${weekKey}`
+            const userWeeklyKey = `community:weekly:user:${userId}:${weekKey}`
             const prevUserWeekly = (await kv.get<number>(userWeeklyKey)) || 0
             await kv.set(userWeeklyKey, prevUserWeekly + weekNewStreams.length, { ex: 604800 })
 
@@ -168,16 +168,16 @@ export async function GET(request: Request) {
       }
     }
 
-    // --- ACCUMULATE (ADD) TO DAILY GOAL TOTAL (ANY ATEEZ) ---
-    if (dailyGoal && newDailyStreams > 0) {
-      const updatedCurrent = (dailyGoal.current || 0) + newDailyStreams
-      await kv.set(dailyGoalKey, {
-        target: dailyGoal.target,
+    // --- ACCUMULATE (ADD) TO COMMUNITY DAILY GOAL TOTAL (ANY ATEEZ) ---
+    if (communityDaily && newDailyStreams > 0) {
+      const updatedCurrent = (communityDaily.current || 0) + newDailyStreams
+      await kv.set(communityDailyKey, {
+        target: communityDaily.target,
         current: updatedCurrent
       }, { ex: 86400 })
     }
 
-    // --- ACCUMULATE (ADD) TO DAILY SONG GOAL TOTAL (SPECIFIC SONG) ---
+    // --- ACCUMULATE (ADD) TO DAILY SONG GOAL TOTAL (SPECIFIC SONG - homepage) ---
     if (dailySongGoal && newDailySongStreams > 0) {
       const updatedCurrent = (dailySongGoal.current || 0) + newDailySongStreams
       await kv.set(dailySongGoalKey, {
@@ -187,11 +187,11 @@ export async function GET(request: Request) {
       }, { ex: 86400 })
     }
 
-    // --- ACCUMULATE (ADD) TO WEEKLY GOAL TOTAL ---
-    if (weeklyGoal && newWeeklyStreams > 0) {
-      const updatedCurrent = (weeklyGoal.current || 0) + newWeeklyStreams
-      await kv.set(weeklyGoalKey, {
-        target: weeklyGoal.target,
+    // --- ACCUMULATE (ADD) TO COMMUNITY WEEKLY GOAL TOTAL ---
+    if (communityWeekly && newWeeklyStreams > 0) {
+      const updatedCurrent = (communityWeekly.current || 0) + newWeeklyStreams
+      await kv.set(communityWeeklyKey, {
+        target: communityWeekly.target,
         current: updatedCurrent
       }, { ex: 604800 })
     }
@@ -209,7 +209,7 @@ export async function GET(request: Request) {
       }
     }
 
-    console.log(`✅ Cron done: ${usersProcessed} users, +${newDailyStreams} daily (any ATEEZ), +${newDailySongStreams} daily song, +${newWeeklyStreams} weekly`)
+    console.log(`✅ Cron done: ${usersProcessed} users, +${newDailyStreams} community daily, +${newDailySongStreams} song daily, +${newWeeklyStreams} community weekly`)
 
     return NextResponse.json({
       success: true,
