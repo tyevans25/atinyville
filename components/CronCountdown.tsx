@@ -8,27 +8,23 @@ export default function CronCountdown() {
 
   useEffect(() => {
     const updateCountdown = () => {
-      // Cron runs every 2 hours at the top of even hours (00:00, 02:00, 04:00, etc.)
+      // Cron runs every 30 minutes (00:00, 00:30, 01:00, 01:30, etc.)
       const now = new Date()
-      const currentHour = now.getHours()
+      const currentMinute = now.getMinutes()
       
-      // Calculate next even hour
-      const nextCronHour = currentHour % 2 === 0 ? currentHour + 2 : currentHour + 1
-      
-      const nextRun = new Date()
-      nextRun.setHours(nextCronHour, 0, 0, 0)
-      
-      // If we've passed the next run time somehow, add 2 more hours
-      if (nextRun <= now) {
-        nextRun.setHours(nextRun.getHours() + 2)
+      // Calculate next 30-minute mark
+      const nextRun = new Date(now)
+      if (currentMinute < 30) {
+        nextRun.setMinutes(30, 0, 0)
+      } else {
+        nextRun.setHours(nextRun.getHours() + 1, 0, 0, 0)
       }
 
       const diff = nextRun.getTime() - now.getTime()
-      const hours = Math.floor(diff / (1000 * 60 * 60))
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+      const minutes = Math.floor(diff / (1000 * 60))
       const seconds = Math.floor((diff % (1000 * 60)) / 1000)
 
-      setTimeLeft(`${hours}h ${minutes}m ${seconds}s`)
+      setTimeLeft(`${minutes}m ${seconds}s`)
     }
 
     updateCountdown()
