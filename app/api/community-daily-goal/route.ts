@@ -8,8 +8,8 @@ export async function GET() {
     const { userId } = await auth()
     const today = new Date().toISOString().split('T')[0]
     
-    // Get today's total goal (ANY ATEEZ) - MATCHES CRON KEY
-    const goalKey = `daily:goal:${today}`
+    // MATCHES CRON: community:daily:${today}
+    const goalKey = `community:daily:${today}`
     const goal = await kv.get<{
       target: number
       current?: number
@@ -19,10 +19,11 @@ export async function GET() {
       return NextResponse.json(null)
     }
 
-    // Get user's personal total ATEEZ streams if logged in - MATCHES CRON KEY
+    // Get user's personal total ATEEZ streams if logged in
+    // MATCHES CRON: community:daily:user:${userId}:${today}
     let userStreams = 0
     if (userId) {
-      const userStreamsKey = `daily:streams:${userId}:${today}`
+      const userStreamsKey = `community:daily:user:${userId}:${today}`
       userStreams = await kv.get<number>(userStreamsKey) || 0
     }
 
@@ -54,7 +55,7 @@ export async function POST(request: Request) {
     }
 
     const today = new Date().toISOString().split('T')[0]
-    const goalKey = `daily:goal:${today}` // MATCHES CRON KEY
+    const goalKey = `community:daily:${today}` // MATCHES CRON
 
     // Check if goal already exists
     const existingGoal = await kv.get<{ target: number; current?: number }>(goalKey)

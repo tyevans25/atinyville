@@ -15,7 +15,8 @@ export async function GET() {
     const { userId } = await auth()
     const today = new Date().toISOString().split('T')[0]
 
-    const goalKey = `daily:song-goal:${today}`
+    // MATCHES CRON: daily:goal:${today}
+    const goalKey = `daily:goal:${today}`
     const dailyGoal = await kv.get<{ song: string; target: number; current?: number }>(goalKey)
 
     if (!dailyGoal || !dailyGoal.song || !dailyGoal.target) {
@@ -24,7 +25,8 @@ export async function GET() {
 
     let userStreams = 0
     if (userId) {
-      const userStreamsKey = `daily:song-streams:${userId}:${today}`
+      // MATCHES CRON: daily:streams:${userId}:${today}
+      const userStreamsKey = `daily:streams:${userId}:${today}`
       userStreams = await kv.get<number>(userStreamsKey) || 0
     }
 
@@ -57,7 +59,7 @@ export async function POST(request: Request) {
     }
 
     const today = new Date().toISOString().split('T')[0]
-    const goalKey = `daily:song-goal:${today}`
+    const goalKey = `daily:goal:${today}`
 
     const existingGoal = await kv.get<{ song: string; target: number; current?: number }>(goalKey)
     const current = existingGoal?.current || 0
