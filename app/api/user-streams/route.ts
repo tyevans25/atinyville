@@ -39,7 +39,7 @@ export async function GET() {
 
     // Fetch streams from stats.fm API
     const response = await fetch(
-      `https://api.stats.fm/api/v1/users/${statsfmUsername}/streams`,
+      `https://api.stats.fm/api/v1/users/${statsfmUsername}/streams?limit=50`,
       {
         headers: {
           'Accept': 'application/json'
