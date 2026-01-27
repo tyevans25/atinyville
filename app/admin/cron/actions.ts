@@ -11,27 +11,47 @@ export async function triggerCronJob() {
       }
     }
 
-    // Get the base URL
-    const baseUrl = process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}` 
+    // Get the base URL - handle different environments
+    let baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL 
+      ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+      : process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
       : 'http://localhost:3000'
+
+    console.log('Triggering cron at:', `${baseUrl}/api/cron/check-streams`)
 
     const res = await fetch(`${baseUrl}/api/cron/check-streams`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${cronSecret}`
+        'Authorization': `Bearer ${cronSecret}`,
+        'Content-Type': 'application/json'
       }
     })
 
+    console.log('Cron response status:', res.status)
+
     if (!res.ok) {
-      const errorData = await res.json()
-      return {
-        success: false,
-        error: errorData.error || 'Failed to trigger cron'
+      const text = await res.text()
+      console.error('Cron error response:', text)
+      
+      // Try to parse as JSON, otherwise return text
+      try {
+        const errorData = JSON.parse(text)
+        return {
+          success: false,
+          error: errorData.error || `HTTP ${res.status}`
+        }
+      } catch {
+        return {
+          success: false,
+          error: `HTTP ${res.status}: ${text.substring(0, 100)}`
+        }
       }
     }
 
     const data = await res.json()
+    console.log('Cron success:', data)
+    
     return {
       success: true,
       data
@@ -41,7 +61,7 @@ export async function triggerCronJob() {
     console.error('Error triggering cron:', err)
     return {
       success: false,
-      error: 'Network error occurred'
+      error: err instanceof Error ? err.message : 'Network error occurred'
     }
   }
 }
