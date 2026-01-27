@@ -11,46 +11,37 @@ export async function triggerCronJob() {
       }
     }
 
-    // Get the base URL - handle different environments
-    let baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL 
-      ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-      : process.env.VERCEL_URL
+    // Get the base URL - production should use the deployment URL
+    const baseUrl = process.env.VERCEL_URL 
       ? `https://${process.env.VERCEL_URL}`
       : 'http://localhost:3000'
 
-    console.log('Triggering cron at:', `${baseUrl}/api/cron/check-streams`)
+    console.log('🔍 Triggering cron at:', `${baseUrl}/api/cron/check-streams`)
+    console.log('🔑 Secret exists:', !!cronSecret, 'Length:', cronSecret.length)
 
     const res = await fetch(`${baseUrl}/api/cron/check-streams`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${cronSecret}`,
         'Content-Type': 'application/json'
-      }
+      },
+      cache: 'no-store'
     })
 
-    console.log('Cron response status:', res.status)
+    console.log('📡 Response status:', res.status)
 
     if (!res.ok) {
       const text = await res.text()
-      console.error('Cron error response:', text)
+      console.error('❌ Error response:', text.substring(0, 200))
       
-      // Try to parse as JSON, otherwise return text
-      try {
-        const errorData = JSON.parse(text)
-        return {
-          success: false,
-          error: errorData.error || `HTTP ${res.status}`
-        }
-      } catch {
-        return {
-          success: false,
-          error: `HTTP ${res.status}: ${text.substring(0, 100)}`
-        }
+      return {
+        success: false,
+        error: `HTTP ${res.status}: Check Vercel function logs for details`
       }
     }
 
     const data = await res.json()
-    console.log('Cron success:', data)
+    console.log('✅ Success:', data)
     
     return {
       success: true,
@@ -58,7 +49,7 @@ export async function triggerCronJob() {
     }
 
   } catch (err) {
-    console.error('Error triggering cron:', err)
+    console.error('💥 Error triggering cron:', err)
     return {
       success: false,
       error: err instanceof Error ? err.message : 'Network error occurred'
