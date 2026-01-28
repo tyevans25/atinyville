@@ -5,6 +5,13 @@ import { kv } from "@vercel/kv"
 // ATEEZ stats.fm Artist ID
 const ATEEZ_ARTIST_ID = 164828
 
+// Helper: Get current date in KST (Korea Standard Time, UTC+9)
+function getKSTDate(): string {
+  const now = new Date()
+  const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000))
+  return kstTime.toISOString().split('T')[0]
+}
+
 export async function GET() {
   try {
     const { userId } = await auth()
@@ -24,9 +31,9 @@ export async function GET() {
       })
     }
 
-    // Get today's SONG goal (specific song) - FIXED KEY
-    const today = new Date().toISOString().split('T')[0]
-    const songGoalKey = `daily:song-goal:${today}` // Changed from daily:goal
+    // Get today's SONG goal (specific song) - FIXED KEY TO MATCH CRON
+    const today = getKSTDate() // Use KST date
+    const songGoalKey = `daily:goal:${today}` // Changed to match cron
     const songGoal = await kv.get<{ song: string; target: number; current?: number }>(songGoalKey)
 
     // Check cache
@@ -58,9 +65,10 @@ export async function GET() {
 
     const data = await response.json()
     
-    // Get today's date range
-    const todayStart = new Date()
-    todayStart.setUTCHours(0, 0, 0, 0)
+    // Get today's date range in KST
+    const kstNow = new Date(new Date().getTime() + (9 * 60 * 60 * 1000))
+    const todayStart = new Date(kstNow)
+    todayStart.setHours(0, 0, 0, 0)
 
     let totalAteezStreams = 0
     let goalSongStreams = 0
@@ -68,7 +76,9 @@ export async function GET() {
     if (data.items && Array.isArray(data.items)) {
       data.items.forEach((stream: any) => {
         const streamDate = new Date(stream.endTime)
-        const isToday = streamDate >= todayStart
+        // Convert stream date to KST for comparison
+        const streamKST = new Date(streamDate.getTime() + (9 * 60 * 60 * 1000))
+        const isToday = streamKST >= todayStart
         const isAteez = stream.artistIds?.includes(ATEEZ_ARTIST_ID)
         
         if (isToday && isAteez) {

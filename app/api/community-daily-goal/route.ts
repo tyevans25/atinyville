@@ -2,11 +2,18 @@ import { kv } from '@vercel/kv'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 
+// Helper: Get current date in KST (Korea Standard Time, UTC+9)
+function getKSTDate(): string {
+  const now = new Date()
+  const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000))
+  return kstTime.toISOString().split('T')[0]
+}
+
 // GET: Fetch today's total ATEEZ goal and user's streams
 export async function GET() {
   try {
     const { userId } = await auth()
-    const today = new Date().toISOString().split('T')[0]
+    const today = getKSTDate() // Use KST date
     
     // MATCHES CRON: community:daily:${today}
     const goalKey = `community:daily:${today}`
@@ -54,7 +61,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const today = new Date().toISOString().split('T')[0]
+    const today = getKSTDate() // Use KST date
     const goalKey = `community:daily:${today}` // MATCHES CRON
 
     // Check if goal already exists

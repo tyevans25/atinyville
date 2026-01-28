@@ -4,6 +4,13 @@ import { NextResponse } from "next/server"
 // ATEEZ artist ID on stats.fm
 const ATEEZ_ARTIST_ID = 164828
 
+// Helper: Get current date in KST (Korea Standard Time, UTC+9)
+function getKSTDate(): string {
+  const now = new Date()
+  const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000))
+  return kstTime.toISOString().split('T')[0]
+}
+
 // Helper: Get current week key (YYYY-W##)
 function getCurrentWeekKey(): string {
   const now = new Date()
@@ -22,7 +29,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const today = new Date().toISOString().split("T")[0]
+    const today = getKSTDate() // Use KST date
     const weekKey = getCurrentWeekKey()
     const cronRunTime = Date.now()
 

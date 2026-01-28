@@ -8,6 +8,13 @@ interface Mission {
   target: number
 }
 
+// Helper: Get current date in KST (Korea Standard Time, UTC+9)
+function getKSTDate(): string {
+  const now = new Date()
+  const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000))
+  return kstTime.toISOString().split('T')[0]
+}
+
 // GET: Fetch today's missions and user's progress
 export async function GET() {
   try {
@@ -17,7 +24,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const today = new Date().toISOString().split('T')[0]
+    const today = getKSTDate() // Use KST date
     
     // Get today's mission list
     const missionKey = `daily:missions:${today}`
@@ -77,7 +84,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const today = new Date().toISOString().split('T')[0]
+    const today = getKSTDate() // Use KST date
     const missionKey = `daily:missions:${today}`
 
     // Set today's missions (expires in 24 hours)
