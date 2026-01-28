@@ -87,7 +87,10 @@ export async function GET(request: Request) {
         // --- COMMUNITY DAILY GOAL (ANY ATEEZ streams) ---
         if (communityDaily) {
           const todayNewStreams = newStreams.filter((s) => {
-            const streamDate = new Date(s.endTime).toISOString().split("T")[0]
+            // Convert stream UTC time to KST for date comparison
+            const streamUTC = new Date(s.endTime)
+            const streamKST = new Date(streamUTC.getTime() + (9 * 60 * 60 * 1000))
+            const streamDate = streamKST.toISOString().split("T")[0]
             const matchesDate = streamDate === today
             const isAteez = s.artistIds?.includes(ATEEZ_ARTIST_ID)
             
@@ -107,7 +110,10 @@ export async function GET(request: Request) {
         // --- DAILY SONG GOAL (SPECIFIC song - homepage) ---
         if (dailySongGoal) {
           const todaySongStreams = newStreams.filter((s) => {
-            const streamDate = new Date(s.endTime).toISOString().split("T")[0]
+            // Convert stream UTC time to KST for date comparison
+            const streamUTC = new Date(s.endTime)
+            const streamKST = new Date(streamUTC.getTime() + (9 * 60 * 60 * 1000))
+            const streamDate = streamKST.toISOString().split("T")[0]
             const matchesDate = streamDate === today
             const matchesSong = s.trackName === dailySongGoal.song
             
@@ -154,7 +160,10 @@ export async function GET(request: Request) {
         if (missions && missions.length > 0) {
           for (const mission of missions) {
             const missionNewStreams = newStreams.filter((s) => {
-              const streamDate = new Date(s.endTime).toISOString().split("T")[0]
+              // Convert stream UTC time to KST for date comparison
+              const streamUTC = new Date(s.endTime)
+              const streamKST = new Date(streamUTC.getTime() + (9 * 60 * 60 * 1000))
+              const streamDate = streamKST.toISOString().split("T")[0]
               return streamDate === today && s.trackName === mission.song
             })
 
