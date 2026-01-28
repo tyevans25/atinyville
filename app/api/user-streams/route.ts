@@ -72,6 +72,7 @@ export async function GET() {
 
     let totalAteezStreams = 0
     let goalSongStreams = 0
+    const recentStreams: any[] = [] // Store full stream data
 
     if (data.items && Array.isArray(data.items)) {
       data.items.forEach((stream: any) => {
@@ -83,6 +84,15 @@ export async function GET() {
         
         if (isToday && isAteez) {
           totalAteezStreams++
+          
+          // Store the full stream data
+          recentStreams.push({
+            trackId: stream.trackId,
+            trackName: stream.trackName,
+            albumId: stream.albumId,
+            endTime: stream.endTime,
+            playedMs: stream.playedMs
+          })
           
           // Check if it matches the song goal (specific song)
           if (songGoal && stream.trackName === songGoal.song) {
@@ -96,7 +106,8 @@ export async function GET() {
       totalStreams: totalAteezStreams,
       goalStreams: goalSongStreams,
       username: statsfmUsername,
-      date: today
+      date: today,
+      recentStreams: recentStreams.slice(0, 20) // Return last 20 streams
     }
 
     // Cache for 5 minutes
