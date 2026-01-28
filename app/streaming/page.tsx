@@ -11,6 +11,10 @@ import DailyGoalCard from "@/components/DailyGoalCard"
 import WeeklyGoalCard from "@/components/WeeklyGoalCard"
 import CronCountdown from "@/components/CronCountdown"
 import { useUser } from "@clerk/nextjs"
+import RecentTracksCard from "@/components/RecentTracksCard"
+
+// Then add it wherever you want:
+<RecentTracksCard />
 
 export default function StreamingHub() {
   const { isSignedIn } = useUser()
@@ -163,6 +167,15 @@ export default function StreamingHub() {
               Personal streaming goals just for you! Complete these to check them off your list.
             </p>
             <DailyMissions />
+          </div>
+
+          {/* Recently Played */}
+          <div>
+            <h2 className="text-2xl font-bold text-white mb-4">Here are your recent tracks!</h2>
+            <p className="text-gray-300 text-sm mb-4">
+              While goals are updated every 30 minutes, your recent streams reflect your real time stats.fm
+            </p>
+            <RecentTracksCard />
           </div>
 
           {/* Curated Streaming Playlist */}
