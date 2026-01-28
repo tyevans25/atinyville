@@ -11,6 +11,7 @@ const isPublicRoute = createRouteMatcher([
   "/lore",
   "/variety",
   "/api/quiz/leaderboard",
+  "/api/cron(.*)", 
   "/sign-in(.*)",
   "/sign-up(.*)",
 ]);
