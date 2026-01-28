@@ -8,7 +8,6 @@ export default function CronCountdown() {
 
   useEffect(() => {
     const updateCountdown = () => {
-      // Cron runs every 30 minutes (00:00, 00:30, 01:00, 01:30, etc.)
       const now = new Date()
       const currentMinute = now.getMinutes()
       
@@ -25,6 +24,13 @@ export default function CronCountdown() {
       const seconds = Math.floor((diff % (1000 * 60)) / 1000)
 
       setTimeLeft(`${minutes}m ${seconds}s`)
+
+      // AUTO-REFRESH when countdown hits 0
+      if (minutes === 0 && seconds === 0) {
+        setTimeout(() => {
+          window.location.reload()
+        }, 2000) // Wait 2 seconds for cron to complete
+      }
     }
 
     updateCountdown()
