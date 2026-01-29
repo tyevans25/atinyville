@@ -83,7 +83,7 @@ export async function GET(request: Request) {
 
         // Fetch user's streams with higher limit
         console.log(`🌐 Fetching streams from stats.fm...`)
-        const res = await fetch(`https://api.stats.fm/api/v1/users/${statsfmUsername}/streams?limit=500`)
+        const res = await fetch(`https://api.stats.fm/api/v1/users/${statsfmUsername}/streams?limit=50`)
         console.log(`📡 Stats.fm response: ${res.status}`)
         
         if (!res.ok) {
@@ -187,7 +187,8 @@ export async function GET(request: Request) {
               const streamUTC = new Date(s.endTime)
               const streamKST = new Date(streamUTC.getTime() + (9 * 60 * 60 * 1000))
               const streamDate = streamKST.toISOString().split("T")[0]
-              return streamDate === today && s.trackName === mission.song
+              // Match by trackId instead of trackName for perfect accuracy!
+              return streamDate === today && s.trackId === mission.trackId
             })
 
             if (missionNewStreams.length > 0) {

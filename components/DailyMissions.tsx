@@ -7,7 +7,8 @@ import { useUser } from "@clerk/nextjs"
 
 interface Mission {
     id: string
-    song: string
+    trackId: number
+    trackName: string
     target: number
     current: number
 }
@@ -114,7 +115,7 @@ export default function DailyMissions() {
                                             <p className={`font-semibold ${
                                                 isComplete ? 'text-green-400 line-through' : 'text-white'
                                             }`}>
-                                                Stream "{mission.song}" {mission.target} {mission.target === 1 ? 'time' : 'times'}
+                                                Stream "{mission.trackName}" {mission.target} {mission.target === 1 ? 'time' : 'times'}
                                             </p>
                                             {!isComplete && (
                                                 <p className="text-xs text-gray-400 mt-1">
@@ -161,7 +162,7 @@ export default function DailyMissions() {
 
                 {/* Info */}
                 <p className="text-xs text-gray-400 text-center mt-4">
-                    Missions reset daily at KST midnight. Streams updated every 30 minutes.
+                    Missions reset daily at midnight
                 </p>
             </CardContent>
         </Card>
