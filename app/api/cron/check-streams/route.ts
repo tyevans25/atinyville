@@ -4,6 +4,13 @@ import { NextResponse } from "next/server"
 // ATEEZ artist ID on stats.fm
 const ATEEZ_ARTIST_ID = 164828
 
+interface Mission {
+  id: string
+  trackId: number
+  trackName: string
+  target: number
+}
+
 // Helper: Get current date in KST (Korea Standard Time, UTC+9)
 function getKSTDate(): string {
   const now = new Date()
@@ -44,7 +51,7 @@ export async function GET(request: Request) {
       kv.get<{ target: number; current?: number }>(communityDailyKey),
       kv.get<{ song: string; target: number; current?: number }>(dailySongGoalKey),
       kv.get<{ target: number; current?: number }>(communityWeeklyKey),
-      kv.get<Array<{ id: string; song: string; target: number }>>(missionsKey)
+      kv.get<Mission[]>(missionsKey)
     ])
 
     if (!communityDaily && !dailySongGoal && !communityWeekly && (!missions || missions.length === 0)) {
