@@ -59,6 +59,7 @@ export async function GET(request: Request) {
 
     // --- Fetch all users with stats.fm ---
     const userKeys = await kv.keys("user:*:statsfm")
+    console.log(`🔍 Debug: Found ${userKeys.length} users:`, JSON.stringify(userKeys))
 
     for (const key of userKeys) {
       try {
