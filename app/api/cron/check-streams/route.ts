@@ -162,16 +162,19 @@ export async function GET(request: Request) {
 
         // --- COMMUNITY WEEKLY GOAL (ANY ATEEZ streams) ---
         if (communityWeekly) {
-          const now = new Date()
-          const dayOfWeek = now.getDay()
+          // Use KST for week calculation
+          const nowKST = new Date(new Date().getTime() + (9 * 60 * 60 * 1000))
+          const dayOfWeek = nowKST.getDay()
           const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1
-          const startOfWeek = new Date(now)
-          startOfWeek.setDate(now.getDate() - daysToMonday)
+          const startOfWeek = new Date(nowKST)
+          startOfWeek.setDate(nowKST.getDate() - daysToMonday)
           startOfWeek.setHours(0, 0, 0, 0)
 
           const weekNewStreams = newStreams.filter((s) => {
-            const streamDate = new Date(s.endTime)
-            const matchesWeek = streamDate >= startOfWeek
+            // Convert stream UTC time to KST
+            const streamUTC = new Date(s.endTime)
+            const streamKST = new Date(streamUTC.getTime() + (9 * 60 * 60 * 1000))
+            const matchesWeek = streamKST >= startOfWeek
             const isAteez = s.artistIds?.includes(ATEEZ_ARTIST_ID)
             
             return matchesWeek && isAteez
@@ -216,31 +219,40 @@ export async function GET(request: Request) {
     }
 
     // --- ACCUMULATE (ADD) TO COMMUNITY DAILY GOAL TOTAL (ANY ATEEZ) ---
+    console.log(`📊 Accumulation check - communityDaily exists: ${!!communityDaily}, newDailyStreams: ${newDailyStreams}`)
     if (communityDaily && newDailyStreams > 0) {
       const updatedCurrent = (communityDaily.current || 0) + newDailyStreams
+      console.log(`💾 Updating community daily: ${communityDaily.current || 0} + ${newDailyStreams} = ${updatedCurrent}`)
       await kv.set(communityDailyKey, {
         target: communityDaily.target,
         current: updatedCurrent
       }, { ex: 86400 })
+      console.log(`✅ Community daily saved: ${updatedCurrent}`)
     }
 
     // --- ACCUMULATE (ADD) TO DAILY SONG GOAL TOTAL (SPECIFIC SONG - homepage) ---
+    console.log(`📊 Song goal check - dailySongGoal exists: ${!!dailySongGoal}, newDailySongStreams: ${newDailySongStreams}`)
     if (dailySongGoal && newDailySongStreams > 0) {
       const updatedCurrent = (dailySongGoal.current || 0) + newDailySongStreams
+      console.log(`💾 Updating song goal: ${dailySongGoal.current || 0} + ${newDailySongStreams} = ${updatedCurrent}`)
       await kv.set(dailySongGoalKey, {
         song: dailySongGoal.song,
         target: dailySongGoal.target,
         current: updatedCurrent
       }, { ex: 86400 })
+      console.log(`✅ Song goal saved: ${updatedCurrent}`)
     }
 
     // --- ACCUMULATE (ADD) TO COMMUNITY WEEKLY GOAL TOTAL ---
+    console.log(`📊 Weekly check - communityWeekly exists: ${!!communityWeekly}, newWeeklyStreams: ${newWeeklyStreams}`)
     if (communityWeekly && newWeeklyStreams > 0) {
       const updatedCurrent = (communityWeekly.current || 0) + newWeeklyStreams
+      console.log(`💾 Updating weekly: ${communityWeekly.current || 0} + ${newWeeklyStreams} = ${updatedCurrent}`)
       await kv.set(communityWeeklyKey, {
         target: communityWeekly.target,
         current: updatedCurrent
       }, { ex: 604800 })
+      console.log(`✅ Weekly saved: ${updatedCurrent}`)
     }
 
     // --- COMMUNITY MISSIONS TOTALS (recalculate from individual progress) ---
