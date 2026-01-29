@@ -35,12 +35,13 @@ export async function GET() {
       kv.get(communityWeeklyKey)
     ])
     
-    // Calculate days in current week (for verification)
-    const now = new Date()
-    const dayOfWeek = now.getDay()
+    // Calculate days in current week (for verification) - USE KST!
+    const nowKST = new Date(new Date().getTime() + (9 * 60 * 60 * 1000))
+    const dayOfWeek = nowKST.getDay()
     const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1
-    const startOfWeek = new Date(now)
-    startOfWeek.setDate(now.getDate() - daysToMonday)
+    const startOfWeek = new Date(nowKST)
+    startOfWeek.setDate(nowKST.getDate() - daysToMonday)
+    startOfWeek.setHours(0, 0, 0, 0)
     
     // Get daily totals for each day this week
     const dailyTotals = []
