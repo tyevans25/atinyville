@@ -63,27 +63,49 @@ export async function GET(request: Request) {
 
     for (const key of userKeys) {
       try {
+        console.log(`🔄 Processing user key: ${key}`)
+        
         const userId = key.split(":")[1]
+        console.log(`👤 User ID: ${userId}`)
+        
         const statsfmUsername = await kv.get<string>(key)
-        if (!statsfmUsername) continue
+        console.log(`📝 Stats.fm username: ${statsfmUsername}`)
+        
+        if (!statsfmUsername) {
+          console.log(`❌ No username found, skipping`)
+          continue
+        }
 
         // Get the last processed timestamp for this user
         const lastProcessedKey = `user:${userId}:last_processed`
         const lastProcessedTime = await kv.get<number>(lastProcessedKey) || 0
+        console.log(`⏰ Last processed: ${lastProcessedTime} (${new Date(lastProcessedTime).toISOString()})`)
 
         // Fetch user's streams with higher limit
+        console.log(`🌐 Fetching streams from stats.fm...`)
         const res = await fetch(`https://api.stats.fm/api/v1/users/${statsfmUsername}/streams?limit=50`)
-        if (!res.ok) continue
+        console.log(`📡 Stats.fm response: ${res.status}`)
+        
+        if (!res.ok) {
+          console.log(`❌ Stats.fm API error, skipping`)
+          continue
+        }
+        
         const data = await res.json()
         const streams: any[] = data.items || []
+        console.log(`📊 Total streams fetched: ${streams.length}`)
 
         // Filter to only NEW streams (after last processed time)
         const newStreams = streams.filter(s => {
           const streamEndTime = new Date(s.endTime).getTime()
           return streamEndTime > lastProcessedTime
         })
+        console.log(`🆕 New streams since last run: ${newStreams.length}`)
 
-        if (newStreams.length === 0) continue
+        if (newStreams.length === 0) {
+          console.log(`⏭️ No new streams, skipping`)
+          continue
+        }
 
         // --- COMMUNITY DAILY GOAL (ANY ATEEZ streams) ---
         if (communityDaily) {
