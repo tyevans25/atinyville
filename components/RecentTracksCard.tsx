@@ -132,7 +132,7 @@ export default function RecentTracksCard() {
             Recent Tracks
           </div>
           <span className="text-sm font-normal text-gray-300">
-            {streamData.recentStreams.length} streams today
+            {streamData.recentStreams.length} most recent streams
           </span>
         </CardTitle>
       </CardHeader>
