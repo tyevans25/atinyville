@@ -40,8 +40,15 @@ const campaignUpdates = [
     ],
     urgent: false
   },
-  {
+    {
     id: 3,
+    title: "\"Adrenaline\" MV Trailer",
+    description: "Check out the trailer for the upcoming MV for \"Adrenaline\"!",
+    videoUrl: "https://www.youtube.com/embed/gBvUjhPy5v4?si=Y2miG7LKOMLF9dP_",
+    urgent: false
+  },
+  {
+    id: 4,
     title: "🛒 Pre-Order GOLDEN HOUR: Part.4",
     description: "Pre-order physical albums!",
     imageUrl: "https://image.static.bstage.in/cdn-cgi/image/metadata=none,dpr=1,f=auto,width=640/ateez/dea14100-3e72-4fd3-9303-67a3201448c0/072b473d-4b13-458d-8375-783ba2ccac0f/ori.jpg",
@@ -51,7 +58,7 @@ const campaignUpdates = [
     urgent: false
   },
   {
-    id: 4,
+    id: 5,
     title: "📹 Stream 'In Your Fantasy' MV",
     description: "Let's get to 40M views!",
     videoUrl: "https://www.youtube.com/embed/JOF2ZTqvzwY?si=3k_W7mXWz7mU4pEh",
@@ -61,7 +68,7 @@ const campaignUpdates = [
     urgent: false
   },
   {
-    id: 5,
+    id: 6,
     title: "🏆 Daily ATEEZ Quiz",
     description: "Can you top the leaderboard?",
     links: [
@@ -70,7 +77,7 @@ const campaignUpdates = [
     urgent: false
   },
   {
-    id: 6,
+    id: 7,
     component: <DailyGoalSlide />
   }
 ]
