@@ -1,5 +1,6 @@
 import { kv } from '@vercel/kv'
 import { NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 
 // Helper: Get current date in KST
 function getKSTDate(): string {
@@ -15,16 +16,42 @@ interface Mission {
   target: number
 }
 
-// GET: Fetch today's missions
+interface MissionWithProgress extends Mission {
+  current: number
+}
+
+// GET: Fetch today's missions with user progress
 export async function GET() {
   try {
+    const { userId } = await auth()
     const today = getKSTDate()
     const missionsKey = `daily:missions:${today}`
     
     const missions = await kv.get<Mission[]>(missionsKey) || []
     
+    // If user is signed in, get their progress for each mission
+    if (userId && missions.length > 0) {
+      const missionsWithProgress: MissionWithProgress[] = await Promise.all(
+        missions.map(async (mission) => {
+          const progressKey = `mission:progress:${userId}:${today}:${mission.id}`
+          const current = await kv.get<number>(progressKey) || 0
+          
+          return {
+            ...mission,
+            current
+          }
+        })
+      )
+      
+      return NextResponse.json({
+        missions: missionsWithProgress,
+        date: today
+      })
+    }
+    
+    // If not signed in, return missions without progress
     return NextResponse.json({
-      missions,
+      missions: missions.map(m => ({ ...m, current: 0 })),
       date: today
     })
   } catch (error) {
