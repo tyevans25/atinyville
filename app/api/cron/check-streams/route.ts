@@ -83,7 +83,7 @@ export async function GET(request: Request) {
 
         // Fetch user's streams with higher limit
         console.log(`🌐 Fetching streams from stats.fm...`)
-        const res = await fetch(`https://api.stats.fm/api/v1/users/${statsfmUsername}/streams?limit=50`)
+        const res = await fetch(`https://api.stats.fm/api/v1/users/${statsfmUsername}/streams?limit=500`)
         console.log(`📡 Stats.fm response: ${res.status}`)
         
         if (!res.ok) {
