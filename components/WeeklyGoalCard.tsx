@@ -36,8 +36,12 @@ export default function WeeklyGoalCard() {
     }, [isSignedIn])
 
     const calculateDaysRemaining = () => {
+        // Get current time in KST (UTC+9)
         const now = new Date()
-        const dayOfWeek = now.getDay()
+        const nowKST = new Date(now.getTime() + (9 * 60 * 60 * 1000))
+        const dayOfWeek = nowKST.getUTCDay() // 0 = Sunday, 1 = Monday, etc in KST
+        
+        // Calculate days until Sunday (week ends Sunday in KST)
         const daysUntilSunday = dayOfWeek === 0 ? 7 : 7 - dayOfWeek
         setDaysRemaining(daysUntilSunday)
     }

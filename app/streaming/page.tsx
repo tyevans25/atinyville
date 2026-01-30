@@ -216,28 +216,9 @@ export default function StreamingHub() {
             </CardContent>
           </Card>
 
-          {/* Info Cards */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <Card className="glass-card">
-              <CardContent className="p-6">
-                <h3 className="text-white font-semibold mb-2">📻 Stationhead</h3>
-                <p className="text-gray-300 text-sm mb-3">
-                  Join streaming parties with other ATINYs
-                </p>
-                <Button
-                  variant="outline"
-                  className="w-full border-white/20 text-white hover:bg-white/10"
-                  onClick={() => window.open('https://stationhead.com', '_blank')}
-                >
-                  Learn More
-                </Button>
-              </CardContent>
-            </Card>
-
-
+            {/* Info Cards */}
             <StreamingGuideButton />
-
-          </div>
+  
         </div>
       </div>
     </>
