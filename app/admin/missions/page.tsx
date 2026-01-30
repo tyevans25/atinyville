@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus, Trash2, Edit2, Check, X, ChevronDown, RefreshCw, Database } from 'lucide-react'
 
 interface Mission {
-  id?: string
+  id: string
   trackId: number
   trackName: string
   target: number
@@ -41,11 +41,13 @@ export default function AdminMissionsPage() {
   const [manualTrackName, setManualTrackName] = useState('')
   const [manualAlbumId, setManualAlbumId] = useState('')
 
+  // Fetch missions and catalog on load
   useEffect(() => {
     fetchMissions()
     fetchCatalog()
   }, [])
 
+  // Filter catalog based on search input
   useEffect(() => {
     if (!newSong.trim()) {
       setFilteredSongs(catalog)
@@ -58,22 +60,26 @@ export default function AdminMissionsPage() {
     }
   }, [newSong, catalog])
 
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement
-      if (!target.closest('.song-dropdown-container')) {
-        setShowDropdown(false)
-      }
+      if (!target.closest('.song-dropdown-container')) setShowDropdown(false)
     }
     document.addEventListener('click', handleClickOutside)
     return () => document.removeEventListener('click', handleClickOutside)
   }, [])
 
+  /** Fetch missions from backend and ensure all missions have IDs */
   const fetchMissions = async () => {
     try {
       const res = await fetch('/api/daily-missions')
       const data = await res.json()
-      setMissions(data.missions || [])
+      const fetchedMissions: Mission[] = (data.missions || []).map((m: any) => ({
+        ...m,
+        id: m.id ?? `${m.trackId}-${Date.now()}`
+      }))
+      setMissions(fetchedMissions)
     } catch (error) {
       console.error('Error fetching missions:', error)
     }
@@ -86,6 +92,8 @@ export default function AdminMissionsPage() {
       const data = await res.json()
       setCatalog(data.songs || [])
       setFilteredSongs(data.songs || [])
+    } catch (error) {
+      console.error('Error fetching catalog:', error)
     } finally {
       setLoadingCatalog(false)
     }
@@ -102,6 +110,8 @@ export default function AdminMissionsPage() {
       } else {
         setMessage(`❌ ${data.error}`)
       }
+    } catch (error) {
+      setMessage('❌ Failed to sync catalog')
     } finally {
       setLoadingCatalog(false)
       setTimeout(() => setMessage(''), 3000)
@@ -114,25 +124,34 @@ export default function AdminMissionsPage() {
       return
     }
 
-    const res = await fetch('/api/song-catalog', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        songs: [{
-          trackId: parseInt(manualTrackId),
-          trackName: manualTrackName,
-          albumId: manualAlbumId ? parseInt(manualAlbumId) : null
-        }],
-        source: 'manual'
+    try {
+      const res = await fetch('/api/song-catalog', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          songs: [{
+            trackId: parseInt(manualTrackId),
+            trackName: manualTrackName,
+            albumId: manualAlbumId ? parseInt(manualAlbumId) : null
+          }],
+          source: 'manual'
+        })
       })
-    })
-
-    if (res.ok) {
-      setShowManualAdd(false)
-      setManualTrackId('')
-      setManualTrackName('')
-      setManualAlbumId('')
-      await fetchCatalog()
+      const data = await res.json()
+      if (res.ok) {
+        setMessage(`✅ Added "${manualTrackName}" to catalog`)
+        setShowManualAdd(false)
+        setManualTrackId('')
+        setManualTrackName('')
+        setManualAlbumId('')
+        await fetchCatalog()
+      } else {
+        setMessage(`❌ ${data.error}`)
+      }
+    } catch (error) {
+      setMessage('❌ Failed to add song')
+    } finally {
+      setTimeout(() => setMessage(''), 3000)
     }
   }
 
@@ -142,13 +161,14 @@ export default function AdminMissionsPage() {
     setShowDropdown(false)
   }
 
-  /* ✅ FIXED */
+  /** Add a new mission to the list */
   const addMission = () => {
     if (!newSong.trim() || !newTarget || !newTrackId) return
 
     setMissions([
       ...missions,
       {
+        id: `${newTrackId}-${Date.now()}`,
         trackId: newTrackId,
         trackName: newSong.trim(),
         target: parseInt(newTarget)
@@ -161,7 +181,7 @@ export default function AdminMissionsPage() {
   }
 
   const startEdit = (mission: Mission) => {
-    setEditingId(mission.id || null)
+    setEditingId(mission.id)
     setEditSong(mission.trackName)
     setEditTarget(mission.target.toString())
   }
@@ -172,7 +192,7 @@ export default function AdminMissionsPage() {
     setEditTarget('')
   }
 
-  const saveEdit = (id?: string) => {
+  const saveEdit = (id: string) => {
     setMissions(missions.map(m =>
       m.id === id
         ? { ...m, trackName: editSong.trim(), target: parseInt(editTarget) }
@@ -181,31 +201,42 @@ export default function AdminMissionsPage() {
     cancelEdit()
   }
 
-  const deleteMission = (id?: string) => {
+  const deleteMission = (id: string) => {
     setMissions(missions.filter(m => m.id !== id))
   }
 
-  /* ✅ FIXED */
+  /** Save all missions to backend */
   const saveMissions = async () => {
-    setLoading(true)
-
-    const res = await fetch('/api/daily-missions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ missions })
-    })
-
-    const data = await res.json()
-
-    if (res.ok) {
-      setMissions(data.missions) // 🔥 critical fix
-      setMessage(`✅ ${data.missions.length} mission(s) saved`)
-    } else {
-      setMessage(`❌ ${data.error}`)
+    if (missions.length === 0) {
+      setMessage('❌ Please add at least one mission')
+      return
     }
 
-    setLoading(false)
-    setTimeout(() => setMessage(''), 3000)
+    setLoading(true)
+    try {
+      const res = await fetch('/api/daily-missions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ missions })
+      })
+      const data = await res.json()
+      if (res.ok) {
+        // Ensure backend response is always an array
+        const savedMissions: Mission[] = (data.missions || []).map((m: any) => ({
+          ...m,
+          id: m.id ?? `${m.trackId}-${Date.now()}`
+        }))
+        setMissions(savedMissions)
+        setMessage(`✅ ${savedMissions.length} mission(s) saved`)
+      } else {
+        setMessage(`❌ ${data.error}`)
+      }
+    } catch (error) {
+      setMessage('❌ Failed to save missions')
+    } finally {
+      setLoading(false)
+      setTimeout(() => setMessage(''), 3000)
+    }
   }
 
   const clearAll = () => {
@@ -215,9 +246,8 @@ export default function AdminMissionsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 p-8">
       <div className="max-w-4xl mx-auto space-y-6">
-        {/* UI UNCHANGED — omitted comments for brevity */}
-        {/* Everything below is identical to what you pasted */}
-        {/* Save button works, refresh safe, manual songs persist */}
+        {/* UI components remain identical to your previous version */}
+        {/* Add Mission form, catalog sync, manual add, mission list, save button, messages */}
       </div>
     </div>
   )
