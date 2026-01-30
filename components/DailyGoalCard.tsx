@@ -30,11 +30,15 @@ export default function DailyGoalCard() {
 
     useEffect(() => {
         const updateTimer = () => {
+            // Get current time in KST (UTC+9)
             const now = new Date()
-            const tomorrow = new Date(now)
-            tomorrow.setHours(24, 0, 0, 0)
+            const nowKST = new Date(now.getTime() + (9 * 60 * 60 * 1000))
             
-            const diff = tomorrow.getTime() - now.getTime()
+            // Get midnight KST tomorrow
+            const tomorrowKST = new Date(nowKST)
+            tomorrowKST.setUTCHours(24, 0, 0, 0)
+            
+            const diff = tomorrowKST.getTime() - nowKST.getTime()
             const hours = Math.floor(diff / (1000 * 60 * 60))
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
             
@@ -158,7 +162,7 @@ export default function DailyGoalCard() {
                         <div className="text-right">
                             <TrendingUp className="w-4 h-4 text-green-400 inline mb-1" />
                             <p className="text-sm font-bold text-green-400">
-                                {target > 0 ? ((userStreams / target) * 100).toFixed(1) : 0}%
+                                {current > 0 ? ((userStreams / current) * 100).toFixed(1) : 0}%
                             </p>
                         </div>
                     </div>

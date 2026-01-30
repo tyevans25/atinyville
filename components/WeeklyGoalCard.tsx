@@ -156,7 +156,7 @@ export default function WeeklyGoalCard() {
                         <div className="text-right">
                             <TrendingUp className="w-4 h-4 text-green-400 inline mb-1" />
                             <p className="text-sm font-bold text-green-400">
-                                {target > 0 ? ((userStreams / target) * 100).toFixed(1) : 0}%
+                                {current > 0 ? ((userStreams / current) * 100).toFixed(1) : 0}%
                             </p>
                         </div>
                     </div>

@@ -33,14 +33,18 @@ export default function DailyGoalSlide() {
         return () => clearInterval(interval)
     }, [isSignedIn])
 
-    // Timer countdown to midnight
+    // Timer countdown to midnight KST
     useEffect(() => {
         const updateTimer = () => {
+            // Get current time in KST (UTC+9)
             const now = new Date()
-            const tomorrow = new Date(now)
-            tomorrow.setHours(24, 0, 0, 0)
+            const nowKST = new Date(now.getTime() + (9 * 60 * 60 * 1000))
             
-            const diff = tomorrow.getTime() - now.getTime()
+            // Get midnight KST tomorrow
+            const tomorrowKST = new Date(nowKST)
+            tomorrowKST.setUTCHours(24, 0, 0, 0)
+            
+            const diff = tomorrowKST.getTime() - nowKST.getTime()
             const hours = Math.floor(diff / (1000 * 60 * 60))
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
             const seconds = Math.floor((diff % (1000 * 60)) / 1000)
@@ -122,7 +126,7 @@ export default function DailyGoalSlide() {
                 </div>
                 <div>
                     <h3 className="text-xl font-bold text-white">Daily Streaming Goal</h3>
-                    <p className="text-xs text-gray-400">Let's go! 🏴‍☠️</p>
+                    <p className="text-xs text-gray-400">Stream together, reach the goal 🏴‍☠️</p>
                 </div>
             </div>
 
@@ -141,7 +145,7 @@ export default function DailyGoalSlide() {
             {/* Description */}
             <p className="text-gray-300 mb-4 text-sm">
                 Complete the daily mission together with other ATINYs! When we reach {target.toLocaleString()} streams, 
-                we can celebrate. (8)TINY makes 1 team! 
+                everyone who contributed can celebrate. Teamwork makes the dream work! 💜
             </p>
 
             {/* Main Progress Card */}
@@ -202,7 +206,7 @@ export default function DailyGoalSlide() {
                         <div className="text-right">
                             <p className="text-xs text-gray-400">Your share</p>
                             <p className="text-base font-bold text-blue-400">
-                                {target > 0 ? ((userStreams / target) * 100).toFixed(1) : 0}%
+                                {current > 0 ? ((userStreams / current) * 100).toFixed(1) : 0}%
                             </p>
                         </div>
                     </div>
