@@ -62,7 +62,7 @@ export default function StreamingHub() {
           {/* Header */}
           <div className="text-center space-y-2">
             <h1 className="text-4xl md:text-5xl font-bold text-white glow-text">
-              🎵 Streaming Hub
+              Streaming Hub
             </h1>
             <p className="text-gray-300">
               Complete missions, track goals, and stream with ATINYs!
