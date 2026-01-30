@@ -2,171 +2,93 @@ import { kv } from '@vercel/kv'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 
-const CATALOG_KEY = 'ateez:songs:catalog'
+interface DailyGoalData {
+  song: string
+  target: number
+  current: number
+  userStreams: number
+}
 
+// Helper: Get current date in KST (Korea Standard Time, UTC+9)
 function getKSTDate(): string {
   const now = new Date()
-  const kstTime = new Date(now.getTime() + 9 * 60 * 60 * 1000)
+  const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000))
   return kstTime.toISOString().split('T')[0]
 }
 
-interface Mission {
-  id: string
-  trackId: number
-  trackName: string
-  target: number
-}
-
-interface SongEntry {
-  trackId: number
-  trackName: string
-  albumId?: number
-  addedAt: string
-  source: 'auto' | 'manual'
-}
-
-/* ---------------------------------- GET ---------------------------------- */
-
+// GET: Fetch today's daily song goal and user's streams
 export async function GET() {
   try {
     const { userId } = await auth()
-    const today = getKSTDate()
+    const today = getKSTDate() // Use KST date
 
-    const key = `daily:missions:${today}`
-    const missions = await kv.get<Mission[]>(key) || []
+    // MATCHES CRON: daily:goal:${today}
+    const goalKey = `daily:goal:${today}`
+    const dailyGoal = await kv.get<{ song: string; target: number; current?: number }>(goalKey)
 
-    if (!userId) {
-      return NextResponse.json({
-        missions: missions.map(m => ({ ...m, current: 0 })),
-        date: today
-      })
+    if (!dailyGoal || !dailyGoal.song || !dailyGoal.target) {
+      return NextResponse.json(null)
     }
 
-    const missionsWithProgress = await Promise.all(
-      missions.map(async (mission) => {
-        const progressKey = `mission:progress:${userId}:${today}:${mission.id}`
-        const current = await kv.get<number>(progressKey) || 0
-        return { ...mission, current }
-      })
-    )
+    let userStreams = 0
+    if (userId) {
+      // MATCHES CRON: daily:streams:${userId}:${today}
+      const userStreamsKey = `daily:streams:${userId}:${today}`
+      userStreams = await kv.get<number>(userStreamsKey) || 0
+    }
 
     return NextResponse.json({
-      missions: missionsWithProgress,
-      date: today
+      song: dailyGoal.song,
+      target: dailyGoal.target,
+      current: dailyGoal.current || 0,
+      userStreams
     })
+
   } catch (error) {
-    console.error('Error fetching missions:', error)
+    console.error('Error fetching daily goal:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch missions' },
+      { error: 'Failed to fetch goal' },
       { status: 500 }
     )
   }
 }
 
-/* ---------------------------------- POST ---------------------------------- */
-
+// POST: Set today's daily song goal (admin only)
 export async function POST(request: Request) {
   try {
-    const { missions } = await request.json()
+    const { song, target } = await request.json()
 
-    if (!Array.isArray(missions)) {
+    if (!song || !target) {
       return NextResponse.json(
-        { error: 'missions must be an array' },
+        { error: 'Song and target are required' },
         { status: 400 }
       )
     }
 
-    const today = getKSTDate()
-    const key = `daily:missions:${today}`
+    const today = getKSTDate() // Use KST date
+    const goalKey = `daily:goal:${today}`
 
-    const normalized: Mission[] = missions.map((m) => {
-      if (!m.trackId || !m.trackName || !m.target) {
-        throw new Error('Invalid mission data')
-      }
+    const existingGoal = await kv.get<{ song: string; target: number; current?: number }>(goalKey)
+    const current = existingGoal?.current || 0
 
-      return {
-        id: `${m.trackId}-${today}`,
-        trackId: m.trackId,
-        trackName: m.trackName,
-        target: m.target
-      }
-    })
-
-    await kv.set(key, normalized, { ex: 86400 })
-
-    // Add each song to the catalog if not already there
-    const catalog = await kv.get<Record<string, SongEntry>>(CATALOG_KEY) || {}
-    let catalogUpdated = false
-
-    for (const mission of normalized) {
-      if (!catalog[mission.trackId]) {
-        catalog[mission.trackId] = {
-          trackId: mission.trackId,
-          trackName: mission.trackName,
-          addedAt: new Date().toISOString(),
-          source: 'auto'
-        }
-        catalogUpdated = true
-      }
-    }
-
-    if (catalogUpdated) {
-      await kv.set(CATALOG_KEY, catalog)
-    }
+    await kv.set(goalKey, {
+      song,
+      target,
+      current
+    }, { ex: 86400 })
 
     return NextResponse.json({
       success: true,
-      missions: normalized,
+      song,
+      target,
+      current,
       date: today
     })
+
   } catch (error) {
-    console.error('Error setting missions:', error)
+    console.error('Error setting daily goal:', error)
     return NextResponse.json(
-      { error: 'Failed to set missions' },
-      { status: 500 }
-    )
-  }
-}
-
-/* ---------------------------------- PATCH --------------------------------- */
-
-export async function PATCH(request: Request) {
-  try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    const body = await request.json()
-    const { missionId, streams } = body
-
-    if (!missionId || streams === undefined) {
-      return NextResponse.json(
-        { error: 'Mission ID and streams required' },
-        { status: 400 }
-      )
-    }
-
-    const today = getKSTDate()
-    const progressKey = `mission:progress:${userId}:${today}:${missionId}`
-    
-    // Update progress (expires in 24 hours)
-    await kv.set(progressKey, streams, { ex: 86400 })
-
-    return NextResponse.json({ 
-      success: true, 
-      missionId, 
-      streams,
-      date: today 
-    })
-  } catch (error) {
-    console.error('Error updating mission progress:', error)
-    return NextResponse.json(
-      { error: 'Failed to update progress' },
+      { error: 'Failed to set goal' },
       { status: 500 }
     )
   }
