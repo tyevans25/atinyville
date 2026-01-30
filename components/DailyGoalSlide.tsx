@@ -42,7 +42,8 @@ export default function DailyGoalSlide() {
             
             // Get midnight KST tomorrow
             const tomorrowKST = new Date(nowKST)
-            tomorrowKST.setUTCHours(24, 0, 0, 0)
+            tomorrowKST.setUTCDate(tomorrowKST.getUTCDate() + 1)
+            tomorrowKST.setUTCHours(0, 0, 0, 0)
             
             const diff = tomorrowKST.getTime() - nowKST.getTime()
             const hours = Math.floor(diff / (1000 * 60 * 60))

@@ -12,9 +12,7 @@ import WeeklyGoalCard from "@/components/WeeklyGoalCard"
 import CronCountdown from "@/components/CronCountdown"
 import { useUser } from "@clerk/nextjs"
 import RecentTracksCard from "@/components/RecentTracksCard"
-
-// Then add it wherever you want:
-<RecentTracksCard />
+import StreamingGuideButton from '@/components/StreamingGuide'
 
 export default function StreamingHub() {
   const { isSignedIn } = useUser()
@@ -59,7 +57,7 @@ export default function StreamingHub() {
       <Navigation />
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 pt-24 px-4">
         <div className="container mx-auto max-w-6xl space-y-6">
-          
+
           {/* Header */}
           <div className="text-center space-y-2">
             <h1 className="text-4xl md:text-5xl font-bold text-white glow-text">
@@ -100,8 +98,8 @@ export default function StreamingHub() {
                       <Button
                         className="bg-white hover:bg-gray-200 text-gray-800"
                         onClick={() => {
-                          document.querySelector('[data-statsfm-card]')?.scrollIntoView({ 
-                            behavior: 'smooth' 
+                          document.querySelector('[data-statsfm-card]')?.scrollIntoView({
+                            behavior: 'smooth'
                           })
                         }}
                       >
@@ -126,7 +124,7 @@ export default function StreamingHub() {
                       <p className="text-gray-300 text-sm">Join fellow ATINYs streaming together</p>
                     </div>
                   </div>
-                  <Button 
+                  <Button
                     className="bg-red-500 hover:bg-red-600 text-white"
                     onClick={() => window.open('https://stationhead.com/YOURUSERNAME', '_blank')}
                   >
@@ -193,7 +191,7 @@ export default function StreamingHub() {
               <p className="text-gray-300">
                 Follow our official ATINYTOWN playlist on Spotify! Updated regularly with streaming priorities and comeback tracks.
               </p>
-              
+
               {/* Placeholder - Replace with your playlist embed when ready */}
               <div className="bg-white/5 border border-white/10 rounded-lg p-6 text-center">
                 <Sparkles className="w-12 h-12 text-blue-400 mx-auto mb-4" />
@@ -226,7 +224,7 @@ export default function StreamingHub() {
                 <p className="text-gray-300 text-sm mb-3">
                   Join streaming parties with other ATINYs
                 </p>
-                <Button 
+                <Button
                   variant="outline"
                   className="w-full border-white/20 text-white hover:bg-white/10"
                   onClick={() => window.open('https://stationhead.com', '_blank')}
@@ -236,22 +234,10 @@ export default function StreamingHub() {
               </CardContent>
             </Card>
 
-            <Card className="glass-card">
-              <CardContent className="p-6">
-                <h3 className="text-white font-semibold mb-2">🎯 Streaming Guide</h3>
-                <p className="text-gray-300 text-sm mb-3">
-                  Tips and best practices for effective streaming
-                </p>
-                <Button 
-                  variant="outline"
-                  className="w-full border-white/20 text-white hover:bg-white/10"
-                >
-                  View Guide
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
 
+            <StreamingGuideButton />
+
+          </div>
         </div>
       </div>
     </>

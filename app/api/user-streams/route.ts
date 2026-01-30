@@ -110,8 +110,8 @@ export async function GET() {
       recentStreams: recentStreams.slice(0, 20) // Return last 20 streams
     }
 
-    // Cache for 5 minutes
-    await kv.set(cacheKey, result, { ex: 300 })
+    // Cache for 1 minute (60 seconds) for fresher data
+    await kv.set(cacheKey, result, { ex: 60 })
 
     return NextResponse.json(result)
 
