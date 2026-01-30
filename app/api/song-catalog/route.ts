@@ -64,9 +64,9 @@ export async function POST(request: Request) {
       // Only add if doesn't exist
       if (!catalog[trackId]) {
         catalog[trackId] = {
-          trackId,
+          trackId: Number(trackId), // CHANGED: Ensure it's a number
           trackName,
-          albumId: albumId || null,
+          albumId: albumId || undefined, // CHANGED: Use undefined instead of null for consistency
           addedAt: new Date().toISOString(),
           source
         }
