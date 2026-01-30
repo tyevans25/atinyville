@@ -17,8 +17,8 @@ export default function StationheadLiveBanner() {
 
   const checkLiveStatus = async () => {
     try {
-      // Replace 'atinytown' with your actual Stationhead username
-      const response = await fetch('https://share.stationhead.com/e111qyfdwm1j')
+      // Use our server-side API (bypasses CORS)
+      const response = await fetch('/api/stationhead-live')
       
       if (response.ok) {
         const data = await response.json()
