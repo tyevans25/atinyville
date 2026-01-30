@@ -13,6 +13,7 @@ import CronCountdown from "@/components/CronCountdown"
 import { useUser } from "@clerk/nextjs"
 import RecentTracksCard from "@/components/RecentTracksCard"
 import StreamingGuideButton from '@/components/StreamingGuide'
+import StationheadLiveBanner from '@/components/StationheadLiveBanner'
 
 export default function StreamingHub() {
   const { isSignedIn } = useUser()
@@ -113,28 +114,10 @@ export default function StreamingHub() {
           )}
 
           {/* Stationhead Live Banner */}
-          {stationheadLive && (
-            <Card className="glass-card border-red-500/50 animate-pulse">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                    <div>
-                      <p className="text-white font-bold text-lg">🎉 Stationhead Party LIVE NOW!</p>
-                      <p className="text-gray-300 text-sm">Join fellow ATINYs streaming together</p>
-                    </div>
-                  </div>
-                  <Button
-                    className="bg-red-500 hover:bg-red-600 text-white"
-                    onClick={() => window.open('https://stationhead.com/YOURUSERNAME', '_blank')}
-                  >
-                    <Radio className="w-4 h-4 mr-2" />
-                    Join Party
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          <div>
+            <StationheadLiveBanner />
+          </div>
+
 
           {/* stats.fm Integration */}
           <div data-statsfm-card>
@@ -216,9 +199,9 @@ export default function StreamingHub() {
             </CardContent>
           </Card>
 
-            {/* Info Cards */}
-            <StreamingGuideButton />
-  
+          {/* Info Cards */}
+          <StreamingGuideButton />
+
         </div>
       </div>
     </>

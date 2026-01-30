@@ -11,7 +11,7 @@ export default function StreamingGuideButton() {
         return (
             <Button
                 onClick={() => setOpen(true)}
-                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
+                className="glass-card border-white/30 text-white hover:bg-white/20 backdrop-blur-xl transition-all"
             >
                 <BookOpen className="w-4 h-4 mr-2" />
                 Streaming Guide
@@ -34,23 +34,23 @@ export default function StreamingGuideButton() {
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Header */}
-                    <div className="sticky top-0 bg-gray-900 border-b border-white/10 p-6 flex items-center justify-between">
-                        <div>
+                    <div className="sticky top-0 bg-gray-900 border-b border-white/10 p-6">
+                        <div className="text-center">
                             <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                                 ATEEZ Streaming Guide 🏴‍☠️
                             </h2>
                             <p className="text-sm text-gray-400 mt-1">
-                                What to do to effectively stream to support ATEEZ
+                                Everything you need to know to support ATEEZ effectively
                             </p>
                         </div>
                         <button
                             onClick={() => setOpen(false)}
-                            className="text-gray-400 hover:text-white transition"
+                            className="absolute top-6 right-6 text-gray-400 hover:text-white transition"
                         >
                             <X className="w-6 h-6" />
                         </button>
                     </div>
-
+ß
                     {/* Content */}
                     <div className="p-6 space-y-6">
                         {/* Section 1: Why Stream */}
@@ -148,6 +148,7 @@ export default function StreamingGuideButton() {
                                 <div>
                                     <p className="text-xs text-gray-400 text-center mt-4">
                                         Be sure to check out our ATINY streaming account for more tips and updates!
+                                        @9024fm @atz_playlist on Twitter
                                     </p>
                                 </div>
                             </div>
@@ -194,8 +195,8 @@ export default function StreamingGuideButton() {
                             Got it!
                         </Button>
                     </div>
-                </div >
-            </div >
+                </div>
+            </div>
         </>
     )
 }
