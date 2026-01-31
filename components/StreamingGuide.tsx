@@ -11,7 +11,7 @@ export default function StreamingGuideButton() {
         return (
             <Button
                 onClick={() => setOpen(true)}
-                className="glass-card border-white/30 text-white hover:bg-white/20 backdrop-blur-xl transition-all"
+                className="w-full glass-card border-white/30 text-white hover:bg-white/20 backdrop-blur-xl transition-all"
             >
                 <BookOpen className="w-4 h-4 mr-2" />
                 Streaming Guide
@@ -50,7 +50,7 @@ export default function StreamingGuideButton() {
                             <X className="w-6 h-6" />
                         </button>
                     </div>
-ß
+                    ß
                     {/* Content */}
                     <div className="p-6 space-y-6">
                         {/* Section 1: Why Stream */}

@@ -78,7 +78,7 @@ export default function StreamingHub() {
                     <TrendingUp className="w-8 h-8 text-blue-400" />
                     <div>
                       <p className="text-white font-bold text-lg">Your ATEEZ Streams Today</p>
-                      <p className="text-gray-300 text-sm">Keep streaming to reach today's goal!</p>
+                      <p className="text-gray-300 text-sm">Keep streaming to reach today&apos;s goal!</p>
                     </div>
                   </div>
                   <div className="flex gap-6">
@@ -175,33 +175,39 @@ export default function StreamingHub() {
                 Follow our official ATINYTOWN playlist on Spotify! Updated regularly with streaming priorities and comeback tracks.
               </p>
 
-              {/* Placeholder - Replace with your playlist embed when ready */}
-              {/* {{ < div className="bg-white/5 border border-white/10 rounded-lg p-6 text-center"> */}
-                {/* // <Sparkles className="w-12 h-12 text-blue-400 mx-auto mb-4" /> */}
-                {/* // <p className="text-white font-semibold mb-2">Playlist Coming Soon!</p>
-                // <p className="text-sm text-gray-400 mb-4">
-                //   We're curating the perfect streaming playlist for you
-                // </p> */}
-              {/* Uncomment and add your playlist link when ready: */}
-            <Button
-              className="w-full bg-white hover:bg-gray-200 text-gray-800"
-              onClick={() => window.open('https://open.spotify.com/embed/playlist/5isPnJGmao1bXq0W5lOVkN?utm_source=generator&theme=0', '_blank')}
-            >
-              <Music className="w-4 h-4 mr-2" />
-              Open in Spotify
-            </Button>
+              {/* Spotify Embed */}
+              <div className="rounded-lg overflow-hidden border border-white/20">
+                <iframe
+                  src="https://open.spotify.com/embed/playlist/5isPnJGmao1bXq0W5lOVkN?utm_source=generator&theme=0"
+                  width="100%"
+                  height="380"
+                  frameBorder="0"
+                  allowFullScreen
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                  loading="lazy"
+                  className="w-full"
+                />
+              </div>
 
-            <p className="text-xs text-gray-400">
-              💡 Feel free to share your own playlists on X! @ATINYTOWN1024 so it can be shared!
-            </p>
-          </CardContent>
-        </Card>
+              <Button
+                className="w-full bg-white hover:bg-gray-200 text-gray-800"
+                onClick={() => window.open('https://open.spotify.com/playlist/5isPnJGmao1bXq0W5lOVkN', '_blank')}
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Open in Spotify
+              </Button>
 
-        {/* Info Cards */}
-        <StreamingGuideButton />
+              <p className="text-xs text-gray-400 text-center">
+                💡 Feel free to share your own playlists on X! @ATINYTOWN1024 so it can be shared!
+              </p>
+            </CardContent>
+          </Card>
 
+          {/* Info Cards */}
+          <StreamingGuideButton />
+
+        </div>
       </div>
-    </div >
     </>
   )
 }
