@@ -176,34 +176,32 @@ export default function StreamingHub() {
               </p>
 
               {/* Placeholder - Replace with your playlist embed when ready */}
-              <div className="bg-white/5 border border-white/10 rounded-lg p-6 text-center">
-                <Sparkles className="w-12 h-12 text-blue-400 mx-auto mb-4" />
-                <p className="text-white font-semibold mb-2">Playlist Coming Soon!</p>
-                <p className="text-sm text-gray-400 mb-4">
-                  We're curating the perfect streaming playlist for you
-                </p>
-                {/* Uncomment and add your playlist link when ready:
-                <Button 
-                  className="w-full bg-white hover:bg-gray-200 text-gray-800"
-                  onClick={() => window.open('YOUR_SPOTIFY_PLAYLIST_LINK', '_blank')}
-                >
-                  <Music className="w-4 h-4 mr-2" />
-                  Open in Spotify
-                </Button>
-                */}
-              </div>
+              {/* {{ < div className="bg-white/5 border border-white/10 rounded-lg p-6 text-center"> */}
+                {/* // <Sparkles className="w-12 h-12 text-blue-400 mx-auto mb-4" /> */}
+                {/* // <p className="text-white font-semibold mb-2">Playlist Coming Soon!</p>
+                // <p className="text-sm text-gray-400 mb-4">
+                //   We're curating the perfect streaming playlist for you
+                // </p> */}
+              {/* Uncomment and add your playlist link when ready: */}
+            <Button
+              className="w-full bg-white hover:bg-gray-200 text-gray-800"
+              onClick={() => window.open('https://open.spotify.com/embed/playlist/5isPnJGmao1bXq0W5lOVkN?utm_source=generator&theme=0', '_blank')}
+            >
+              <Music className="w-4 h-4 mr-2" />
+              Open in Spotify
+            </Button>
 
-              <p className="text-xs text-gray-400">
-                💡 Feel free to share your own playlists on X! @ATINYTOWN1024 so it can be shared!
-              </p>
-            </CardContent>
-          </Card>
+            <p className="text-xs text-gray-400">
+              💡 Feel free to share your own playlists on X! @ATINYTOWN1024 so it can be shared!
+            </p>
+          </CardContent>
+        </Card>
 
-          {/* Info Cards */}
-          <StreamingGuideButton />
+        {/* Info Cards */}
+        <StreamingGuideButton />
 
-        </div>
       </div>
+    </div >
     </>
   )
 }
