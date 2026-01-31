@@ -12,20 +12,22 @@ export default function StationheadLiveBanner() {
           <div className="flex items-center gap-3">
             <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
             <div>
-              <p className="text-white font-bold text-lg">Stationhead LIVE!</p>
-              <p className="text-gray-300 text-sm">Check if we're live and join the party!</p>
+              <p className="text-white font-bold text-lg">🎉 Stationhead Party LIVE NOW!</p>
+              <p className="text-gray-300 text-sm">Join fellow ATINYs streaming together</p>
             </div>
           </div>
-          <Button
-            className="bg-red-500 hover:bg-red-600 text-white"
-            onClick={() => window.open('https://stationhead.com/atinytown', '_blank')}
+          <a
+            href="/stationhead"
+            target="_blank"
+            rel="noopener noreferrer"
           >
-            <Radio className="w-4 h-4 mr-2" />
-            Join Party
-          </Button>
+            <Button className="bg-red-500 hover:bg-red-600 text-white">
+              <Radio className="w-4 h-4 mr-2" />
+              Join Party
+            </Button>
+          </a>
         </div>
       </CardContent>
     </Card>
   )
 }
-
