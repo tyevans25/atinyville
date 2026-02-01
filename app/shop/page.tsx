@@ -559,7 +559,7 @@ export default function ShopPage() {
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             console.error('Image failed to load:', album.cover)
-                            e.currentTarget.src = 'https://via.placeholder.com/300x300/1a1a1a/ffffff?text=Album+Cover'
+                            e.currentTarget.src = 'https://toppng.com/uploads/preview/target-logo-11530965454baetvidszx.png'
                           }}
                         />
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
