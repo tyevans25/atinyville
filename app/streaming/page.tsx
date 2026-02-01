@@ -154,7 +154,7 @@ export default function StreamingHub() {
           <div>
             <h2 className="text-2xl font-bold text-white mb-4">Here are your recent tracks!</h2>
             <p className="text-gray-300 text-sm mb-4">
-              While goals are updated every 30 minutes, your recent streams reflect your real time stats.fm
+              While goals are updated every 30 minutes, your recent streams are updated based on stats.fm
             </p>
             <RecentTracksCard />
           </div>
@@ -198,7 +198,7 @@ export default function StreamingHub() {
               </Button>
 
               <p className="text-xs text-gray-400 text-center">
-                💡 Feel free to share your own playlists on X! @ATINYTOWN1024 so it can be shared!
+                💡 Feel free to share your own playlists on X (@AtinyTown_)! ATINY made playlists will also be shared here!
               </p>
             </CardContent>
           </Card>

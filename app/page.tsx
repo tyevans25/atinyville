@@ -8,6 +8,12 @@ import { Trophy, Calendar, Music, ShoppingCart, ExternalLink, ChevronLeft, Chevr
 import Navigation from "@/components/Navigation"
 import DailyGoalSlide from "@/components/DailyGoalSlide"
 
+declare global {
+  interface Window {
+    twttr: any
+  }
+}
+
 // Helper function to convert KST to local timezone
 const convertKSTtoLocal = (kstDateString: string, kstTime?: string) => {
   // If time is provided, use it; otherwise default to midnight
@@ -40,7 +46,7 @@ const campaignUpdates = [
     ],
     urgent: false
   },
-    {
+  {
     id: 3,
     title: "\"Adrenaline\" MV Trailer",
     description: "Check out the trailer for the upcoming MV for \"Adrenaline\"!",
@@ -126,7 +132,7 @@ const upcomingEvents = [
   {
     id: 6,
     date: "2026-02-02",
-    time: "00:00:00",
+    time: "14:00:00",
     title: "Character Poster",
     description: "Character poster released",
     type: "promotion"
@@ -134,7 +140,7 @@ const upcomingEvents = [
   {
     id: 7,
     date: "2026-02-03",
-    time: "00:00:00",
+    time: "14:00:00",
     title: "MV Poster",
     description: "MV poster released",
     type: "promotion"
@@ -142,7 +148,7 @@ const upcomingEvents = [
   {
     id: 8,
     date: "2026-02-04",
-    time: "00:00:00",
+    time: "14:00:00",
     title: "MV Teaser 1",
     description: "MV teaser 1 released",
     type: "teaser"
@@ -150,7 +156,7 @@ const upcomingEvents = [
   {
     id: 9,
     date: "2026-02-05",
-    time: "00:00:00",
+    time: "14:00:00",
     title: "MV Teaser 2",
     description: "MV teaser 2 released",
     type: "teaser"
@@ -184,6 +190,36 @@ export default function Home() {
 
     return () => clearInterval(interval)
   }, [carouselPaused, currentSlide])
+
+  // Load Twitter widget script
+  useEffect(() => {
+    // Remove any existing script first
+    const existingScript = document.querySelector('script[src="https://platform.twitter.com/widgets.js"]')
+    if (existingScript) {
+      existingScript.remove()
+    }
+
+    // Load Twitter widget script
+    const script = document.createElement('script')
+    script.src = 'https://platform.twitter.com/widgets.js'
+    script.async = true
+    script.charset = 'utf-8'
+
+    script.onload = () => {
+      // Force reload widgets after script loads
+      if (window.twttr?.widgets) {
+        window.twttr.widgets.load()
+      }
+    }
+
+    document.body.appendChild(script)
+
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -230,7 +266,7 @@ export default function Home() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <div 
+              <div
                 className="relative"
                 onMouseEnter={() => setCarouselPaused(true)}
                 onMouseLeave={() => setCarouselPaused(false)}
@@ -255,7 +291,7 @@ export default function Home() {
                         <p className="text-gray-300 mb-4">
                           {campaignUpdates[currentSlide].description}
                         </p>
-                        
+
                         {campaignUpdates[currentSlide].videoUrl && (
                           <div className="aspect-video rounded-lg overflow-hidden bg-black mb-4">
                             <iframe
@@ -349,11 +385,10 @@ export default function Home() {
                     <button
                       key={index}
                       onClick={() => setCurrentSlide(index)}
-                      className={`h-2 rounded-full transition-all ${
-                        index === currentSlide
-                          ? 'w-8 bg-blue-600'
-                          : 'w-2 bg-white/40'
-                      }`}
+                      className={`h-2 rounded-full transition-all ${index === currentSlide
+                        ? 'w-8 bg-blue-600'
+                        : 'w-2 bg-white/40'
+                        }`}
                     />
                   ))}
                 </div>
@@ -383,7 +418,7 @@ export default function Home() {
                         const msUntil = eventDate.getTime() - now.getTime()
                         const hoursUntil = Math.floor(msUntil / (1000 * 60 * 60))
                         const daysUntil = Math.floor(hoursUntil / 24)
-                        
+
                         // Format time display with timezone
                         let timeDisplay = ''
                         if (event.time) {
@@ -413,12 +448,12 @@ export default function Home() {
                               <p className="text-sm text-gray-300">{event.description}</p>
                               <div className="flex flex-wrap gap-2 items-center mt-1">
                                 <p className="text-xs text-white font-medium">
-                                  {hoursUntil < 1 
-                                    ? 'Happening now!' 
-                                    : hoursUntil < 24 
-                                      ? `In ${hoursUntil} hours` 
-                                      : daysUntil === 1 
-                                        ? 'Tomorrow' 
+                                  {hoursUntil < 1
+                                    ? 'Happening now!'
+                                    : hoursUntil < 24
+                                      ? `In ${hoursUntil} hours`
+                                      : daysUntil === 1
+                                        ? 'Tomorrow'
                                         : `In ${daysUntil} days`}
                                 </p>
                                 {timeDisplay && (
@@ -446,62 +481,55 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            {/* Watch Next - Embedded Playlists */}
+            {/* Twitter Timeline */}
             <Card className="glass-card">
               <CardHeader className="glass-header-blue text-white">
                 <CardTitle className="flex items-center gap-2">
-                  <Play className="w-5 h-5" />
-                  What's Next?
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                  </svg>
+                  Latest Updates
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                {/* YouTube MV */}
-                <div>
-                  <h4 className="font-semibold text-white mb-2 text-sm">📺 ATEEZ Present</h4>
-                  <iframe
-                    style={{ borderRadius: '12px' }}
-                    width="100%"
-                    height="200"
-                    src="https://www.youtube.com/embed/XP7zqLMu-mM?si=cEYGaCq_xHdE1Ngi"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-
-                {/* Spotify Playlist */}
-                <div>
-                  <h4 className="font-semibold text-white mb-2 text-sm">🎵 ATEEZ on Spotify</h4>
-                  <iframe
-                    style={{ borderRadius: '12px' }}
-                    src="https://open.spotify.com/embed/playlist/37i9dQZF1DXdlpBrO6fF3s?utm_source=generator&theme=0"
-                    width="100%"
-                    height="152"
-                    frameBorder="0"
-                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                    loading="lazy"
-                  />
-                </div>
-
-                {/* YouTube Playlist */}
-                <div>
-                  <h4 className="font-semibold text-white mb-2 text-sm">📺 WANTEEZ</h4>
-                  <iframe
-                    style={{ borderRadius: '12px' }}
-                    width="100%"
-                    height="200"
-                    src="https://www.youtube.com/embed/videoseries?si=506tvL7Jdx0S40eQ&amp;list=PL_G3lYLGW-D_yqkYBZgIhCTYrN18POCdQ"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
+              <CardContent className="p-6">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-sm font-semibold text-white mb-2">@ATEEZofficial</h4>
+                    <div style={{ height: '500px', overflow: 'hidden' }}>
+                      <a
+                        className="twitter-timeline"
+                        data-theme="dark"
+                        data-tweet-limit="3"
+                        data-chrome="noheader nofooter noborders transparent"
+                        href="https://twitter.com/ATEEZofficial"
+                      >
+                        Loading tweets...
+                      </a>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-white mb-2">@ATEEZofficial_JP</h4>
+                    <div style={{ height: '500px', overflow: 'hidden' }}>
+                      <a
+                        className="twitter-timeline"
+                        data-theme="dark"
+                        data-tweet-limit="3"
+                        data-chrome="noheader nofooter noborders transparent"
+                        href="https://twitter.com/ATEEZofficial_JP"
+                      >
+                        Loading tweets...
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
           {/* Quiz Feature Highlight */}
-          <Card className="bg-gradient-to-r from-gray-800 to-gray-900 border-b border-white/10 text-white mt-8">
+
+          {/* Quiz Feature Highlight */}
+          < Card className="bg-gradient-to-r from-gray-800 to-gray-900 border-b border-white/10 text-white mt-8" >
             <CardContent className="p-8">
               <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="flex-1">
@@ -527,20 +555,20 @@ export default function Home() {
                 </Button>
               </div>
             </CardContent>
-          </Card>
+          </Card >
 
-        </div>
-      </div>
+        </div >
+      </div >
 
       {/* Footer */}
-      <div className="text-center pb-8">
+      < div className="text-center pb-8" >
         <p className="text-gray-400 text-sm">
           Made for ATINYs
         </p>
         <p className="text-gray-500 text-xs mt-2">
           Not affiliated with KQ Entertainment
         </p>
-      </div>
+      </div >
     </>
   )
 }

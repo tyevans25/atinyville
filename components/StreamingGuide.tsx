@@ -111,7 +111,7 @@ export default function StreamingGuideButton() {
                             </div>
                         </section>
 
-                        {/* Section 3: Platforms */}
+                        {/* Section 3: Details */}
                         <section>
                             <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
                                 <Smartphone className="w-5 h-5 text-green-400" />
@@ -147,8 +147,8 @@ export default function StreamingGuideButton() {
                                 </div>
                                 <div>
                                     <p className="text-xs text-gray-400 text-center mt-4">
-                                        Be sure to check out our ATINY streaming account for more tips and updates!
-                                        @9024fm @atz_playlist on Twitter
+                                        Be sure to check out our ATINY streaming accounts for more tips and updates!
+                                        @9024fm @atz_playlist @ateezrendezvous on X
                                     </p>
                                 </div>
                             </div>

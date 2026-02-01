@@ -146,7 +146,7 @@ export default function DailyGoalSlide() {
             {/* Description */}
             <p className="text-gray-300 mb-4 text-sm">
                 Complete the daily mission together with other ATINYs! When we reach {target.toLocaleString()} streams, 
-                everyone who contributed can celebrate. Teamwork makes the dream work! 💜
+                everyone who contributed can celebrate. Teamwork makes the dream work! 🤍
             </p>
 
             {/* Main Progress Card */}
@@ -252,7 +252,7 @@ export default function DailyGoalSlide() {
 
             {/* Footer message */}
             <p className="text-center text-xs text-gray-400 mt-3">
-                ⏰ Goal resets at midnight in your timezone
+                ⏰ Goal resets at 12AM KST daily
             </p>
         </div>
     )

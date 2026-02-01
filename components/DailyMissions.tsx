@@ -162,7 +162,7 @@ export default function DailyMissions() {
 
                 {/* Info */}
                 <p className="text-xs text-gray-400 text-center mt-4">
-                    Missions reset daily at midnight
+                    Missions reset daily at 12AM KST. Keep streaming to complete new missions!
                 </p>
             </CardContent>
         </Card>
