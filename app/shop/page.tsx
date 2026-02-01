@@ -30,43 +30,43 @@ const albums: Album[] = [
       {
         name: "Target",
         productImage: "https://target.scene7.com/is/image/Target/GUEST_7f384248-c41e-4c59-b6fa-7a9839d49b13?wid=600&hei=600&qlt=80",
-        logo: "https://icon2.cleanpng.com/20180202/ldq/avithxb3s.webp",
+        logo: "https://toppng.com/uploads/preview/target-logo-11530965454baetvidszx.png",
         link: "https://www.target.com/p/ateez-golden-hour-part-4-diary-ver-target-exclusive-cd/-/A-95151746#lnk=sametab"
       },
       {
         name: "Target",
         productImage: "https://target.scene7.com/is/image/Target/GUEST_da4fd028-b7bf-4549-aea9-0915bd91960e?wid=600&hei=600&qlt=80",
-        logo: "https://icon2.cleanpng.com/20180202/ldq/avithxb3s.webp",
+        logo: "https://toppng.com/uploads/preview/target-logo-11530965454baetvidszx.png",
         link: "https://www.target.com/p/ateez-golden-hour-part-4-a-ver-target-exclusive-cd/-/A-95151398#lnk=sametab"
       },
       {
         name: "Target",
         productImage: "https://target.scene7.com/is/image/Target/GUEST_7a50ba5c-4df2-425f-8bb6-faa64aefb761?wid=1200&hei=1200&qlt=80",
-        logo: "https://icon2.cleanpng.com/20180202/ldq/avithxb3s.webp",
+        logo: "https://toppng.com/uploads/preview/target-logo-11530965454baetvidszx.png",
         link: "https://www.target.com/p/ateez-golden-hour-part-4-z-ver-target-exclusive-cd/-/A-95151748"
       },
       {
         name: "Target",
         productImage: "https://target.scene7.com/is/image/Target/GUEST_63a8ccce-669a-46a8-bd74-c9d42f85e117?wid=600&hei=600&qlt=80",
-        logo: "https://icon2.cleanpng.com/20180202/ldq/avithxb3s.webp",
+        logo: "https://toppng.com/uploads/preview/target-logo-11530965454baetvidszx.png",
         link: "https://www.target.com/p/ateez-golden-hour-part-4-digipack-target-exclusive-cd/-/A-95151752#lnk=sametab"
       },
       {
         name: "Target",
         productImage: "https://target.scene7.com/is/image/Target/GUEST_50086bfb-6b2a-4442-9cd1-fcdb3ad4cfd4?wid=600&hei=600&qlt=80",
-        logo: "https://icon2.cleanpng.com/20180202/ldq/avithxb3s.webp",
+        logo: "https://toppng.com/uploads/preview/target-logo-11530965454baetvidszx.png",
         link: "https://www.target.com/p/ateez-golden-hour-part-4-pic-disc-target-exclusive-vinyl/-/A-95151802#lnk=sametab"
       },
       {
         name: "Target",
         productImage: "https://target.scene7.com/is/image/Target/GUEST_9e8aa5d7-404b-4baf-9a67-798250293b09?wid=600&hei=600&qlt=80",
-        logo: "https://icon2.cleanpng.com/20180202/ldq/avithxb3s.webp",
+        logo: "https://toppng.com/uploads/preview/target-logo-11530965454baetvidszx.png",
         link: "https://www.target.com/p/ateez-tiny-vinyl-edition-single-target-exclusive-vinyl-4-inch/-/A-95186430?preselect=95151991#lnk=sametab"
       },
       {
         name: "Target",
         productImage: "https://target.scene7.com/is/image/Target/GUEST_5c92df6b-4cc4-4b16-b314-daef9c48a68b?wid=600&hei=600&qlt=80",
-        logo: "https://icon2.cleanpng.com/20180202/ldq/avithxb3s.webp",
+        logo: "https://toppng.com/uploads/preview/target-logo-11530965454baetvidszx.png",
         link: "https://www.target.com/p/ateez-tiny-vinyl-edition-single-target-exclusive-vinyl-4-inch/-/A-95186430?preselect=95152046#lnk=sametab"
       },
       {
@@ -217,7 +217,7 @@ const albums: Album[] = [
       {
         name: "Target",
         productImage: "https://target.scene7.com/is/image/Target/GUEST_84712334-a0d0-42c8-9594-4abfe320b0a3?wid=384&qlt=80",
-        logo: "https://icon2.cleanpng.com/20180202/ldq/avithxb3s.webp",
+        logo: "https://toppng.com/uploads/preview/target-logo-11530965454baetvidszx.png",
         link: "https://target.scene7.com/is/image/Target/GUEST_84712334-a0d0-42c8-9594-4abfe320b0a3?wid=384&qlt=80"
       },
       {
@@ -259,7 +259,7 @@ const albums: Album[] = [
     stores: [{
       name: "Target",
       productImage: "https://target.scene7.com/is/image/Target/GUEST_13596c32-4734-48f8-b3d6-e2a12da5ffdc?wid=1200&hei=1200&qlt=80",
-      logo: "https://icon2.cleanpng.com/20180202/ldq/avithxb3s.webp",
+      logo: "https://toppng.com/uploads/preview/target-logo-11530965454baetvidszx.png",
       link: "https://www.target.com/p/ateez-golden-hour-part-3-39-in-your-fantasy-edition-39-cd/-/A-94784941#lnk=sametab"
     },
     {
@@ -333,7 +333,7 @@ const albums: Album[] = [
       {
         name: "Target",
         productImage: "https://target.scene7.com/is/image/Target/GUEST_b6cfdef3-058b-49fb-a6df-624b91c0d839?wid=600&hei=600&qlt=80",
-        logo: "https://icon2.cleanpng.com/20180202/ldq/avithxb3s.webp",
+        logo: "https://toppng.com/uploads/preview/target-logo-11530965454baetvidszx.png",
         link: "https://www.target.com/p/ateez-golden-hour-part-2-to-ver-target-exclusive-cd/-/A-93619759#lnk=sametab"
       },
       {
