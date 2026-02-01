@@ -465,13 +465,13 @@ const albums: Album[] = [
         link: "https://kplaceshop.com/products/ateez-golden-hour-part-1-10th-mini-album?variant=49503215452478"
       }
     ]
-  },
-  {
-    id: "ghp1",
-    title: "GOLDEN HOUR : Part.1",
-    cover: "https://via.placeholder.com/300x300/ff69b4/000000?text=GHP1",
-    stores: []
   }
+  // {
+  //   id: "ghp1",
+  //   title: "GOLDEN HOUR : Part.1",
+  //   cover: "https://via.placeholder.com/300x300/ff69b4/000000?text=GHP1",
+  //   stores: []
+  // }
 ]
 
 export default function ShopPage() {
