@@ -192,34 +192,19 @@ export default function Home() {
   }, [carouselPaused, currentSlide])
 
   // Load Twitter widget script
-  useEffect(() => {
-    // Remove any existing script first
-    const existingScript = document.querySelector('script[src="https://platform.twitter.com/widgets.js"]')
-    if (existingScript) {
-      existingScript.remove()
+useEffect(() => {
+  const script = document.createElement('script')
+  script.src = 'https://platform.twitter.com/widgets.js'
+  script.async = true
+  script.charset = 'utf-8'
+  document.body.appendChild(script)
+
+  return () => {
+    if (document.body.contains(script)) {
+      document.body.removeChild(script)
     }
-
-    // Load Twitter widget script
-    const script = document.createElement('script')
-    script.src = 'https://platform.twitter.com/widgets.js'
-    script.async = true
-    script.charset = 'utf-8'
-
-    script.onload = () => {
-      // Force reload widgets after script loads
-      if (window.twttr?.widgets) {
-        window.twttr.widgets.load()
-      }
-    }
-
-    document.body.appendChild(script)
-
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script)
-      }
-    }
-  }, [])
+  }
+}, [])
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -508,7 +493,7 @@ export default function Home() {
                     </div>
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold text-white mb-2">@ATEEZofficial_JP</h4>
+                    <h4 className="text-sm font-semibold text-white mb-2">@1024updates</h4>
                     <div style={{ height: '500px', overflow: 'hidden' }}>
                       <a
                         className="twitter-timeline"
