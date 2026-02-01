@@ -191,27 +191,6 @@ export default function Home() {
     return () => clearInterval(interval)
   }, [carouselPaused, currentSlide])
 
-  // Load Twitter widget script
-useEffect(() => {
-  const script = document.createElement('script')
-  script.src = 'https://platform.twitter.com/widgets.js'
-  script.async = true
-  script.charset = 'utf-8'
-  document.body.appendChild(script)
-
-  return () => {
-    if (document.body.contains(script)) {
-      document.body.removeChild(script)
-    }
-  }
-}, [])
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('startQuiz') === 'true') {
-      setQuizStarted(true)
-    }
-  }, [])
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % campaignUpdates.length)
@@ -466,46 +445,55 @@ useEffect(() => {
               </CardContent>
             </Card>
 
-            {/* Twitter Timeline */}
+            {/* Watch Next - Embedded Playlists */}
             <Card className="glass-card">
               <CardHeader className="glass-header-blue text-white">
                 <CardTitle className="flex items-center gap-2">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                  </svg>
-                  Latest Updates
+                  <Play className="w-5 h-5" />
+                  What's Next?
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="text-sm font-semibold text-white mb-2">@ATEEZofficial</h4>
-                    <div style={{ height: '500px', overflow: 'hidden' }}>
-                      <a
-                        className="twitter-timeline"
-                        data-theme="dark"
-                        data-tweet-limit="3"
-                        data-chrome="noheader nofooter noborders transparent"
-                        href="https://twitter.com/ATEEZofficial"
-                      >
-                        Loading tweets...
-                      </a>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-white mb-2">@1024updates</h4>
-                    <div style={{ height: '500px', overflow: 'hidden' }}>
-                      <a
-                        className="twitter-timeline"
-                        data-theme="dark"
-                        data-tweet-limit="3"
-                        data-chrome="noheader nofooter noborders transparent"
-                        href="https://twitter.com/ATEEZofficial_JP"
-                      >
-                        Loading tweets...
-                      </a>
-                    </div>
-                  </div>
+              <CardContent className="p-6 space-y-4">
+                {/* YouTube MV */}
+                <div>
+                  <h4 className="font-semibold text-white mb-2 text-sm">📺 ATEEZ Present</h4>
+                  <iframe
+                    style={{ borderRadius: '12px' }}
+                    width="100%"
+                    height="200"
+                    src="https://www.youtube.com/embed/XP7zqLMu-mM?si=cEYGaCq_xHdE1Ngi"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+
+                {/* Spotify Playlist */}
+                <div>
+                  <h4 className="font-semibold text-white mb-2 text-sm">🎵 ATEEZ on Spotify</h4>
+                  <iframe
+                    style={{ borderRadius: '12px' }}
+                    src="https://open.spotify.com/embed/playlist/37i9dQZF1DXdlpBrO6fF3s?utm_source=generator&theme=0"
+                    width="100%"
+                    height="152"
+                    frameBorder="0"
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                    loading="lazy"
+                  />
+                </div>
+
+                {/* YouTube Playlist */}
+                <div>
+                  <h4 className="font-semibold text-white mb-2 text-sm">📺 WANTEEZ</h4>
+                  <iframe
+                    style={{ borderRadius: '12px' }}
+                    width="100%"
+                    height="200"
+                    src="https://www.youtube.com/embed/videoseries?si=506tvL7Jdx0S40eQ&amp;list=PL_G3lYLGW-D_yqkYBZgIhCTYrN18POCdQ"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
                 </div>
               </CardContent>
             </Card>
