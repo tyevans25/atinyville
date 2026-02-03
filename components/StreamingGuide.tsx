@@ -148,7 +148,7 @@ export default function StreamingGuideButton() {
                                 <div>
                                     <p className="text-xs text-gray-400 text-center mt-4">
                                         Be sure to check out our ATINY streaming accounts for more tips and updates!
-                                        @9024fm @atz_playlist @ateezrendezvous on X
+                                        @9024fm @atz_playlist @ateezrendezvous @AtzBluebirdFM on X
                                     </p>
                                 </div>
                             </div>

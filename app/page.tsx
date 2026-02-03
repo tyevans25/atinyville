@@ -168,6 +168,94 @@ const upcomingEvents = [
     title: "GOLDEN HOUR Part.4 Album Release",
     description: "GOLDEN HOUR Part.4 album released",
     type: "release"
+  },
+  {
+    id: 11,
+    date: "2026-02-07",
+    time: "18:00:00", // 6 PM KST release
+    title: "'On The Road' Spotify Live Version Release",
+    description: "'On The Road' Spotify Live Version released",
+    type: "release"
+  },
+  {
+    id: 12,
+    date: "2026-02-06",
+    time: "22:00:00", // 6 PM KST release
+    title: "ATTEZ on 'The Seasons' KBS Music Talk Show",
+    description: "'Music Talk Show appearance",
+    type: "promotion"
+  },
+  {
+    id: 13,
+    date: "2026-02-08",
+    time: "20:00:00", // 6 PM KST release
+    title: "ATTEZ on '1N2D' KBS Variety Show",
+    description: "'1N2D' Variety Show appearance",
+    type: "promotion"
+  },
+  {
+    id: 13,
+    date: "2026-02-06",
+    time: "17:05:00", // 6 PM KST release
+    title: "ATEEZ Comeback Stage on KBS Music Bank",
+    description: "Comeback stage on KBS Music Bank",
+    type: "promotion"
+  },
+  {
+    id: 14,
+    date: "2026-02-04",
+    time: "16:59:00", // 6 PM KST release
+    title: "ATEEZ GOLDEN HOUR Part.4 Preview Live",
+    description: "Album preview live stream",
+    type: "promotion"
+  },
+  {
+    id: 15,
+    date: "2026-02-07",
+    time: "18:05:00", // 6 PM KST release
+    title: "Jongho on 'Immortal Songs'",
+    description: "Jongho appears on 'Immortal Songs'",
+    type: "promotion"
+  },
+  {
+    id: 16,
+    date: "2026-02-08",
+    time: "15:25:00", // 6 PM KST release
+    title: "ATEEZ Comeback Stage on SBS Inkigayo",
+    description: "ATEEZ appears on SBS Inkigayo",
+    type: "promotion"
+  },
+  {
+    id: 17,
+    date: "2026-02-08",
+    time: "16:40:00", // 6 PM KST release
+    title: "San on 'Boss in the Mirror",
+    description: "San continued appearance on 'Boss in the Mirror'",
+    type: "promotion"
+  },
+  {
+    id: 18,
+    date: "2026-02-15",
+    time: "18:00:00", // 6 PM KST release
+    title: "ATEEZ @ Hanteo Music Awards",
+    description: "ATEEZ attends Hanteo Music Awards; no performance",
+    type: "promotion"
+  },
+  {
+    id: 19,
+    date: "2026-02-26",
+    time: "22:00:00", // 6 PM KST release
+    title: "WOOYOUNG @ PRADA Show for Milan Fashion Week",
+    description: "Wooyoung fashion week appearance",
+    type: "appearance"
+  },
+  {
+    id: 20,
+    date: "2026-02-22",
+    time: "19:00:00", // 6 PM KST release
+    title: "2026 World Tour: In Your Fantasy in Singapore",
+    description: "Continuation of Asia leg of world tour",
+    type: "appearance"
   }
 ]
 

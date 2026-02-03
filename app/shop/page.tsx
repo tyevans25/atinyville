@@ -218,13 +218,7 @@ const albums: Album[] = [
         name: "Target",
         productImage: "https://target.scene7.com/is/image/Target/GUEST_84712334-a0d0-42c8-9594-4abfe320b0a3?wid=384&qlt=80",
         logo: "https://toppng.com/uploads/preview/target-logo-11530965454baetvidszx.png",
-        link: "https://target.scene7.com/is/image/Target/GUEST_84712334-a0d0-42c8-9594-4abfe320b0a3?wid=384&qlt=80"
-      },
-      {
-        name: "Walmart",
-        productImage: "https://i5.walmartimages.com/seo/Ateez-Ashes-to-Light-CD_b6e998ee-2f62-4f04-8ec9-ad047458679a.bcb474a7b706b49a4c238e1fe3900d26.jpeg?odnHeight=2000&odnWidth=2000&odnBg=FFFFFF",
-        logo: "https://toppng.com/uploads/preview/walmart-new-vector-logo-free-download-11574013610ep8hruyeqb.png",
-        link: "https://www.walmart.com/ip/Ateez-Ashes-to-Light-CD/17441452306?classType=REGULAR&from=/search"
+        link: "https://www.target.com/p/ateez-ashes-to-light-target-exclusive-cd/-/A-94948768"
       },
       {
         name: "Choice Music LA",
