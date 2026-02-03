@@ -258,6 +258,16 @@ export default function AdminMissionsPage() {
           </p>
         </div>
 
+        {/* Info Card */}
+        <Card className="glass-card border-blue-500/50">
+          <CardContent className="p-4">
+            <p className="text-sm text-blue-300">
+              💡 <strong>Auto-Default:</strong> If you don&apos;t set new missions, yesterday&apos;s missions will automatically carry over. 
+              Great for consistent daily tracking!
+            </p>
+          </CardContent>
+        </Card>
+
         {/* Song Catalog Management */}
         <Card className="glass-card border-purple-500/50">
           <CardHeader className="glass-header-blue text-white">

@@ -400,6 +400,16 @@ export default function AdminDailySongGoalPage() {
         )}
 
         {/* Info */}
+        <Card className="glass-card border-blue-500/50">
+          <CardContent className="p-4">
+            <p className="text-sm text-blue-300">
+              💡 <strong>Auto-Default:</strong> If you don&apos;t set a new song goal, yesterday&apos;s song will automatically continue. 
+              Perfect for comeback season - set it once and it keeps going!
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Original Info */}
         <Card className="glass-card">
           <CardContent className="p-6">
             <h3 className="text-white font-semibold mb-2">ℹ️ About This Goal</h3>

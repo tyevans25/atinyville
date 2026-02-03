@@ -4,6 +4,11 @@ import { NextResponse } from "next/server"
 // ATEEZ artist ID on stats.fm
 const ATEEZ_ARTIST_ID = 164828
 
+// DEFAULT GOALS
+const DEFAULT_COMMUNITY_DAILY = 10000
+const DEFAULT_COMMUNITY_WEEKLY = 50000
+const DEFAULT_SONG_GOAL_TARGET = 5000
+
 interface Mission {
   id: string
   trackId: number
@@ -21,11 +26,77 @@ function getKSTDate(): string {
 // Helper: Get current week key (YYYY-W##)
 function getCurrentWeekKey(): string {
   const now = new Date()
-  const year = now.getFullYear()
-  const startOfYear = new Date(year, 0, 1)
-  const days = Math.floor((now.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000))
-  const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7)
+  const kstNow = new Date(now.getTime() + (9 * 60 * 60 * 1000))
+  const year = kstNow.getUTCFullYear()
+  const startOfYear = new Date(Date.UTC(year, 0, 1))
+  const days = Math.floor((kstNow.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000))
+  const weekNumber = Math.ceil((days + startOfYear.getUTCDay() + 1) / 7)
   return `${year}-W${String(weekNumber).padStart(2, '0')}`
+}
+
+// Helper: Get yesterday's date in KST
+function getYesterdayKST(): string {
+  const now = new Date()
+  const yesterday = new Date(now.getTime() + (9 * 60 * 60 * 1000) - (24 * 60 * 60 * 1000))
+  return yesterday.toISOString().split('T')[0]
+}
+
+// Helper: Set default goals if they don't exist
+async function ensureDefaultGoals(today: string, weekKey: string) {
+  const yesterday = getYesterdayKST()
+  
+  const communityDailyKey = `community:daily:${today}`
+  const communityWeeklyKey = `community:weekly:${weekKey}`
+  const dailySongGoalKey = `daily:goal:${today}`
+  const missionsKey = `daily:missions:${today}`
+  
+  // Check and set daily community goal
+  const dailyGoal = await kv.get(communityDailyKey)
+  if (!dailyGoal) {
+    await kv.set(communityDailyKey, { target: DEFAULT_COMMUNITY_DAILY, current: 0 }, { ex: 86400 })
+    console.log(`✅ Set default daily community goal: ${DEFAULT_COMMUNITY_DAILY}`)
+  }
+  
+  // Check and set weekly community goal
+  const weeklyGoal = await kv.get(communityWeeklyKey)
+  if (!weeklyGoal) {
+    await kv.set(communityWeeklyKey, { target: DEFAULT_COMMUNITY_WEEKLY, current: 0 }, { ex: 604800 })
+    console.log(`✅ Set default weekly community goal: ${DEFAULT_COMMUNITY_WEEKLY}`)
+  }
+  
+  // Check and set daily song goal (copy from yesterday)
+  const songGoal = await kv.get(dailySongGoalKey)
+  if (!songGoal) {
+    const yesterdaySongGoalKey = `daily:goal:${yesterday}`
+    const yesterdaySongGoal = await kv.get<{ song: string; target: number }>(yesterdaySongGoalKey)
+    
+    if (yesterdaySongGoal?.song) {
+      await kv.set(dailySongGoalKey, {
+        song: yesterdaySongGoal.song,
+        target: yesterdaySongGoal.target || DEFAULT_SONG_GOAL_TARGET,
+        current: 0
+      }, { ex: 86400 })
+      console.log(`✅ Copied yesterday's song goal: "${yesterdaySongGoal.song}" (${yesterdaySongGoal.target})`)
+    }
+  }
+  
+  // Check and set missions (copy from yesterday)
+  const missions = await kv.get(missionsKey)
+  if (!missions || (Array.isArray(missions) && missions.length === 0)) {
+    const yesterdayMissionsKey = `daily:missions:${yesterday}`
+    const yesterdayMissions = await kv.get<Mission[]>(yesterdayMissionsKey)
+    
+    if (yesterdayMissions && yesterdayMissions.length > 0) {
+      // Update mission IDs to include today's date
+      const todayMissions = yesterdayMissions.map(m => ({
+        ...m,
+        id: `${m.trackId}-${today}`
+      }))
+      
+      await kv.set(missionsKey, todayMissions, { ex: 86400 })
+      console.log(`✅ Copied ${todayMissions.length} missions from yesterday`)
+    }
+  }
 }
 
 export async function GET(request: Request) {
@@ -36,14 +107,17 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const today = getKSTDate() // Use KST date
+    const today = getKSTDate()
     const weekKey = getCurrentWeekKey()
     const cronRunTime = Date.now()
 
+    // --- Ensure default goals exist ---
+    await ensureDefaultGoals(today, weekKey)
+
     // --- Keys ---
-    const communityDailyKey = `community:daily:${today}` // ANY ATEEZ streams (streaming hub)
-    const dailySongGoalKey = `daily:goal:${today}` // SPECIFIC song (homepage)
-    const communityWeeklyKey = `community:weekly:${weekKey}` // ANY ATEEZ streams (streaming hub)
+    const communityDailyKey = `community:daily:${today}`
+    const dailySongGoalKey = `daily:goal:${today}`
+    const communityWeeklyKey = `community:weekly:${weekKey}`
     const missionsKey = `daily:missions:${today}`
 
     // --- Load goals and missions ---
@@ -54,11 +128,7 @@ export async function GET(request: Request) {
       kv.get<Mission[]>(missionsKey)
     ])
 
-    if (!communityDaily && !dailySongGoal && !communityWeekly && (!missions || missions.length === 0)) {
-      return NextResponse.json({ success: true, message: "No active goals today" })
-    }
-
-    // --- Initialize NEW stream counters (only counting NEW streams this run) ---
+    // --- Initialize NEW stream counters ---
     let newDailyStreams = 0
     let newDailySongStreams = 0
     let newWeeklyStreams = 0
@@ -66,221 +136,149 @@ export async function GET(request: Request) {
 
     // --- Fetch all users with stats.fm ---
     const userKeys = await kv.keys("user:*:statsfm")
-    console.log(`🔍 Debug: Found ${userKeys.length} users:`, JSON.stringify(userKeys))
 
     for (const key of userKeys) {
       try {
-        console.log(`🔄 Processing user key: ${key}`)
-        
         const userId = key.split(":")[1]
-        console.log(`👤 User ID: ${userId}`)
-        
         const statsfmUsername = await kv.get<string>(key)
-        console.log(`📝 Stats.fm username: ${statsfmUsername}`)
         
-        if (!statsfmUsername) {
-          console.log(`❌ No username found, skipping`)
-          continue
-        }
+        if (!statsfmUsername) continue
 
-        // Get the last processed timestamp for this user
         const lastProcessedKey = `user:${userId}:last_processed`
-        const lastProcessedTime = await kv.get<number>(lastProcessedKey) || 0
-        console.log(`⏰ Last processed: ${lastProcessedTime} (${new Date(lastProcessedTime).toISOString()})`)
+        const lastProcessed = await kv.get<number>(lastProcessedKey) || 0
 
-        // Fetch user's streams with higher limit
-        console.log(`🌐 Fetching streams from stats.fm...`)
-        const res = await fetch(`https://api.stats.fm/api/v1/users/${statsfmUsername}/streams?limit=50`)
-        console.log(`📡 Stats.fm response: ${res.status}`)
-        
-        if (!res.ok) {
-          console.log(`❌ Stats.fm API error, skipping`)
-          continue
-        }
-        
+        // Fetch streams
+        const res = await fetch(`https://api.stats.fm/api/v1/users/${statsfmUsername}/streams?limit=500`)
+        if (!res.ok) continue
+
         const data = await res.json()
-        const streams: any[] = data.items || []
-        console.log(`📊 Total streams fetched: ${streams.length}`)
+        const streams = data.items || []
 
-        // Filter to only NEW streams (after last processed time)
-        const newStreams = streams.filter(s => {
-          const streamEndTime = new Date(s.endTime).getTime()
-          return streamEndTime > lastProcessedTime
+        // Filter ATEEZ streams newer than last processed
+        const newStreams = streams.filter((s: any) => {
+          const streamTime = new Date(s.endTime).getTime()
+          return s.artistIds?.includes(ATEEZ_ARTIST_ID) && streamTime > lastProcessed
         })
-        console.log(`🆕 New streams since last run: ${newStreams.length}`)
 
-        if (newStreams.length === 0) {
-          console.log(`⏭️ No new streams, skipping`)
-          continue
-        }
+        if (newStreams.length === 0) continue
 
-        // --- COMMUNITY DAILY GOAL (ANY ATEEZ streams) ---
+        usersProcessed++
+
+        // --- Process streams for each goal ---
+        
+        // Community Daily Goal (ANY ATEEZ)
         if (communityDaily) {
-          const todayNewStreams = newStreams.filter((s) => {
-            // Convert stream UTC time to KST for date comparison
-            const streamUTC = new Date(s.endTime)
-            const streamKST = new Date(streamUTC.getTime() + (9 * 60 * 60 * 1000))
-            const streamDate = streamKST.toISOString().split("T")[0]
-            const matchesDate = streamDate === today
-            const isAteez = s.artistIds?.includes(ATEEZ_ARTIST_ID)
-            
-            return matchesDate && isAteez
+          const todayStreams = newStreams.filter((s: any) => {
+            const streamDate = new Date(s.endTime)
+            const kstDate = new Date(streamDate.getTime() + (9 * 60 * 60 * 1000))
+            return kstDate.toISOString().split('T')[0] === today
           })
 
-          if (todayNewStreams.length > 0) {
-            // Increment user's daily count
+          if (todayStreams.length > 0) {
+            newDailyStreams += todayStreams.length
+
             const userDailyKey = `community:daily:user:${userId}:${today}`
-            const prevUserDaily = (await kv.get<number>(userDailyKey)) || 0
-            await kv.set(userDailyKey, prevUserDaily + todayNewStreams.length, { ex: 86400 })
-
-            newDailyStreams += todayNewStreams.length
+            const currentUserDaily = await kv.get<number>(userDailyKey) || 0
+            await kv.set(userDailyKey, currentUserDaily + todayStreams.length, { ex: 86400 })
           }
         }
 
-        // --- DAILY SONG GOAL (SPECIFIC song - homepage) ---
-        if (dailySongGoal) {
-          const todaySongStreams = newStreams.filter((s) => {
-            // Convert stream UTC time to KST for date comparison
-            const streamUTC = new Date(s.endTime)
-            const streamKST = new Date(streamUTC.getTime() + (9 * 60 * 60 * 1000))
-            const streamDate = streamKST.toISOString().split("T")[0]
-            const matchesDate = streamDate === today
-            const matchesSong = s.trackName === dailySongGoal.song
-            
-            return matchesDate && matchesSong
+        // Daily Song Goal (SPECIFIC song)
+        if (dailySongGoal?.song) {
+          const songStreams = newStreams.filter((s: any) => {
+            const streamDate = new Date(s.endTime)
+            const kstDate = new Date(streamDate.getTime() + (9 * 60 * 60 * 1000))
+            return kstDate.toISOString().split('T')[0] === today && 
+                   s.trackName === dailySongGoal.song
           })
 
-          if (todaySongStreams.length > 0) {
-            // Increment user's daily song count
-            const userDailySongKey = `daily:streams:${userId}:${today}`
-            const prevUserDailySong = (await kv.get<number>(userDailySongKey)) || 0
-            await kv.set(userDailySongKey, prevUserDailySong + todaySongStreams.length, { ex: 86400 })
+          if (songStreams.length > 0) {
+            newDailySongStreams += songStreams.length
 
-            newDailySongStreams += todaySongStreams.length
+            const userSongKey = `daily:streams:${userId}:${today}`
+            const currentUserSong = await kv.get<number>(userSongKey) || 0
+            await kv.set(userSongKey, currentUserSong + songStreams.length, { ex: 86400 })
           }
         }
 
-        // --- COMMUNITY WEEKLY GOAL (ANY ATEEZ streams) ---
+        // Weekly Goal (ANY ATEEZ)
         if (communityWeekly) {
-          // Use KST for week calculation
-          const nowKST = new Date(new Date().getTime() + (9 * 60 * 60 * 1000))
-          const dayOfWeek = nowKST.getDay()
-          const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1
-          const startOfWeek = new Date(nowKST)
-          startOfWeek.setDate(nowKST.getDate() - daysToMonday)
-          startOfWeek.setHours(0, 0, 0, 0)
-
-          const weekNewStreams = newStreams.filter((s) => {
-            // Convert stream UTC time to KST
-            const streamUTC = new Date(s.endTime)
-            const streamKST = new Date(streamUTC.getTime() + (9 * 60 * 60 * 1000))
-            const matchesWeek = streamKST >= startOfWeek
-            const isAteez = s.artistIds?.includes(ATEEZ_ARTIST_ID)
-            
-            return matchesWeek && isAteez
+          const weekStreams = newStreams.filter((s: any) => {
+            const streamDate = new Date(s.endTime)
+            const kstDate = new Date(streamDate.getTime() + (9 * 60 * 60 * 1000))
+            const streamYear = kstDate.getUTCFullYear()
+            const startOfYear = new Date(Date.UTC(streamYear, 0, 1))
+            const days = Math.floor((kstDate.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000))
+            const streamWeekNumber = Math.ceil((days + startOfYear.getUTCDay() + 1) / 7)
+            const streamWeekKey = `${streamYear}-W${String(streamWeekNumber).padStart(2, '0')}`
+            return streamWeekKey === weekKey
           })
 
-          if (weekNewStreams.length > 0) {
-            const userWeeklyKey = `community:weekly:user:${userId}:${weekKey}`
-            const prevUserWeekly = (await kv.get<number>(userWeeklyKey)) || 0
-            await kv.set(userWeeklyKey, prevUserWeekly + weekNewStreams.length, { ex: 604800 })
+          if (weekStreams.length > 0) {
+            newWeeklyStreams += weekStreams.length
 
-            newWeeklyStreams += weekNewStreams.length
+            const userWeeklyKey = `community:weekly:user:${userId}:${weekKey}`
+            const currentUserWeekly = await kv.get<number>(userWeeklyKey) || 0
+            await kv.set(userWeeklyKey, currentUserWeekly + weekStreams.length, { ex: 604800 })
           }
         }
 
-        // --- INDIVIDUAL MISSIONS (specific songs) ---
+        // Missions
         if (missions && missions.length > 0) {
           for (const mission of missions) {
-            const missionNewStreams = newStreams.filter((s) => {
-              // Convert stream UTC time to KST for date comparison
-              const streamUTC = new Date(s.endTime)
-              const streamKST = new Date(streamUTC.getTime() + (9 * 60 * 60 * 1000))
-              const streamDate = streamKST.toISOString().split("T")[0]
-              // Match by trackId instead of trackName for perfect accuracy!
-              return streamDate === today && s.trackId === mission.trackId
+            const missionStreams = newStreams.filter((s: any) => {
+              const streamDate = new Date(s.endTime)
+              const kstDate = new Date(streamDate.getTime() + (9 * 60 * 60 * 1000))
+              return kstDate.toISOString().split('T')[0] === today && 
+                     s.trackId === mission.trackId
             })
 
-            if (missionNewStreams.length > 0) {
-              const missionKey = `mission:progress:${userId}:${today}:${mission.id}`
-              const prevMission = (await kv.get<number>(missionKey)) || 0
-              await kv.set(missionKey, prevMission + missionNewStreams.length, { ex: 86400 })
+            if (missionStreams.length > 0) {
+              const progressKey = `mission:progress:${userId}:${today}:${mission.id}`
+              const current = await kv.get<number>(progressKey) || 0
+              await kv.set(progressKey, current + missionStreams.length, { ex: 86400 })
             }
           }
         }
 
-        // Update last processed timestamp for this user
-        await kv.set(lastProcessedKey, cronRunTime, { ex: 604800 }) // 7 day expiry
+        // Update last processed timestamp
+        await kv.set(lastProcessedKey, cronRunTime, { ex: 604800 })
 
-        usersProcessed++
-      } catch (err) {
-        console.error(`Error processing user ${key}:`, err)
+      } catch (error) {
+        console.error(`Error processing user ${key}:`, error)
       }
     }
 
-    // --- ACCUMULATE (ADD) TO COMMUNITY DAILY GOAL TOTAL (ANY ATEEZ) ---
-    console.log(`📊 Accumulation check - communityDaily exists: ${!!communityDaily}, newDailyStreams: ${newDailyStreams}`)
+    // --- Update goal totals ---
     if (communityDaily && newDailyStreams > 0) {
-      const updatedCurrent = (communityDaily.current || 0) + newDailyStreams
-      console.log(`💾 Updating community daily: ${communityDaily.current || 0} + ${newDailyStreams} = ${updatedCurrent}`)
-      await kv.set(communityDailyKey, {
-        target: communityDaily.target,
-        current: updatedCurrent
-      }, { ex: 86400 })
-      console.log(`✅ Community daily saved: ${updatedCurrent}`)
+      const current = (communityDaily.current || 0) + newDailyStreams
+      await kv.set(communityDailyKey, { ...communityDaily, current }, { ex: 86400 })
     }
 
-    // --- ACCUMULATE (ADD) TO DAILY SONG GOAL TOTAL (SPECIFIC SONG - homepage) ---
-    console.log(`📊 Song goal check - dailySongGoal exists: ${!!dailySongGoal}, newDailySongStreams: ${newDailySongStreams}`)
     if (dailySongGoal && newDailySongStreams > 0) {
-      const updatedCurrent = (dailySongGoal.current || 0) + newDailySongStreams
-      console.log(`💾 Updating song goal: ${dailySongGoal.current || 0} + ${newDailySongStreams} = ${updatedCurrent}`)
-      await kv.set(dailySongGoalKey, {
-        song: dailySongGoal.song,
-        target: dailySongGoal.target,
-        current: updatedCurrent
-      }, { ex: 86400 })
-      console.log(`✅ Song goal saved: ${updatedCurrent}`)
+      const current = (dailySongGoal.current || 0) + newDailySongStreams
+      await kv.set(dailySongGoalKey, { ...dailySongGoal, current }, { ex: 86400 })
     }
 
-    // --- ACCUMULATE (ADD) TO COMMUNITY WEEKLY GOAL TOTAL ---
-    console.log(`📊 Weekly check - communityWeekly exists: ${!!communityWeekly}, newWeeklyStreams: ${newWeeklyStreams}`)
     if (communityWeekly && newWeeklyStreams > 0) {
-      const updatedCurrent = (communityWeekly.current || 0) + newWeeklyStreams
-      console.log(`💾 Updating weekly: ${communityWeekly.current || 0} + ${newWeeklyStreams} = ${updatedCurrent}`)
-      await kv.set(communityWeeklyKey, {
-        target: communityWeekly.target,
-        current: updatedCurrent
-      }, { ex: 604800 })
-      console.log(`✅ Weekly saved: ${updatedCurrent}`)
+      const current = (communityWeekly.current || 0) + newWeeklyStreams
+      await kv.set(communityWeeklyKey, { ...communityWeekly, current }, { ex: 604800 })
     }
-
-    // --- COMMUNITY MISSIONS TOTALS (recalculate from individual progress) ---
-    if (missions && missions.length > 0) {
-      for (const mission of missions) {
-        let missionTotal = 0
-        for (const key of userKeys) {
-          const userId = key.split(":")[1]
-          const count = (await kv.get<number>(`mission:progress:${userId}:${today}:${mission.id}`)) || 0
-          missionTotal += count
-        }
-        await kv.set(`mission:community:${today}:${mission.id}`, missionTotal, { ex: 86400 })
-      }
-    }
-
-    console.log(`✅ Cron done: ${usersProcessed} users, +${newDailyStreams} community daily, +${newDailySongStreams} song daily, +${newWeeklyStreams} community weekly`)
 
     return NextResponse.json({
       success: true,
-      usersProcessed,
-      newDailyStreams,
-      newDailySongStreams,
-      newWeeklyStreams,
-      missionsCount: missions?.length || 0,
-      timestamp: new Date().toISOString()
+      processed: {
+        users: usersProcessed,
+        daily: newDailyStreams,
+        song: newDailySongStreams,
+        weekly: newWeeklyStreams
+      },
+      date: today,
+      week: weekKey
     })
+
   } catch (error) {
-    console.error("Error in cron job:", error)
-    return NextResponse.json({ error: "Cron job failed" }, { status: 500 })
+    console.error("Cron error:", error)
+    return NextResponse.json({ error: "Cron failed" }, { status: 500 })
   }
 }

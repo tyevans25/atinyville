@@ -3,10 +3,15 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { RotateCcw } from "lucide-react"
+
+// Default goal values
+const DEFAULT_DAILY_TARGET = 10000
+const DEFAULT_WEEKLY_TARGET = 50000
 
 export default function AdminCommunityGoals() {
-  const [dailyTarget, setDailyTarget] = useState(10000)
-  const [weeklyTarget, setWeeklyTarget] = useState(50000)
+  const [dailyTarget, setDailyTarget] = useState(DEFAULT_DAILY_TARGET)
+  const [weeklyTarget, setWeeklyTarget] = useState(DEFAULT_WEEKLY_TARGET)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState("")
 
@@ -60,6 +65,17 @@ export default function AdminCommunityGoals() {
     }
   }
 
+  const resetToDefaults = (type: 'daily' | 'weekly') => {
+    if (type === 'daily') {
+      setDailyTarget(DEFAULT_DAILY_TARGET)
+      setResult(`📝 Daily target reset to default: ${DEFAULT_DAILY_TARGET.toLocaleString()}`)
+    } else {
+      setWeeklyTarget(DEFAULT_WEEKLY_TARGET)
+      setResult(`📝 Weekly target reset to default: ${DEFAULT_WEEKLY_TARGET.toLocaleString()}`)
+    }
+    setTimeout(() => setResult(''), 3000)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 p-8">
       <div className="container mx-auto max-w-4xl space-y-6">
@@ -68,6 +84,22 @@ export default function AdminCommunityGoals() {
           <h1 className="text-3xl font-bold text-white mb-2">Community Goals Admin</h1>
           <p className="text-gray-400">Set total ATEEZ streaming goals for the community</p>
         </div>
+
+        {/* Info Card */}
+        <Card className="glass-card border-blue-500/50">
+          <CardContent className="p-4">
+            <p className="text-sm text-blue-300 mb-2">
+              💡 <strong>Auto-Defaults:</strong> Goals are automatically set if you don&apos;t manually update them:
+            </p>
+            <ul className="text-sm text-blue-300 space-y-1 ml-4">
+              <li>• <strong>Community Goals:</strong> Daily: {DEFAULT_DAILY_TARGET.toLocaleString()}, Weekly: {DEFAULT_WEEKLY_TARGET.toLocaleString()}</li>
+              <li>• <strong>Daily Song Goal & Missions:</strong> Copies from yesterday (maintains continuity)</li>
+            </ul>
+            <p className="text-xs text-gray-400 mt-2">
+              You can override these anytime - your changes won&apos;t be overwritten!
+            </p>
+          </CardContent>
+        </Card>
 
         {/* Daily Community Goal */}
         <Card className="glass-card">
@@ -104,6 +136,15 @@ export default function AdminCommunityGoals() {
               size="lg"
             >
               {loading ? 'Setting...' : 'Set Daily Community Goal'}
+            </Button>
+
+            <Button
+              onClick={() => resetToDefaults('daily')}
+              variant="outline"
+              className="w-full border-white/20 text-white hover:bg-white/10"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Reset to Default ({DEFAULT_DAILY_TARGET.toLocaleString()})
             </Button>
 
             <div className="bg-blue-500/10 border border-blue-400/20 rounded-lg p-4">
@@ -150,6 +191,15 @@ export default function AdminCommunityGoals() {
               size="lg"
             >
               {loading ? 'Setting...' : 'Set Weekly Community Goal'}
+            </Button>
+
+            <Button
+              onClick={() => resetToDefaults('weekly')}
+              variant="outline"
+              className="w-full border-white/20 text-white hover:bg-white/10"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Reset to Default ({DEFAULT_WEEKLY_TARGET.toLocaleString()})
             </Button>
 
             <div className="bg-blue-500/10 border border-blue-400/20 rounded-lg p-4">
