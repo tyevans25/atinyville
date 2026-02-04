@@ -178,15 +178,15 @@ export default function Quiz() {
   // Sign-in prompt screen for non-authenticated users
   if (!usernameSubmitted && !isSignedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 w-20 h-20 bg-primary rounded-full flex items-center justify-center">
               <Trophy className="w-10 h-10 text-white" />
             </div>
-            <CardTitle className="text-3xl">Sign In to Play</CardTitle>
+            <CardTitle className="text-3xl">Sign In Required</CardTitle>
             <CardDescription>
-              You need to be signed in to take the ATEEZ Streaming Quiz!
+              Please sign in on the homepage to take the ATEEZ Streaming Quiz!
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -202,16 +202,11 @@ export default function Quiz() {
             </div>
 
             <div className="flex gap-3">
-              <Link href="/sign-in" className="flex-1">
+              <a href="/" className="flex-1">
                 <Button className="w-full" size="lg">
-                  Sign In
+                  Go to Homepage
                 </Button>
-              </Link>
-              <Link href="/sign-up" className="flex-1">
-                <Button variant="outline" className="w-full text-gray-900 hover:text-gray-900" size="lg">
-                  Sign Up
-                </Button>
-              </Link>
+              </a>
             </div>
 
             <div className="text-center pt-4">
@@ -238,7 +233,7 @@ export default function Quiz() {
   // Loading state while checking authentication
   if (!usernameSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
             <p className="text-gray-600">Loading...</p>
@@ -254,7 +249,7 @@ export default function Quiz() {
     const percentage = Math.round((score / maxScore) * 100)
     
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center p-4">
         <Card className="w-full max-w-2xl">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 w-20 h-20 bg-primary rounded-full flex items-center justify-center">
@@ -324,7 +319,7 @@ export default function Quiz() {
 
   // Quiz screen
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 p-4">
       <div className="max-w-4xl mx-auto py-8 space-y-6">
         {/* Header with progress */}
         <div className="space-y-2">

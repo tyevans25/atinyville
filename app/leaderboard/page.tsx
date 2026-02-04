@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Trophy, Medal, Award, ArrowLeft } from "lucide-react"
+import { Trophy, Medal, Award } from "lucide-react"
 import Link from "next/link"
 import Navigation from "@/components/Navigation"
+import { useUser } from "@clerk/nextjs"
+import { useRouter } from "next/navigation"
 
 interface LeaderboardEntry {
   rank: number
@@ -14,12 +16,23 @@ interface LeaderboardEntry {
 }
 
 export default function LeaderboardPage() {
+  const { isSignedIn, user } = useUser()
+  const router = useRouter()
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [loading, setLoading] = useState(true)
+  const [checkingPlayStatus, setCheckingPlayStatus] = useState(false)
+  const [hasPlayedToday, setHasPlayedToday] = useState(false)
 
   useEffect(() => {
     fetchLeaderboard()
   }, [])
+
+  // Check if user has played today when signed in
+  useEffect(() => {
+    if (isSignedIn && user) {
+      checkIfPlayedToday()
+    }
+  }, [isSignedIn, user])
 
   const fetchLeaderboard = async () => {
     try {
@@ -30,6 +43,38 @@ export default function LeaderboardPage() {
       console.error('Error fetching leaderboard:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const checkIfPlayedToday = async () => {
+    if (!user?.id) return
+    
+    setCheckingPlayStatus(true)
+    try {
+      const response = await fetch('/api/quiz/check-played', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id })
+      })
+      const data = await response.json()
+      setHasPlayedToday(data.hasPlayed)
+    } catch (error) {
+      console.error('Error checking play status:', error)
+    } finally {
+      setCheckingPlayStatus(false)
+    }
+  }
+
+  const handleQuizButtonClick = () => {
+    if (!isSignedIn) {
+      // Not signed in -> go to homepage (where sign in button is)
+      router.push('/')
+    } else if (hasPlayedToday) {
+      // Already played -> do nothing (button shows message)
+      return
+    } else {
+      // Signed in and hasn't played -> go to quiz
+      router.push('/quiz')
     }
   }
 
@@ -44,6 +89,13 @@ export default function LeaderboardPage() {
       default:
         return <span className="w-6 h-6 flex items-center justify-center font-bold text-gray-400">#{rank}</span>
     }
+  }
+
+  const getQuizButtonText = () => {
+    if (!isSignedIn) return "Take the Quiz"
+    if (checkingPlayStatus) return "Checking..."
+    if (hasPlayedToday) return "Come Back Tomorrow 🏴‍☠️"
+    return "Take the Quiz"
   }
 
   return (
@@ -112,17 +164,31 @@ export default function LeaderboardPage() {
                 </div>
               )}
 
-              {/* Single Take Quiz Button */}
-              <div className="mt-6 pt-6 border-t border-white/10">
+              {/* Take Quiz Button with Status */}
+              <div className="mt-6 pt-6 border-t border-white/10 text-center">
                 <Button
-                  className="w-full bg-white hover:bg-gray-200 text-gray-800"
-                  onClick={() => {
-                    window.location.href = '/'
-                    // Then user clicks "Start Quiz" from carousel
-                  }}
+                  className={`w-full ${
+                    hasPlayedToday 
+                      ? 'bg-gray-500 hover:bg-gray-500 cursor-not-allowed' 
+                      : 'bg-white hover:bg-gray-200 text-gray-800'
+                  }`}
+                  onClick={handleQuizButtonClick}
+                  disabled={hasPlayedToday || checkingPlayStatus}
                 >
-                  Take the Quiz
+                  {getQuizButtonText()}
                 </Button>
+                
+                {hasPlayedToday && (
+                  <p className="text-xs text-gray-400 mt-2">
+                    You've already played today! Check back tomorrow for a new attempt.
+                  </p>
+                )}
+                
+                {!isSignedIn && (
+                  <p className="text-xs text-gray-400 mt-2">
+                    <a href="/" className="text-blue-400 hover:underline">Go to homepage</a> to sign in and play the quiz!
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
