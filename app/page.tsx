@@ -45,8 +45,18 @@ const campaignUpdates = [
     ],
     urgent: true
   },
-  {
+      {
     id: 3,
+    title: "\"Adrenaline\" MV Teaser",
+    description: "Sneak peek of the title song \"Adrenaline\"!",
+    videoUrl: "https://www.youtube.com/embed/nvCan9BZqAY?si=1W4iVupHMxZG7FFt",
+    links: [
+      { url: "https://youtu.be/nvCan9BZqAY?si=1W4iVupHMxZG7FFt", label: "Watch on YouTube", color: "orange" }
+    ],
+    urgent: false
+  },
+  {
+    id: 4,
     title: "GOLDEN HOUR: Part.4 Album Teaser",
     description: "Get a sneak peek of the upcoming album!",
     videoUrl: "https://www.youtube.com/embed/hPdS8GVb_9w?si=6QaxkRWpqqY7eNkG",
@@ -56,29 +66,19 @@ const campaignUpdates = [
     urgent: false
   },
   {
-    id: 4,
+    id: 5,
     title: "\"Adrenaline\" MV Trailer",
     description: "Check out the trailer for the upcoming MV for \"Adrenaline\"!",
     videoUrl: "https://www.youtube.com/embed/gBvUjhPy5v4?si=Y2miG7LKOMLF9dP_",
     urgent: false
   },
   {
-    id: 5,
+    id: 6,
     title: "🛒 Pre-Order GOLDEN HOUR: Part.4",
     description: "Pre-order physical albums!",
     imageUrl: "https://image.static.bstage.in/cdn-cgi/image/metadata=none,dpr=1,f=auto,width=640/ateez/dea14100-3e72-4fd3-9303-67a3201448c0/072b473d-4b13-458d-8375-783ba2ccac0f/ori.jpg",
     links: [
       { url: "https://linktr.ee/atzinfo", label: "Pre-Order", color: "purple" }
-    ],
-    urgent: false
-  },
-  {
-    id: 6,
-    title: "📹 Stream 'In Your Fantasy' MV",
-    description: "Let's get to 40M views!",
-    videoUrl: "https://www.youtube.com/embed/JOF2ZTqvzwY?si=3k_W7mXWz7mU4pEh",
-    links: [
-      { url: "https://youtu.be/JOF2ZTqvzwY?si=NnH7BohnhSPyBDQ9", label: "Watch on YouTube", color: "orange" }
     ],
     urgent: false
   },
@@ -265,6 +265,27 @@ const upcomingEvents = [
     title: "2026 World Tour: In Your Fantasy in Singapore",
     description: "Continuation of Asia leg of world tour",
     type: "appearance"
+  },
+    {
+    id: 22,
+    date: "2026-02-12",
+    title: "WOOYOUNG on RISBAE Youtube Channel",
+    description: "Wooyoung gets a makeover by RISBAE!",
+    type: "variety"
+  },
+        {
+    id: 23,
+    date: "2026-02-11",
+    title: "ATEEZ @ The Performance",
+    description: "ATEEZ headlines Mynavi'The Performance' live concert event, Day 1",
+    type: "performance"
+  },
+      {
+    id: 24,
+    date: "2026-02-12",
+    title: "ATEEZ @ The Performance",
+    description: "ATEEZ headlines Mynavi'The Performance' live concert event, Day 2",
+    type: "performance"
   }
 ]
 
