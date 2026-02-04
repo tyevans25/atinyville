@@ -34,7 +34,7 @@ export async function GET() {
     // Get today's SONG goal (specific song)
     const today = getKSTDate()
     const songGoalKey = `daily:goal:${today}`
-    const songGoal = await kv.get<{ song: string; target: number; current?: number }>(songGoalKey)
+    const songGoal = await kv.get<{ song: string; trackId?: number; target: number; current?: number }>(songGoalKey)
 
     // 🔍 DEBUG: Log song goal
     console.log('🔍 Today (KST):', today)
@@ -93,7 +93,7 @@ export async function GET() {
           totalAteezStreams++
           
           // 🔍 DEBUG: Log track info
-          console.log(`📀 ATEEZ Track: "${stream.trackName}"`)
+          console.log(`📀 ATEEZ Track: "${stream.trackName}" (ID: ${stream.trackId})`)
           
           recentStreams.push({
             trackId: stream.trackId,
@@ -103,15 +103,28 @@ export async function GET() {
             playedMs: stream.playedMs
           })
           
-          // Check if it matches the song goal
+          // Check if it matches the song goal (prefer trackId, fallback to name)
           if (songGoal) {
-            console.log(`  📊 Comparing: "${stream.trackName}" === "${songGoal.song}"`)
-            
-            if (stream.trackName === songGoal.song) {
-              console.log('  ✅ MATCH!')
-              goalSongStreams++
+            if (songGoal.trackId) {
+              // Compare by track ID (more reliable)
+              console.log(`  📊 Comparing by ID: ${stream.trackId} === ${songGoal.trackId}`)
+              
+              if (stream.trackId === songGoal.trackId) {
+                console.log('  ✅ MATCH (by ID)!')
+                goalSongStreams++
+              } else {
+                console.log('  ❌ No match')
+              }
             } else {
-              console.log('  ❌ No match')
+              // Fallback to name comparison
+              console.log(`  📊 Comparing by name: "${stream.trackName}" === "${songGoal.song}"`)
+              
+              if (stream.trackName === songGoal.song) {
+                console.log('  ✅ MATCH (by name)!')
+                goalSongStreams++
+              } else {
+                console.log('  ❌ No match')
+              }
             }
           }
         }

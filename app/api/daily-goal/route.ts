@@ -2,45 +2,37 @@ import { kv } from '@vercel/kv'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 
-interface DailyGoalData {
-  song: string
-  target: number
-  current: number
-  userStreams: number
-}
-
-// Helper: Get current date in KST (Korea Standard Time, UTC+9)
-function getKSTDate(): string {
-  const now = new Date()
-  const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000))
-  return kstTime.toISOString().split('T')[0]
-}
-
-// GET: Fetch today's daily song goal and user's streams
+// GET: Fetch today's goal and user's streams
 export async function GET() {
   try {
     const { userId } = await auth()
-    const today = getKSTDate() // Use KST date
-
-    // MATCHES CRON: daily:goal:${today}
+    const today = new Date().toISOString().split('T')[0]
+    
+    // Get today's goal
     const goalKey = `daily:goal:${today}`
-    const dailyGoal = await kv.get<{ song: string; target: number; current?: number }>(goalKey)
+    const goal = await kv.get<{
+      song: string
+      trackId?: number
+      target: number
+      current: number
+    }>(goalKey)
 
-    if (!dailyGoal || !dailyGoal.song || !dailyGoal.target) {
+    if (!goal) {
       return NextResponse.json(null)
     }
 
+    // Get user's personal streams if logged in
     let userStreams = 0
     if (userId) {
-      // MATCHES CRON: daily:streams:${userId}:${today}
       const userStreamsKey = `daily:streams:${userId}:${today}`
       userStreams = await kv.get<number>(userStreamsKey) || 0
     }
 
     return NextResponse.json({
-      song: dailyGoal.song,
-      target: dailyGoal.target,
-      current: dailyGoal.current || 0,
+      song: goal.song,
+      trackId: goal.trackId,  // ← Add this!
+      target: goal.target,
+      current: goal.current,
       userStreams
     })
 
@@ -53,10 +45,10 @@ export async function GET() {
   }
 }
 
-// POST: Set today's daily song goal (admin only)
+// POST: Set today's goal (admin only - you'll call this manually or via admin panel)
 export async function POST(request: Request) {
   try {
-    const { song, target } = await request.json()
+    const { song, trackId, target } = await request.json()
 
     if (!song || !target) {
       return NextResponse.json(
@@ -65,14 +57,17 @@ export async function POST(request: Request) {
       )
     }
 
-    const today = getKSTDate() // Use KST date
+    const today = new Date().toISOString().split('T')[0]
     const goalKey = `daily:goal:${today}`
 
-    const existingGoal = await kv.get<{ song: string; target: number; current?: number }>(goalKey)
-    const current = existingGoal?.current || 0
+    // Check if goal already exists
+    const existingGoal = await kv.get(goalKey)
+    const current = existingGoal ? (existingGoal as any).current : 0
 
+    // Set today's goal (expires in 24 hours) - now includes trackId
     await kv.set(goalKey, {
       song,
+      trackId,  // ← Add this!
       target,
       current
     }, { ex: 86400 })
@@ -80,9 +75,9 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       song,
+      trackId,  // ← Add this!
       target,
-      current,
-      date: today
+      current
     })
 
   } catch (error) {

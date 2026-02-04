@@ -154,6 +154,7 @@ export default function AdminDailySongGoalPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           song: selectedSong,
+          trackId: selectedTrackId,  // ← Add this!
           target 
         })
       })
