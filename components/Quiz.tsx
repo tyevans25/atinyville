@@ -7,8 +7,11 @@ import { Progress } from "@/components/ui/progress"
 import { quizQuestions, type Question } from "@/data/questions"
 import { Clock, Trophy, Play, User } from "lucide-react"
 import Link from "next/link"
+import { useUser } from "@clerk/nextjs"
 
 export default function Quiz() {
+  const { isSignedIn, user } = useUser()
+  
   // Username state
   const [username, setUsername] = useState("")
   const [usernameSubmitted, setUsernameSubmitted] = useState(false)
@@ -31,6 +34,16 @@ export default function Quiz() {
 
   const currentQuestion = quizQuestions[currentQuestionIndex]
   const progress = ((currentQuestionIndex + 1) / quizQuestions.length) * 100
+
+  // Auto-check if user is signed in
+  useEffect(() => {
+    if (isSignedIn && user && !usernameSubmitted) {
+      // Use Clerk username only
+      const clerkUsername = user.username || 'ATINY'
+      setUsername(clerkUsername)
+      handleUsernameSubmit(null, clerkUsername)
+    }
+  }, [isSignedIn, user])
 
   // Timer logic - counts UP instead of down
   useEffect(() => {
@@ -56,20 +69,22 @@ export default function Quiz() {
     return calculateSpeedBonus()
   }
 
-  const handleUsernameSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleUsernameSubmit = async (e: React.FormEvent | null, presetUsername?: string) => {
+    if (e) e.preventDefault()
     
-    if (!username.trim()) {
+    const usernameToCheck = presetUsername || username.trim()
+    
+    if (!usernameToCheck) {
       setUsernameError("Please enter a username")
       return
     }
 
-    if (username.length < 3) {
+    if (usernameToCheck.length < 3) {
       setUsernameError("Username must be at least 3 characters")
       return
     }
 
-    if (username.length > 20) {
+    if (usernameToCheck.length > 20) {
       setUsernameError("Username must be less than 20 characters")
       return
     }
@@ -82,7 +97,7 @@ export default function Quiz() {
       const response = await fetch('/api/quiz/check-played', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: username.trim() })
+        body: JSON.stringify({ username: usernameToCheck })
       })
 
       const data = await response.json()
@@ -93,6 +108,9 @@ export default function Quiz() {
         return
       }
 
+      if (presetUsername) {
+        setUsername(presetUsername)
+      }
       setUsernameSubmitted(true)
     } catch (error) {
       console.error('Error checking username:', error)
@@ -157,73 +175,73 @@ export default function Quiz() {
     }
   }
 
-  // Username entry screen
-  if (!usernameSubmitted) {
+  // Sign-in prompt screen for non-authenticated users
+  if (!usernameSubmitted && !isSignedIn) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 w-20 h-20 bg-primary rounded-full flex items-center justify-center">
-              <User className="w-10 h-10 text-white" />
+              <Trophy className="w-10 h-10 text-white" />
             </div>
-            <CardTitle className="text-3xl">Enter Your Username</CardTitle>
+            <CardTitle className="text-3xl">Sign In to Play</CardTitle>
             <CardDescription>
-              Choose a username to compete on the leaderboard!
+              You need to be signed in to take the ATEEZ Streaming Quiz!
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleUsernameSubmit} className="space-y-4">
-              <div>
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="ATINYfan123"
-                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
-                  maxLength={20}
-                  disabled={checkingUsername}
-                />
-                {usernameError && (
-                  <>
-                    <p className="text-red-500 text-sm mt-2">{usernameError}</p>
-                    {usernameError.includes("already played") && (
-                      <div className="flex gap-3 mt-4">
-                        <Link href="/leaderboard" className="flex-1">
-                          <Button variant="outline" className="w-full text-gray-900 hover:text-gray-900">
-                            View Leaderboard
-                          </Button>
-                        </Link>
-                        <a href="/" className="flex-1">
-                          <Button variant="outline" className="w-full text-gray-900 hover:text-gray-900">
-                            Back to Hub
-                          </Button>
-                        </a>
-                      </div>
-                    )}
-                  </>
-                )}
-                <p className="text-xs text-gray-500 mt-2">
-                  3-20 characters • You can only play once per day
-                </p>
-              </div>
+          <CardContent className="space-y-4">
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+              <p className="text-sm text-purple-800 mb-2">
+                📝 <strong>Why sign in?</strong>
+              </p>
+              <ul className="text-xs text-purple-700 space-y-1 ml-4">
+                <li>• Track your scores on the leaderboard</li>
+                <li>• One quiz attempt per day</li>
+                <li>• Compete with other ATINYs!</li>
+              </ul>
+            </div>
 
-              <Button 
-                type="submit" 
-                className="w-full"
-                size="lg"
-                disabled={checkingUsername}
-              >
-                {checkingUsername ? 'Checking...' : 'Start Quiz'}
-              </Button>
+            <div className="flex gap-3">
+              <Link href="/sign-in" className="flex-1">
+                <Button className="w-full" size="lg">
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/sign-up" className="flex-1">
+                <Button variant="outline" className="w-full text-gray-900 hover:text-gray-900" size="lg">
+                  Sign Up
+                </Button>
+              </Link>
+            </div>
 
-              <div className="text-center pt-4">
-                <Link href="/leaderboard">
-                  <Button variant="ghost" className="text-purple-600">
-                    View Leaderboard
-                  </Button>
-                </Link>
-              </div>
-            </form>
+            <div className="text-center pt-4">
+              <Link href="/leaderboard">
+                <Button variant="ghost" className="text-purple-600">
+                  View Leaderboard
+                </Button>
+              </Link>
+            </div>
+
+            <div className="text-center pt-2">
+              <a href="/">
+                <Button variant="ghost" className="text-purple-600">
+                  Back to Hub
+                </Button>
+              </a>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Loading state while checking authentication
+  if (!usernameSubmitted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-8 text-center">
+            <p className="text-gray-600">Loading...</p>
           </CardContent>
         </Card>
       </div>
