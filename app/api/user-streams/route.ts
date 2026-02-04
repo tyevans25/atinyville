@@ -31,16 +31,22 @@ export async function GET() {
       })
     }
 
-    // Get today's SONG goal (specific song) - FIXED KEY TO MATCH CRON
-    const today = getKSTDate() // Use KST date
-    const songGoalKey = `daily:goal:${today}` // Changed to match cron
+    // Get today's SONG goal (specific song)
+    const today = getKSTDate()
+    const songGoalKey = `daily:goal:${today}`
     const songGoal = await kv.get<{ song: string; target: number; current?: number }>(songGoalKey)
+
+    // 🔍 DEBUG: Log song goal
+    console.log('🔍 Today (KST):', today)
+    console.log('🔍 Song Goal Key:', songGoalKey)
+    console.log('🔍 Song Goal Data:', songGoal)
 
     // Check cache
     const cacheKey = `user:streams:cache:${userId}:${today}`
     const cached = await kv.get<any>(cacheKey)
     
     if (cached) {
+      console.log('📦 Returning cached data')
       return NextResponse.json(cached)
     }
 
@@ -72,12 +78,13 @@ export async function GET() {
 
     let totalAteezStreams = 0
     let goalSongStreams = 0
-    const recentStreams: any[] = [] // Store full stream data
+    const recentStreams: any[] = []
+
+    console.log('🔍 Processing streams...')
 
     if (data.items && Array.isArray(data.items)) {
       data.items.forEach((stream: any) => {
         const streamDate = new Date(stream.endTime)
-        // Convert stream date to KST for comparison
         const streamKST = new Date(streamDate.getTime() + (9 * 60 * 60 * 1000))
         const isToday = streamKST >= todayStart
         const isAteez = stream.artistIds?.includes(ATEEZ_ARTIST_ID)
@@ -85,7 +92,9 @@ export async function GET() {
         if (isToday && isAteez) {
           totalAteezStreams++
           
-          // Store the full stream data
+          // 🔍 DEBUG: Log track info
+          console.log(`📀 ATEEZ Track: "${stream.trackName}"`)
+          
           recentStreams.push({
             trackId: stream.trackId,
             trackName: stream.trackName,
@@ -94,23 +103,34 @@ export async function GET() {
             playedMs: stream.playedMs
           })
           
-          // Check if it matches the song goal (specific song)
-          if (songGoal && stream.trackName === songGoal.song) {
-            goalSongStreams++
+          // Check if it matches the song goal
+          if (songGoal) {
+            console.log(`  📊 Comparing: "${stream.trackName}" === "${songGoal.song}"`)
+            
+            if (stream.trackName === songGoal.song) {
+              console.log('  ✅ MATCH!')
+              goalSongStreams++
+            } else {
+              console.log('  ❌ No match')
+            }
           }
         }
       })
     }
+
+    console.log('📊 Final Results:')
+    console.log('  Total ATEEZ Streams:', totalAteezStreams)
+    console.log('  Goal Song Streams:', goalSongStreams)
 
     const result = {
       totalStreams: totalAteezStreams,
       goalStreams: goalSongStreams,
       username: statsfmUsername,
       date: today,
-      recentStreams: recentStreams.slice(0, 20) // Return last 20 streams
+      recentStreams: recentStreams.slice(0, 20)
     }
 
-    // Cache for 1 minute (60 seconds) for fresher data
+    // Cache for 1 minute
     await kv.set(cacheKey, result, { ex: 60 })
 
     return NextResponse.json(result)
