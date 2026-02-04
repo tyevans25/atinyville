@@ -27,8 +27,15 @@ const convertKSTtoLocal = (kstDateString: string, kstTime?: string) => {
 
 // EDIT THIS: Add your campaign updates here!
 const campaignUpdates = [
-  {
+    {
     id: 1,
+    title: "🫧 GOLDEN HOUR: Part.4 PREVIEW LIVE",
+    description: "Watch the preview live for ATEEZ's highly anticipated album!",
+    videoUrl: "https://www.youtube.com/embed/ct3_SOh-d-o?si=xkks96PcRt_YSndf",
+    urgent: false
+  },
+  {
+    id: 2,
     title: "🫧 Pre-Save GOLDEN HOUR: Part.4",
     description: "Pre-save the highly anticipated album on Spotify & Apple Music!",
     spotifyUrl: "https://open.spotify.com/embed/prerelease/2Mnno3uSsiVdOpKJL4Vz5b?utm_source=generator",
@@ -39,7 +46,7 @@ const campaignUpdates = [
     urgent: true
   },
   {
-    id: 2,
+    id: 3,
     title: "GOLDEN HOUR: Part.4 Album Teaser",
     description: "Get a sneak peek of the upcoming album!",
     videoUrl: "https://www.youtube.com/embed/hPdS8GVb_9w?si=6QaxkRWpqqY7eNkG",
@@ -49,14 +56,14 @@ const campaignUpdates = [
     urgent: false
   },
   {
-    id: 3,
+    id: 4,
     title: "\"Adrenaline\" MV Trailer",
     description: "Check out the trailer for the upcoming MV for \"Adrenaline\"!",
     videoUrl: "https://www.youtube.com/embed/gBvUjhPy5v4?si=Y2miG7LKOMLF9dP_",
     urgent: false
   },
   {
-    id: 4,
+    id: 5,
     title: "🛒 Pre-Order GOLDEN HOUR: Part.4",
     description: "Pre-order physical albums!",
     imageUrl: "https://image.static.bstage.in/cdn-cgi/image/metadata=none,dpr=1,f=auto,width=640/ateez/dea14100-3e72-4fd3-9303-67a3201448c0/072b473d-4b13-458d-8375-783ba2ccac0f/ori.jpg",
@@ -66,7 +73,7 @@ const campaignUpdates = [
     urgent: false
   },
   {
-    id: 5,
+    id: 6,
     title: "📹 Stream 'In Your Fantasy' MV",
     description: "Let's get to 40M views!",
     videoUrl: "https://www.youtube.com/embed/JOF2ZTqvzwY?si=3k_W7mXWz7mU4pEh",
@@ -76,7 +83,7 @@ const campaignUpdates = [
     urgent: false
   },
   {
-    id: 6,
+    id: 7,
     title: "🏆 Daily ATEEZ Quiz",
     description: "Can you top the leaderboard?",
     links: [
@@ -85,7 +92,7 @@ const campaignUpdates = [
     urgent: false
   },
   {
-    id: 7,
+    id: 8,
     component: <DailyGoalSlide />
   }
 ]
@@ -205,8 +212,8 @@ const upcomingEvents = [
   },
   {
     id: 15,
-    date: "2026-02-04",
-    time: "16:59:00",
+    date: "2026-02-05",
+    time: "20:00:00",
     title: "ATEEZ GOLDEN HOUR Part.4 Preview Live",
     description: "Album preview live stream",
     type: "promotion"
