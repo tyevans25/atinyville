@@ -95,7 +95,7 @@ const upcomingEvents = [
   {
     id: 1,
     date: "2026-01-26",
-    time: "00:00:00", // Optional: KST time (6 PM KST)
+    time: "00:00:00",
     title: "Album Preview",
     description: "Album Preview Teaser!",
     type: "teaser"
@@ -166,7 +166,7 @@ const upcomingEvents = [
   {
     id: 10,
     date: "2026-02-06",
-    time: "14:00:00", // 6 PM KST release
+    time: "14:00:00",
     title: "GOLDEN HOUR Part.4 Album Release",
     description: "GOLDEN HOUR Part.4 album released",
     type: "release"
@@ -174,7 +174,7 @@ const upcomingEvents = [
   {
     id: 11,
     date: "2026-02-07",
-    time: "18:00:00", // 6 PM KST release
+    time: "18:00:00",
     title: "'On The Road' Spotify Live Version Release",
     description: "'On The Road' Spotify Live Version released",
     type: "release"
@@ -182,7 +182,7 @@ const upcomingEvents = [
   {
     id: 12,
     date: "2026-02-06",
-    time: "22:00:00", // 6 PM KST release
+    time: "22:00:00",
     title: "ATTEZ on 'The Seasons' KBS Music Talk Show",
     description: "'Music Talk Show appearance",
     type: "promotion"
@@ -190,71 +190,71 @@ const upcomingEvents = [
   {
     id: 13,
     date: "2026-02-08",
-    time: "20:00:00", // 6 PM KST release
+    time: "20:00:00",
     title: "ATTEZ on '1N2D' KBS Variety Show",
     description: "'1N2D' Variety Show appearance",
     type: "promotion"
   },
   {
-    id: 13,
+    id: 14,
     date: "2026-02-06",
-    time: "17:05:00", // 6 PM KST release
+    time: "17:05:00",
     title: "ATEEZ Comeback Stage on KBS Music Bank",
     description: "Comeback stage on KBS Music Bank",
     type: "promotion"
   },
   {
-    id: 14,
+    id: 15,
     date: "2026-02-04",
-    time: "16:59:00", // 6 PM KST release
+    time: "16:59:00",
     title: "ATEEZ GOLDEN HOUR Part.4 Preview Live",
     description: "Album preview live stream",
     type: "promotion"
   },
   {
-    id: 15,
+    id: 16,
     date: "2026-02-07",
-    time: "18:05:00", // 6 PM KST release
+    time: "18:05:00",
     title: "Jongho on 'Immortal Songs'",
     description: "Jongho appears on 'Immortal Songs'",
     type: "promotion"
   },
   {
-    id: 16,
+    id: 17,
     date: "2026-02-08",
-    time: "15:25:00", // 6 PM KST release
+    time: "15:25:00",
     title: "ATEEZ Comeback Stage on SBS Inkigayo",
     description: "ATEEZ appears on SBS Inkigayo",
     type: "promotion"
   },
   {
-    id: 17,
+    id: 18,
     date: "2026-02-08",
-    time: "16:40:00", // 6 PM KST release
+    time: "16:40:00",
     title: "San on 'Boss in the Mirror",
     description: "San continued appearance on 'Boss in the Mirror'",
     type: "promotion"
   },
   {
-    id: 18,
+    id: 19,
     date: "2026-02-15",
-    time: "18:00:00", // 6 PM KST release
+    time: "18:00:00",
     title: "ATEEZ @ Hanteo Music Awards",
     description: "ATEEZ attends Hanteo Music Awards; no performance",
     type: "promotion"
   },
   {
-    id: 19,
+    id: 20,
     date: "2026-02-26",
-    time: "22:00:00", // 6 PM KST release
+    time: "22:00:00",
     title: "WOOYOUNG @ PRADA Show for Milan Fashion Week",
     description: "Wooyoung fashion week appearance",
     type: "appearance"
   },
   {
-    id: 20,
+    id: 21,
     date: "2026-02-22",
-    time: "19:00:00", // 6 PM KST release
+    time: "19:00:00",
     title: "2026 World Tour: In Your Fantasy in Singapore",
     description: "Continuation of Asia leg of world tour",
     type: "appearance"
@@ -262,24 +262,70 @@ const upcomingEvents = [
 ]
 
 export default function Home() {
+  const { isSignedIn, user } = useUser()
   const [quizStarted, setQuizStarted] = useState(false)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [showAllEvents, setShowAllEvents] = useState(false)
   const [carouselPaused, setCarouselPaused] = useState(false)
-  const { isSignedIn } = useUser()
+  
+  // Quiz status checking
+  const [checkingPlayStatus, setCheckingPlayStatus] = useState(false)
+  const [hasPlayedToday, setHasPlayedToday] = useState(false)
+
+  // Check if user has played today when signed in
+  useEffect(() => {
+    if (isSignedIn && user) {
+      checkIfPlayedToday()
+    }
+  }, [isSignedIn, user])
+
+  const checkIfPlayedToday = async () => {
+    if (!user?.id) return
+    
+    setCheckingPlayStatus(true)
+    try {
+      const response = await fetch('/api/quiz/check-played', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id })
+      })
+      const data = await response.json()
+      setHasPlayedToday(data.hasPlayed)
+    } catch (error) {
+      console.error('Error checking play status:', error)
+    } finally {
+      setCheckingPlayStatus(false)
+    }
+  }
 
   const handleQuizClick = () => {
-    if (isSignedIn) {
-      setQuizStarted(true)
+    if (!isSignedIn) {
+      // Not signed in, do nothing (stays on page)
+      return
     }
-    // If not signed in, do nothing (stays on page)
+    
+    if (hasPlayedToday) {
+      // Already played, do nothing
+      return
+    }
+    
+    // Signed in and hasn't played -> start quiz
+    setQuizStarted(true)
   }
+
+  const getQuizButtonText = () => {
+    if (!isSignedIn) return "Start Quiz"
+    if (checkingPlayStatus) return "Checking..."
+    if (hasPlayedToday) return "Come Back Tomorrow 🏴‍☠️"
+    return "Start Quiz"
+  }
+
   // Auto-advance carousel (only when not paused)
   useEffect(() => {
     if (carouselPaused) return
 
-    // Give daily goal slide (index 5) more time - 10 seconds vs 7 seconds for others
-    const slideTime = currentSlide === 5 ? 10000 : 7000
+    // Give daily goal slide (index 6) more time - 10 seconds vs 7 seconds for others
+    const slideTime = currentSlide === 6 ? 10000 : 7000
 
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % campaignUpdates.length)
@@ -287,7 +333,6 @@ export default function Home() {
 
     return () => clearInterval(interval)
   }, [carouselPaused, currentSlide])
-
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % campaignUpdates.length)
@@ -406,7 +451,7 @@ export default function Home() {
                                 key={index}
                                 onClick={() => {
                                   if (link.url === "#quiz") {
-                                    setQuizStarted(true)
+                                    handleQuizClick()
                                   } else {
                                     window.open(link.url, '_blank')
                                   }
@@ -597,9 +642,7 @@ export default function Home() {
           </div>
 
           {/* Quiz Feature Highlight */}
-
-          {/* Quiz Feature Highlight */}
-          < Card className="bg-gradient-to-r from-gray-800 to-gray-900 border-b border-white/10 text-white mt-8" >
+          <Card className="bg-gradient-to-r from-gray-800 to-gray-900 border-b border-white/10 text-white mt-8">
             <CardContent className="p-8">
               <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="flex-1">
@@ -618,34 +661,46 @@ export default function Home() {
                 <div className="flex flex-col items-center gap-2">
                   <Button
                     size="lg"
-                    className="bg-white text-purple-700 hover:bg-purple-50 text-lg px-8 py-6"
+                    className={`text-lg px-8 py-6 ${
+                      hasPlayedToday 
+                        ? 'bg-gray-500 hover:bg-gray-500 cursor-not-allowed text-white' 
+                        : 'bg-white text-gray-800 hover:bg-gray-200'
+                    }`}
                     onClick={handleQuizClick}
+                    disabled={hasPlayedToday || checkingPlayStatus}
                   >
                     <Trophy className="w-5 h-5 mr-2" />
-                    Start Quiz
+                    {getQuizButtonText()}
                   </Button>
+                  
+                  {hasPlayedToday && (
+                    <p className="text-xs text-gray-300">
+                      You've already played today!
+                    </p>
+                  )}
+                  
                   {!isSignedIn && (
-                    <p className="text-xs text-purple-100">
-                      <Link href="/sign-in" className="text-white hover:underline font-semibold">Sign in</Link> to play
+                    <p className="text-xs text-gray-300">
+                      Sign in to play the quiz
                     </p>
                   )}
                 </div>
               </div>
             </CardContent>
-          </Card >
+          </Card>
 
-        </div >
-      </div >
+        </div>
+      </div>
 
       {/* Footer */}
-      < div className="text-center pb-8" >
+      <div className="text-center pb-8">
         <p className="text-gray-400 text-sm">
           Made for ATINYs
         </p>
         <p className="text-gray-500 text-xs mt-2">
           Not affiliated with KQ Entertainment
         </p>
-      </div >
+      </div>
     </>
   )
 }
