@@ -7,6 +7,8 @@ import Quiz from "@/components/Quiz"
 import { Trophy, Calendar, Music, ShoppingCart, ExternalLink, ChevronLeft, ChevronRight, Play, Zap } from "lucide-react"
 import Navigation from "@/components/Navigation"
 import DailyGoalSlide from "@/components/DailyGoalSlide"
+import { useUser } from "@clerk/nextjs"
+import Link from "next/link"
 
 declare global {
   interface Window {
@@ -264,7 +266,14 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [showAllEvents, setShowAllEvents] = useState(false)
   const [carouselPaused, setCarouselPaused] = useState(false)
+  const { isSignedIn } = useUser()
 
+  const handleQuizClick = () => {
+    if (isSignedIn) {
+      setQuizStarted(true)
+    }
+    // If not signed in, do nothing (stays on page)
+  }
   // Auto-advance carousel (only when not paused)
   useEffect(() => {
     if (carouselPaused) return
@@ -606,14 +615,21 @@ export default function Home() {
                     <span className="bg-white/20 px-3 py-1 rounded-full">Share on Twitter</span>
                   </div>
                 </div>
-                <Button
-                  size="lg"
-                  className="bg-white text-gray-400 hover:bg-purple-50 text-lg px-8 py-6"
-                  onClick={() => setQuizStarted(true)}
-                >
-                  <Trophy className="w-5 h-5 mr-2" />
-                  Start Quiz
-                </Button>
+                <div className="flex flex-col items-center gap-2">
+                  <Button
+                    size="lg"
+                    className="bg-white text-purple-700 hover:bg-purple-50 text-lg px-8 py-6"
+                    onClick={handleQuizClick}
+                  >
+                    <Trophy className="w-5 h-5 mr-2" />
+                    Start Quiz
+                  </Button>
+                  {!isSignedIn && (
+                    <p className="text-xs text-purple-100">
+                      <Link href="/sign-in" className="text-white hover:underline font-semibold">Sign in</Link> to play
+                    </p>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card >

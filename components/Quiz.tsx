@@ -178,23 +178,23 @@ export default function Quiz() {
   // Sign-in prompt screen for non-authenticated users
   if (!usernameSubmitted && !isSignedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
-        <Card className="glass-card w-full max-w-md">
-          <CardHeader className="text-center glass-header-blue text-white">
-            <div className="mx-auto mb-4 w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center border border-blue-400/30">
-              <Trophy className="w-10 h-10 text-blue-400" />
+      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 w-20 h-20 bg-primary rounded-full flex items-center justify-center">
+              <Trophy className="w-10 h-10 text-white" />
             </div>
             <CardTitle className="text-3xl">Sign In to Play</CardTitle>
-            <CardDescription className="text-gray-300">
+            <CardDescription>
               You need to be signed in to take the ATEEZ Streaming Quiz!
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 p-6">
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-              <p className="text-sm text-blue-300 mb-2">
+          <CardContent className="space-y-4">
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+              <p className="text-sm text-purple-800 mb-2">
                 📝 <strong>Why sign in?</strong>
               </p>
-              <ul className="text-xs text-gray-300 space-y-1 ml-4">
+              <ul className="text-xs text-purple-700 space-y-1 ml-4">
                 <li>• Track your scores on the leaderboard</li>
                 <li>• One quiz attempt per day</li>
                 <li>• Compete with other ATINYs!</li>
@@ -203,12 +203,12 @@ export default function Quiz() {
 
             <div className="flex gap-3">
               <Link href="/sign-in" className="flex-1">
-                <Button className="w-full bg-blue-500 hover:bg-blue-600" size="lg">
+                <Button className="w-full" size="lg">
                   Sign In
                 </Button>
               </Link>
               <Link href="/sign-up" className="flex-1">
-                <Button variant="outline" className="w-full border-white/10 hover:bg-white/5 text-white" size="lg">
+                <Button variant="outline" className="w-full text-gray-900 hover:text-gray-900" size="lg">
                   Sign Up
                 </Button>
               </Link>
@@ -216,7 +216,7 @@ export default function Quiz() {
 
             <div className="text-center pt-4">
               <Link href="/leaderboard">
-                <Button variant="ghost" className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10">
+                <Button variant="ghost" className="text-purple-600">
                   View Leaderboard
                 </Button>
               </Link>
@@ -224,7 +224,7 @@ export default function Quiz() {
 
             <div className="text-center pt-2">
               <a href="/">
-                <Button variant="ghost" className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10">
+                <Button variant="ghost" className="text-purple-600">
                   Back to Hub
                 </Button>
               </a>
@@ -238,10 +238,10 @@ export default function Quiz() {
   // Loading state while checking authentication
   if (!usernameSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
-        <Card className="glass-card w-full max-w-md">
+      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
-            <p className="text-gray-400">Loading...</p>
+            <p className="text-gray-600">Loading...</p>
           </CardContent>
         </Card>
       </div>
@@ -254,43 +254,43 @@ export default function Quiz() {
     const percentage = Math.round((score / maxScore) * 100)
     
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
-        <Card className="glass-card w-full max-w-2xl">
-          <CardHeader className="text-center glass-header-blue text-white">
-            <div className="mx-auto mb-4 w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center border border-blue-400/30">
-              <Trophy className="w-10 h-10 text-blue-400" />
+      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 flex items-center justify-center p-4">
+        <Card className="w-full max-w-2xl">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 w-20 h-20 bg-primary rounded-full flex items-center justify-center">
+              <Trophy className="w-10 h-10 text-white" />
             </div>
             <CardTitle className="text-3xl">Quiz Complete!</CardTitle>
-            <CardDescription className="text-gray-300">Great job, {username}! 🏴‍☠️</CardDescription>
+            <CardDescription>Great job, {username}! 🏴‍☠️</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6 p-6">
+          <CardContent className="space-y-6">
             <div className="text-center">
-              <p className="text-6xl font-bold text-blue-400 mb-2">{score}</p>
-              <p className="text-gray-300">Total Points</p>
+              <p className="text-6xl font-bold text-primary mb-2">{score}</p>
+              <p className="text-muted-foreground">Total Points</p>
               {isNewBest && (
-                <p className="text-green-400 font-semibold mt-2">🎉 New Personal Best!</p>
+                <p className="text-green-600 font-semibold mt-2">🎉 New Personal Best!</p>
               )}
             </div>
             
             {userRank && (
-              <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 text-center">
-                <p className="text-sm text-blue-400 font-semibold mb-1">Your Rank</p>
-                <p className="text-4xl font-bold text-blue-400">#{userRank}</p>
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center">
+                <p className="text-sm text-purple-600 font-semibold mb-1">Your Rank</p>
+                <p className="text-4xl font-bold text-purple-600">#{userRank}</p>
               </div>
             )}
 
             <div className="space-y-2">
-              <div className="flex justify-between text-sm text-gray-300">
+              <div className="flex justify-between text-sm">
                 <span>Accuracy</span>
                 <span className="font-semibold">{percentage}%</span>
               </div>
-              <Progress value={percentage} max={100} className="bg-white/10" />
+              <Progress value={percentage} max={100} />
             </div>
 
-            <div className="bg-white/5 border border-white/10 p-4 rounded-lg space-y-2">
-              <p className="text-sm font-semibold text-white">Share your score on Twitter!</p>
+            <div className="bg-secondary p-4 rounded-lg space-y-2">
+              <p className="text-sm font-semibold">Share your score on Twitter!</p>
               <Button 
-                className="w-full bg-blue-500 hover:bg-blue-600"
+                className="w-full"
                 onClick={() => {
                   const text = `I just scored ${score} points on the ATEEZ Streaming Quiz! 🏴‍☠️${userRank ? ` Ranked #${userRank}!` : ''} Can you beat my score, ATINY?\n\n#ATEEZ #에이티즈`
                   window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank')
@@ -302,18 +302,18 @@ export default function Quiz() {
 
             <div className="flex gap-3">
               <Link href="/leaderboard" className="flex-1">
-                <Button variant="outline" className="w-full border-white/10 hover:bg-white/5 text-white">
+                <Button variant="outline" className="w-full text-gray-900 hover:text-gray-900">
                   View Leaderboard
                 </Button>
               </Link>
               <a href="/" className="flex-1">
-                <Button variant="outline" className="w-full border-white/10 hover:bg-white/5 text-white">
+                <Button variant="outline" className="w-full text-gray-900 hover:text-gray-900">
                   Back to Hub
                 </Button>
               </a>
             </div>
 
-            <p className="text-xs text-center text-gray-400">
+            <p className="text-xs text-center text-gray-500">
               Come back tomorrow to play again and improve your rank!
             </p>
           </CardContent>
@@ -324,7 +324,7 @@ export default function Quiz() {
 
   // Quiz screen
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 p-4">
       <div className="max-w-4xl mx-auto py-8 space-y-6">
         {/* Header with progress */}
         <div className="space-y-2">
@@ -347,21 +347,21 @@ export default function Quiz() {
               )}
             </div>
           </div>
-          <Progress value={progress} max={100} className="bg-white/10" />
+          <Progress value={progress} max={100} className="bg-white/20" />
           <p className="text-white/80 text-sm">
             Question {currentQuestionIndex + 1} of {quizQuestions.length}
           </p>
         </div>
 
         {/* Question Card */}
-        <Card className="glass-card">
-          <CardHeader className="glass-header-blue text-white">
+        <Card>
+          <CardHeader>
             <CardTitle>{currentQuestion.question}</CardTitle>
-            <CardDescription className="text-gray-300">
+            <CardDescription>
               Worth {currentQuestion.points} points + speed bonus (50 pts max, decreases every 3 sec)
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6 p-6">
+          <CardContent className="space-y-6">
             {/* Video Embed */}
             {currentQuestion.videoUrl && (
               <div className="aspect-video rounded-lg overflow-hidden bg-black">
@@ -405,19 +405,19 @@ export default function Quiz() {
                   } else if (isSelected && !isCorrect) {
                     buttonClass = "bg-red-500 text-white border-red-600 hover:bg-red-500"
                   } else {
-                    buttonClass = "text-white border-white/10" // Unselected answers after reveal
+                    buttonClass = "text-gray-900" // Unselected answers after reveal
                   }
                 } else if (isSelected) {
-                  buttonClass = "bg-blue-500 text-white border-blue-400"
+                  buttonClass = "bg-primary text-white"
                 } else {
-                  buttonClass = "text-white border-white/10" // Unselected answers before answering
+                  buttonClass = "text-gray-900" // Unselected answers before answering
                 }
 
                 return (
                   <Button
                     key={index}
-                    variant="outline"
-                    className={`h-auto py-4 text-left justify-start hover:bg-white/5 ${buttonClass}`}
+                    variant={isSelected && !showResult ? "default" : "outline"}
+                    className={`h-auto py-4 text-left justify-start ${buttonClass}`}
                     onClick={() => handleAnswerSelect(index)}
                     disabled={isAnswered}
                   >
@@ -430,15 +430,15 @@ export default function Quiz() {
 
             {/* Show explanation after answering */}
             {isAnswered && currentQuestion.explanation && (
-              <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-                <p className="text-sm font-semibold mb-1 text-white">
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                <p className="text-sm font-semibold mb-1">
                   {selectedAnswer === currentQuestion.correctAnswer ? "Correct! 🎉" : "Not quite!"}
                 </p>
-                <p className="text-sm text-gray-300">
+                <p className="text-sm text-muted-foreground">
                   {currentQuestion.explanation}
                 </p>
                 {speedBonus > 0 && (
-                  <p className="text-sm font-semibold text-blue-400 mt-2">
+                  <p className="text-sm font-semibold text-primary mt-2">
                     Speed Bonus: +{speedBonus} points! ⚡
                   </p>
                 )}
@@ -451,7 +451,7 @@ export default function Quiz() {
                 <Button 
                   onClick={handleSubmitAnswer}
                   disabled={selectedAnswer === null}
-                  className="flex-1 bg-blue-500 hover:bg-blue-600"
+                  className="flex-1"
                   size="lg"
                 >
                   Submit Answer
@@ -459,7 +459,7 @@ export default function Quiz() {
               ) : (
                 <Button 
                   onClick={handleNextQuestion}
-                  className="flex-1 bg-blue-500 hover:bg-blue-600"
+                  className="flex-1"
                   size="lg"
                 >
                   {currentQuestionIndex < quizQuestions.length - 1 ? "Next Question" : "See Results"}
