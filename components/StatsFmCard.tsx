@@ -121,7 +121,7 @@ export default function StatsFmCard() {
             {// Add remove button
             <Button 
               variant="outline" 
-              className="w-full border-white/20 text-white hover:bg-white/10"
+              className="w-full border-white/20 text-gray-300 hover:bg-white/10"
               onClick={handleRemove}
             >
               Remove Username
