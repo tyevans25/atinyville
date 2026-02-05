@@ -118,7 +118,7 @@ export default function StatsFmCard() {
             <p className="text-sm text-gray-400">
               Your streams are being tracked automatically. Check the daily goal to see your contribution!
             </p>
-            {/* Optional: Add remove button
+            {// Add remove button
             <Button 
               variant="outline" 
               className="w-full border-white/20 text-white hover:bg-white/10"
@@ -126,7 +126,7 @@ export default function StatsFmCard() {
             >
               Remove Username
             </Button>
-            */}
+            }
           </div>
         ) : (
           // Not saved yet
