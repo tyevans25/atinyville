@@ -2,13 +2,14 @@ import { kv } from '@vercel/kv'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 
-// Helper to get current week key
+// Helper to get current week key IN KST (matches cron calculation)
 function getCurrentWeekKey(): string {
   const now = new Date()
-  const year = now.getFullYear()
-  const startOfYear = new Date(year, 0, 1)
-  const days = Math.floor((now.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000))
-  const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7)
+  const kstNow = new Date(now.getTime() + (9 * 60 * 60 * 1000))
+  const year = kstNow.getUTCFullYear()
+  const startOfYear = new Date(Date.UTC(year, 0, 1))
+  const days = Math.floor((kstNow.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000))
+  const weekNumber = Math.ceil((days + startOfYear.getUTCDay() + 1) / 7)
   return `${year}-W${String(weekNumber).padStart(2, '0')}`
 }
 
