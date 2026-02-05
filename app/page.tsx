@@ -25,17 +25,61 @@ const convertKSTtoLocal = (kstDateString: string, kstTime?: string) => {
   return date
 }
 
-// EDIT THIS: Add your campaign updates here!
+// EDIT THIS: Add your campaign updates here!  https://www.youtube.com/embed/ao0q70VFBt0?si=grM8ji7JHC4_M8C-
 const campaignUpdates = [
     {
     id: 1,
-    title: "🫧 GOLDEN HOUR: Part.4 PREVIEW LIVE",
-    description: "Watch the preview live for ATEEZ's highly anticipated album!",
-    videoUrl: "https://www.youtube.com/embed/ct3_SOh-d-o?si=xkks96PcRt_YSndf",
-    urgent: false
+    component: <DailyGoalSlide />
   },
   {
     id: 2,
+    title: "🫧 GOLDEN HOUR: Part.4 PREVIEW LIVE",
+    description: "Watch the preview live for ATEEZ's highly anticipated album! (They'll probably spoil stuff)",
+    videoUrl: "https://www.youtube.com/embed/ct3_SOh-d-o?si=xkks96PcRt_YSndf",
+    urgent: false
+  },
+      {
+    id: 3,
+    title: "\"Adrenaline\" MV Teaser 2",
+    description: "More of the title song \"Adrenaline\"!",
+    videoUrl: "https://www.youtube.com/embed/ao0q70VFBt0?si=hM10zGSpSk7gB-3t",
+    links: [
+      { url: "https://www.youtube.com/embed/ao0q70VFBt0?si=hM10zGSpSk7gB-3t", label: "Watch on YouTube", color: "orange" }
+    ],
+    urgent: false
+  },
+    {
+    id: 4,
+    title: "\"Adrenaline\" MV Teaser 1",
+    description: "Sneak peek of the title song \"Adrenaline\"!",
+    videoUrl: "https://www.youtube.com/embed/nvCan9BZqAY?si=1W4iVupHMxZG7FFt",
+    links: [
+      { url: "https://youtu.be/nvCan9BZqAY?si=1W4iVupHMxZG7FFt", label: "Watch on YouTube", color: "orange" }
+    ],
+    urgent: false
+  },
+  {
+    id: 5,
+    title: "GOLDEN HOUR: Part.4 Album Teaser",
+    description: "Get a sneak peek of the upcoming album!",
+    videoUrl: "https://www.youtube.com/embed/hPdS8GVb_9w?si=6QaxkRWpqqY7eNkG",
+    links: [
+      { url: "https://linktr.ee/atzinfo", label: "Pre-Order", color: "purple" }
+    ],
+    urgent: false
+  },
+        {
+    id: 6,
+    title: "YUNHO on Lee Mujin Service",
+    description: "Watch Yunho shine on Lee Mujin Service!",
+    videoUrl: "https://www.youtube.com/embed/p4Q221AMiss?si=x_7DlMMnfpj9LAjb",
+    links: [
+      { url: "https://www.youtube.com/embed/p4Q221AMiss?si=x_7DlMMnfpj9LAjb", label: "Watch on YouTube", color: "orange" }
+    ],
+    urgent: false
+  },
+  {
+    id: 7,
     title: "🫧 Pre-Save GOLDEN HOUR: Part.4",
     description: "Pre-save the highly anticipated album on Spotify & Apple Music!",
     spotifyUrl: "https://open.spotify.com/embed/prerelease/2Mnno3uSsiVdOpKJL4Vz5b?utm_source=generator",
@@ -45,35 +89,8 @@ const campaignUpdates = [
     ],
     urgent: true
   },
-      {
-    id: 3,
-    title: "\"Adrenaline\" MV Teaser",
-    description: "Sneak peek of the title song \"Adrenaline\"!",
-    videoUrl: "https://www.youtube.com/embed/nvCan9BZqAY?si=1W4iVupHMxZG7FFt",
-    links: [
-      { url: "https://youtu.be/nvCan9BZqAY?si=1W4iVupHMxZG7FFt", label: "Watch on YouTube", color: "orange" }
-    ],
-    urgent: false
-  },
   {
-    id: 4,
-    title: "GOLDEN HOUR: Part.4 Album Teaser",
-    description: "Get a sneak peek of the upcoming album!",
-    videoUrl: "https://www.youtube.com/embed/hPdS8GVb_9w?si=6QaxkRWpqqY7eNkG",
-    links: [
-      { url: "https://linktr.ee/atzinfo", label: "Pre-Order", color: "purple" }
-    ],
-    urgent: false
-  },
-  {
-    id: 5,
-    title: "\"Adrenaline\" MV Trailer",
-    description: "Check out the trailer for the upcoming MV for \"Adrenaline\"!",
-    videoUrl: "https://www.youtube.com/embed/gBvUjhPy5v4?si=Y2miG7LKOMLF9dP_",
-    urgent: false
-  },
-  {
-    id: 6,
+    id: 8,
     title: "🛒 Pre-Order GOLDEN HOUR: Part.4",
     description: "Pre-order physical albums!",
     imageUrl: "https://image.static.bstage.in/cdn-cgi/image/metadata=none,dpr=1,f=auto,width=640/ateez/dea14100-3e72-4fd3-9303-67a3201448c0/072b473d-4b13-458d-8375-783ba2ccac0f/ori.jpg",
@@ -83,85 +100,18 @@ const campaignUpdates = [
     urgent: false
   },
   {
-    id: 7,
+    id: 9,
     title: "🏆 Daily ATEEZ Quiz",
     description: "Can you top the leaderboard?",
     links: [
       { url: "#quiz", label: "Start Quiz", color: "purple" }
     ],
     urgent: false
-  },
-  {
-    id: 8,
-    component: <DailyGoalSlide />
   }
 ]
 
 // EDIT THIS: Add upcoming events here (dates in KST)
 const upcomingEvents = [
-  {
-    id: 1,
-    date: "2026-01-26",
-    time: "00:00:00",
-    title: "Album Preview",
-    description: "Album Preview Teaser!",
-    type: "teaser"
-  },
-  {
-    id: 2,
-    date: "2026-01-27",
-    time: "00:00:00",
-    title: "Concept Photo 3",
-    description: "3rd set of concept photos released",
-    type: "promotion"
-  },
-  {
-    id: 3,
-    date: "2026-01-28",
-    time: "00:00:00",
-    title: "Concept Photo 3",
-    description: "3rd set of concept photos released",
-    type: "promotion"
-  },
-  {
-    id: 4,
-    date: "2026-01-29",
-    time: "00:00:00",
-    title: "Concept Photo 3",
-    description: "3rd set of concept photos released",
-    type: "promotion"
-  },
-  {
-    id: 5,
-    date: "2026-01-30",
-    title: "?",
-    description: "Surprise content!",
-    type: "teaser"
-  },
-  {
-    id: 6,
-    date: "2026-02-02",
-    time: "14:00:00",
-    title: "Character Poster",
-    description: "Character poster released",
-    type: "promotion"
-  },
-  {
-    id: 7,
-    date: "2026-02-03",
-    time: "14:00:00",
-    title: "MV Poster",
-    description: "MV poster released",
-    type: "promotion"
-  },
-  {
-    id: 8,
-    date: "2026-02-04",
-    time: "14:00:00",
-    title: "MV Teaser 1",
-    description: "MV teaser 1 released",
-    type: "teaser"
-  },
   {
     id: 9,
     date: "2026-02-05",
@@ -190,7 +140,7 @@ const upcomingEvents = [
     id: 12,
     date: "2026-02-06",
     time: "22:00:00",
-    title: "ATTEZ on 'The Seasons' KBS Music Talk Show",
+    title: "ATEEZ on 'The Seasons' KBS Music Talk Show",
     description: "'Music Talk Show appearance",
     type: "promotion"
   },
@@ -198,7 +148,7 @@ const upcomingEvents = [
     id: 13,
     date: "2026-02-08",
     time: "20:00:00",
-    title: "ATTEZ on '1N2D' KBS Variety Show",
+    title: "ATEEZ on '1N2D' KBS Variety Show",
     description: "'1N2D' Variety Show appearance",
     type: "promotion"
   },
@@ -266,21 +216,21 @@ const upcomingEvents = [
     description: "Continuation of Asia leg of world tour",
     type: "appearance"
   },
-    {
+  {
     id: 22,
     date: "2026-02-12",
     title: "WOOYOUNG on RISBAE Youtube Channel",
     description: "Wooyoung gets a makeover by RISBAE!",
     type: "variety"
   },
-        {
+  {
     id: 23,
     date: "2026-02-11",
     title: "ATEEZ @ The Performance",
     description: "ATEEZ headlines Mynavi'The Performance' live concert event, Day 1",
     type: "performance"
   },
-      {
+  {
     id: 24,
     date: "2026-02-12",
     title: "ATEEZ @ The Performance",
@@ -295,7 +245,7 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [showAllEvents, setShowAllEvents] = useState(false)
   const [carouselPaused, setCarouselPaused] = useState(false)
-  
+
   // Quiz status checking
   const [checkingPlayStatus, setCheckingPlayStatus] = useState(false)
   const [hasPlayedToday, setHasPlayedToday] = useState(false)
@@ -309,7 +259,7 @@ export default function Home() {
 
   const checkIfPlayedToday = async () => {
     if (!user?.id) return
-    
+
     setCheckingPlayStatus(true)
     try {
       const response = await fetch('/api/quiz/check-played', {
@@ -331,12 +281,12 @@ export default function Home() {
       // Not signed in, do nothing (stays on page)
       return
     }
-    
+
     if (hasPlayedToday) {
       // Already played, do nothing
       return
     }
-    
+
     // Signed in and hasn't played -> start quiz
     setQuizStarted(true)
   }
@@ -689,24 +639,23 @@ export default function Home() {
                 <div className="flex flex-col items-center gap-2">
                   <Button
                     size="lg"
-                    className={`text-lg px-8 py-6 ${
-                      hasPlayedToday 
-                        ? 'bg-gray-500 hover:bg-gray-500 cursor-not-allowed text-white' 
+                    className={`text-lg px-8 py-6 ${hasPlayedToday
+                        ? 'bg-gray-500 hover:bg-gray-500 cursor-not-allowed text-white'
                         : 'bg-white text-gray-800 hover:bg-gray-200'
-                    }`}
+                      }`}
                     onClick={handleQuizClick}
                     disabled={hasPlayedToday || checkingPlayStatus}
                   >
                     <Trophy className="w-5 h-5 mr-2" />
                     {getQuizButtonText()}
                   </Button>
-                  
+
                   {hasPlayedToday && (
                     <p className="text-xs text-gray-300">
                       You've already played today!
                     </p>
                   )}
-                  
+
                   {!isSignedIn && (
                     <p className="text-xs text-gray-300">
                       Sign in to play the quiz
