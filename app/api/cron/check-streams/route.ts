@@ -9,6 +9,11 @@ const DEFAULT_COMMUNITY_DAILY = 10000
 const DEFAULT_COMMUNITY_WEEKLY = 50000
 const DEFAULT_SONG_GOAL_TARGET = 5000
 
+// 🚀 RATE LIMITING: Delay to prevent stats.fm throttling
+function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 interface Mission {
   id: string
   trackId: number
@@ -68,11 +73,12 @@ async function ensureDefaultGoals(today: string, weekKey: string) {
   const songGoal = await kv.get(dailySongGoalKey)
   if (!songGoal) {
     const yesterdaySongGoalKey = `daily:goal:${yesterday}`
-    const yesterdaySongGoal = await kv.get<{ song: string; target: number }>(yesterdaySongGoalKey)
+    const yesterdaySongGoal = await kv.get<{ song: string; trackId?: number; target: number }>(yesterdaySongGoalKey)
     
     if (yesterdaySongGoal?.song) {
       await kv.set(dailySongGoalKey, {
         song: yesterdaySongGoal.song,
+        trackId: yesterdaySongGoal.trackId, // Include trackId!
         target: yesterdaySongGoal.target || DEFAULT_SONG_GOAL_TARGET,
         current: 0
       }, { ex: 86400 })
@@ -111,6 +117,8 @@ export async function GET(request: Request) {
     const weekKey = getCurrentWeekKey()
     const cronRunTime = Date.now()
 
+    console.log(`🚀 Cron started at ${new Date(cronRunTime).toISOString()}`)
+
     // --- Ensure default goals exist ---
     await ensureDefaultGoals(today, weekKey)
 
@@ -123,7 +131,7 @@ export async function GET(request: Request) {
     // --- Load goals and missions ---
     const [communityDaily, dailySongGoal, communityWeekly, missions] = await Promise.all([
       kv.get<{ target: number; current?: number }>(communityDailyKey),
-      kv.get<{ song: string; target: number; current?: number }>(dailySongGoalKey),
+      kv.get<{ song: string; trackId?: number; target: number; current?: number }>(dailySongGoalKey),
       kv.get<{ target: number; current?: number }>(communityWeeklyKey),
       kv.get<Mission[]>(missionsKey)
     ])
@@ -133,23 +141,36 @@ export async function GET(request: Request) {
     let newDailySongStreams = 0
     let newWeeklyStreams = 0
     let usersProcessed = 0
+    let usersSkipped = 0
 
     // --- Fetch all users with stats.fm ---
     const userKeys = await kv.keys("user:*:statsfm")
+    console.log(`📊 Processing ${userKeys.length} users with 1-second delays...`)
 
     for (const key of userKeys) {
       try {
         const userId = key.split(":")[1]
         const statsfmUsername = await kv.get<string>(key)
         
-        if (!statsfmUsername) continue
+        if (!statsfmUsername) {
+          usersSkipped++
+          continue
+        }
+
+        // ⏱️ RATE LIMITING: Wait 1 second between each user
+        await delay(1000)
 
         const lastProcessedKey = `user:${userId}:last_processed`
         const lastProcessed = await kv.get<number>(lastProcessedKey) || 0
 
         // Fetch streams
         const res = await fetch(`https://api.stats.fm/api/v1/users/${statsfmUsername}/streams?limit=500`)
-        if (!res.ok) continue
+        
+        if (!res.ok) {
+          console.log(`⚠️ Failed to fetch for ${statsfmUsername}: ${res.status}`)
+          usersSkipped++
+          continue
+        }
 
         const data = await res.json()
         const streams = data.items || []
@@ -160,9 +181,13 @@ export async function GET(request: Request) {
           return s.artistIds?.includes(ATEEZ_ARTIST_ID) && streamTime > lastProcessed
         })
 
-        if (newStreams.length === 0) continue
+        if (newStreams.length === 0) {
+          usersSkipped++
+          continue
+        }
 
         usersProcessed++
+        console.log(`✅ ${statsfmUsername}: ${newStreams.length} new streams`)
 
         // --- Process streams for each goal ---
         
@@ -183,8 +208,25 @@ export async function GET(request: Request) {
           }
         }
 
-        // Daily Song Goal (SPECIFIC song)
-        if (dailySongGoal?.song) {
+        // Daily Song Goal (SPECIFIC song - prefer trackId, fallback to name)
+        if (dailySongGoal?.trackId) {
+          // Use trackId for precise matching
+          const songStreams = newStreams.filter((s: any) => {
+            const streamDate = new Date(s.endTime)
+            const kstDate = new Date(streamDate.getTime() + (9 * 60 * 60 * 1000))
+            return kstDate.toISOString().split('T')[0] === today && 
+                   s.trackId === dailySongGoal.trackId
+          })
+
+          if (songStreams.length > 0) {
+            newDailySongStreams += songStreams.length
+
+            const userSongKey = `daily:streams:${userId}:${today}`
+            const currentUserSong = await kv.get<number>(userSongKey) || 0
+            await kv.set(userSongKey, currentUserSong + songStreams.length, { ex: 86400 })
+          }
+        } else if (dailySongGoal?.song) {
+          // Fallback to song name
           const songStreams = newStreams.filter((s: any) => {
             const streamDate = new Date(s.endTime)
             const kstDate = new Date(streamDate.getTime() + (9 * 60 * 60 * 1000))
@@ -245,30 +287,38 @@ export async function GET(request: Request) {
         await kv.set(lastProcessedKey, cronRunTime, { ex: 604800 })
 
       } catch (error) {
-        console.error(`Error processing user ${key}:`, error)
+        console.error(`❌ Error processing ${key}:`, error)
+        usersSkipped++
+        continue
       }
     }
+
+    console.log(`📊 Summary: ${usersProcessed} processed, ${usersSkipped} skipped`)
 
     // --- Update goal totals ---
     if (communityDaily && newDailyStreams > 0) {
       const current = (communityDaily.current || 0) + newDailyStreams
       await kv.set(communityDailyKey, { ...communityDaily, current }, { ex: 86400 })
+      console.log(`✅ Daily goal: +${newDailyStreams} streams (total: ${current})`)
     }
 
     if (dailySongGoal && newDailySongStreams > 0) {
       const current = (dailySongGoal.current || 0) + newDailySongStreams
       await kv.set(dailySongGoalKey, { ...dailySongGoal, current }, { ex: 86400 })
+      console.log(`✅ Song goal: +${newDailySongStreams} streams (total: ${current})`)
     }
 
     if (communityWeekly && newWeeklyStreams > 0) {
       const current = (communityWeekly.current || 0) + newWeeklyStreams
       await kv.set(communityWeeklyKey, { ...communityWeekly, current }, { ex: 604800 })
+      console.log(`✅ Weekly goal: +${newWeeklyStreams} streams (total: ${current})`)
     }
 
     return NextResponse.json({
       success: true,
       processed: {
         users: usersProcessed,
+        skipped: usersSkipped,
         daily: newDailyStreams,
         song: newDailySongStreams,
         weekly: newWeeklyStreams
@@ -278,7 +328,7 @@ export async function GET(request: Request) {
     })
 
   } catch (error) {
-    console.error("Cron error:", error)
+    console.error("❌ Cron error:", error)
     return NextResponse.json({ error: "Cron failed" }, { status: 500 })
   }
 }

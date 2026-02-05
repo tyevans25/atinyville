@@ -13,11 +13,7 @@ export default function CronCountdown() {
       
       // Calculate next 30-minute mark
       const nextRun = new Date(now)
-      if (currentMinute < 30) {
-        nextRun.setMinutes(30, 0, 0)
-      } else {
-        nextRun.setHours(nextRun.getHours() + 1, 0, 0, 0)
-      }
+      nextRun.setHours(nextRun.getHours() + 1, 0, 0, 0)
 
       const diff = nextRun.getTime() - now.getTime()
       const minutes = Math.floor(diff / (1000 * 60))
