@@ -9,7 +9,7 @@ const DEFAULT_COMMUNITY_DAILY = 10000
 const DEFAULT_COMMUNITY_WEEKLY = 50000
 const DEFAULT_SONG_GOAL_TARGET = 5000
 
-// 🚀 RATE LIMITING: Delay to prevent stats.fm throttling
+// Helper: Delay to prevent rate limiting
 function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
@@ -28,14 +28,31 @@ function getKSTDate(): string {
   return kstTime.toISOString().split('T')[0]
 }
 
-// Helper: Get current week key (YYYY-W##)
+// Helper: Get current week key (Thursday-Wednesday weeks in KST)
 function getCurrentWeekKey(): string {
   const now = new Date()
   const kstNow = new Date(now.getTime() + (9 * 60 * 60 * 1000))
-  const year = kstNow.getUTCFullYear()
+  
+  // Get current day of week (0 = Sunday, 4 = Thursday)
+  const kstDay = kstNow.getUTCDay()
+  
+  // Calculate days since last Thursday
+  const daysSinceThursday = (kstDay + 7 - 4) % 7
+  
+  // Get the date of this week's Thursday
+  const thisWeekThursday = new Date(kstNow)
+  thisWeekThursday.setUTCDate(kstNow.getUTCDate() - daysSinceThursday)
+  thisWeekThursday.setUTCHours(0, 0, 0, 0)
+  
+  // Calculate week number based on Thursdays
+  const year = thisWeekThursday.getUTCFullYear()
   const startOfYear = new Date(Date.UTC(year, 0, 1))
-  const days = Math.floor((kstNow.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000))
-  const weekNumber = Math.ceil((days + startOfYear.getUTCDay() + 1) / 7)
+  const firstThursday = new Date(startOfYear)
+  const daysUntilThursday = (4 - startOfYear.getUTCDay() + 7) % 7
+  firstThursday.setUTCDate(1 + daysUntilThursday)
+  
+  const weekNumber = Math.floor((thisWeekThursday.getTime() - firstThursday.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1
+  
   return `${year}-W${String(weekNumber).padStart(2, '0')}`
 }
 
@@ -78,7 +95,7 @@ async function ensureDefaultGoals(today: string, weekKey: string) {
     if (yesterdaySongGoal?.song) {
       await kv.set(dailySongGoalKey, {
         song: yesterdaySongGoal.song,
-        trackId: yesterdaySongGoal.trackId, // Include trackId!
+        trackId: yesterdaySongGoal.trackId,
         target: yesterdaySongGoal.target || DEFAULT_SONG_GOAL_TARGET,
         current: 0
       }, { ex: 86400 })
@@ -145,7 +162,7 @@ export async function GET(request: Request) {
 
     // --- Fetch all users with stats.fm ---
     const userKeys = await kv.keys("user:*:statsfm")
-    console.log(`📊 Processing ${userKeys.length} users with 1-second delays...`)
+    console.log(`📊 Processing ${userKeys.length} users...`)
 
     for (const key of userKeys) {
       try {
@@ -167,7 +184,7 @@ export async function GET(request: Request) {
         const res = await fetch(`https://api.stats.fm/api/v1/users/${statsfmUsername}/streams?limit=500`)
         
         if (!res.ok) {
-          console.log(`⚠️ Failed to fetch for ${statsfmUsername}: ${res.status}`)
+          console.log(`⚠️ Failed to fetch streams for ${statsfmUsername}: ${res.status}`)
           usersSkipped++
           continue
         }
@@ -187,7 +204,7 @@ export async function GET(request: Request) {
         }
 
         usersProcessed++
-        console.log(`✅ ${statsfmUsername}: ${newStreams.length} new streams`)
+        console.log(`✅ Processing ${newStreams.length} new streams for ${statsfmUsername}`)
 
         // --- Process streams for each goal ---
         
@@ -208,9 +225,8 @@ export async function GET(request: Request) {
           }
         }
 
-        // Daily Song Goal (SPECIFIC song - prefer trackId, fallback to name)
+        // Daily Song Goal (SPECIFIC song by trackId)
         if (dailySongGoal?.trackId) {
-          // Use trackId for precise matching
           const songStreams = newStreams.filter((s: any) => {
             const streamDate = new Date(s.endTime)
             const kstDate = new Date(streamDate.getTime() + (9 * 60 * 60 * 1000))
@@ -226,7 +242,7 @@ export async function GET(request: Request) {
             await kv.set(userSongKey, currentUserSong + songStreams.length, { ex: 86400 })
           }
         } else if (dailySongGoal?.song) {
-          // Fallback to song name
+          // Fallback to song name if no trackId
           const songStreams = newStreams.filter((s: any) => {
             const streamDate = new Date(s.endTime)
             const kstDate = new Date(streamDate.getTime() + (9 * 60 * 60 * 1000))
@@ -248,11 +264,23 @@ export async function GET(request: Request) {
           const weekStreams = newStreams.filter((s: any) => {
             const streamDate = new Date(s.endTime)
             const kstDate = new Date(streamDate.getTime() + (9 * 60 * 60 * 1000))
-            const streamYear = kstDate.getUTCFullYear()
+            
+            // Calculate which week this stream belongs to (Thursday-start)
+            const streamDay = kstDate.getUTCDay()
+            const daysSinceThursday = (streamDay + 7 - 4) % 7
+            const streamWeekThursday = new Date(kstDate)
+            streamWeekThursday.setUTCDate(kstDate.getUTCDate() - daysSinceThursday)
+            streamWeekThursday.setUTCHours(0, 0, 0, 0)
+            
+            const streamYear = streamWeekThursday.getUTCFullYear()
             const startOfYear = new Date(Date.UTC(streamYear, 0, 1))
-            const days = Math.floor((kstDate.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000))
-            const streamWeekNumber = Math.ceil((days + startOfYear.getUTCDay() + 1) / 7)
+            const firstThursday = new Date(startOfYear)
+            const daysUntilThursday = (4 - startOfYear.getUTCDay() + 7) % 7
+            firstThursday.setUTCDate(1 + daysUntilThursday)
+            
+            const streamWeekNumber = Math.floor((streamWeekThursday.getTime() - firstThursday.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1
             const streamWeekKey = `${streamYear}-W${String(streamWeekNumber).padStart(2, '0')}`
+            
             return streamWeekKey === weekKey
           })
 
@@ -287,8 +315,9 @@ export async function GET(request: Request) {
         await kv.set(lastProcessedKey, cronRunTime, { ex: 604800 })
 
       } catch (error) {
-        console.error(`❌ Error processing ${key}:`, error)
+        console.error(`❌ Error processing user ${key}:`, error)
         usersSkipped++
+        // Continue to next user
         continue
       }
     }
@@ -299,19 +328,19 @@ export async function GET(request: Request) {
     if (communityDaily && newDailyStreams > 0) {
       const current = (communityDaily.current || 0) + newDailyStreams
       await kv.set(communityDailyKey, { ...communityDaily, current }, { ex: 86400 })
-      console.log(`✅ Daily goal: +${newDailyStreams} streams (total: ${current})`)
+      console.log(`✅ Updated daily goal: +${newDailyStreams} streams`)
     }
 
     if (dailySongGoal && newDailySongStreams > 0) {
       const current = (dailySongGoal.current || 0) + newDailySongStreams
       await kv.set(dailySongGoalKey, { ...dailySongGoal, current }, { ex: 86400 })
-      console.log(`✅ Song goal: +${newDailySongStreams} streams (total: ${current})`)
+      console.log(`✅ Updated song goal: +${newDailySongStreams} streams`)
     }
 
     if (communityWeekly && newWeeklyStreams > 0) {
       const current = (communityWeekly.current || 0) + newWeeklyStreams
       await kv.set(communityWeeklyKey, { ...communityWeekly, current }, { ex: 604800 })
-      console.log(`✅ Weekly goal: +${newWeeklyStreams} streams (total: ${current})`)
+      console.log(`✅ Updated weekly goal: +${newWeeklyStreams} streams`)
     }
 
     return NextResponse.json({

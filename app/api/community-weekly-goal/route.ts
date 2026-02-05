@@ -2,14 +2,31 @@ import { kv } from '@vercel/kv'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 
-// Helper to get current week key IN KST (matches cron calculation)
+// Helper: Get current week key (Thursday-Wednesday weeks in KST)
 function getCurrentWeekKey(): string {
   const now = new Date()
   const kstNow = new Date(now.getTime() + (9 * 60 * 60 * 1000))
-  const year = kstNow.getUTCFullYear()
+  
+  // Get current day of week (0 = Sunday, 4 = Thursday)
+  const kstDay = kstNow.getUTCDay()
+  
+  // Calculate days since last Thursday
+  const daysSinceThursday = (kstDay + 7 - 4) % 7
+  
+  // Get the date of this week's Thursday
+  const thisWeekThursday = new Date(kstNow)
+  thisWeekThursday.setUTCDate(kstNow.getUTCDate() - daysSinceThursday)
+  thisWeekThursday.setUTCHours(0, 0, 0, 0)
+  
+  // Calculate week number based on Thursdays
+  const year = thisWeekThursday.getUTCFullYear()
   const startOfYear = new Date(Date.UTC(year, 0, 1))
-  const days = Math.floor((kstNow.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000))
-  const weekNumber = Math.ceil((days + startOfYear.getUTCDay() + 1) / 7)
+  const firstThursday = new Date(startOfYear)
+  const daysUntilThursday = (4 - startOfYear.getUTCDay() + 7) % 7
+  firstThursday.setUTCDate(1 + daysUntilThursday)
+  
+  const weekNumber = Math.floor((thisWeekThursday.getTime() - firstThursday.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1
+  
   return `${year}-W${String(weekNumber).padStart(2, '0')}`
 }
 
