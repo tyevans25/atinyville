@@ -39,11 +39,15 @@ export default function WeeklyGoalCard() {
         // Get current time in KST (UTC+9)
         const now = new Date()
         const nowKST = new Date(now.getTime() + (9 * 60 * 60 * 1000))
-        const dayOfWeek = nowKST.getUTCDay() // 0 = Sunday, 1 = Monday, etc in KST
+        const dayOfWeek = nowKST.getUTCDay() // 0 = Sunday, 1 = Monday, ..., 4 = Thursday
         
-        // Calculate days until Sunday (week ends Sunday in KST)
-        const daysUntilSunday = dayOfWeek === 0 ? 7 : 7 - dayOfWeek
-        setDaysRemaining(daysUntilSunday)
+        // Calculate days until next Thursday (week resets Thursday at midnight KST)
+        // If today is Thursday (4), next reset is in 7 days
+        // If today is Friday (5), next reset is in 6 days
+        // If today is Wednesday (3), next reset is in 1 day
+        const daysUntilThursday = (4 - dayOfWeek + 7) % 7
+        
+        setDaysRemaining(daysUntilThursday === 0 ? 7 : daysUntilThursday)
     }
 
     const fetchGoalData = async () => {
@@ -127,6 +131,7 @@ export default function WeeklyGoalCard() {
                 <div>
                     <p className="text-xs text-gray-400 mb-1">This Week's Goal</p>
                     <h4 className="text-xl font-bold text-white">Stream ANY ATEEZ songs</h4>
+                    <p className="text-xs text-gray-500 mt-1">Resets Thursday 12AM KST</p>
                 </div>
 
                 {/* Progress Numbers */}
