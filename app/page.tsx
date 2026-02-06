@@ -27,7 +27,7 @@ const convertKSTtoLocal = (kstDateString: string, kstTime?: string) => {
 
 // EDIT THIS: Add your campaign updates here!  https://www.youtube.com/embed/ao0q70VFBt0?si=grM8ji7JHC4_M8C-
 const campaignUpdates = [
-    {
+  {
     id: 1,
     component: <DailyGoalSlide />
   },
@@ -38,28 +38,34 @@ const campaignUpdates = [
     videoUrl: "https://www.youtube.com/embed/vqkfEUqjl6Y?si=N-36Jk4xkZN8bGas",
     urgent: true
   },
-    {
+  {
     id: 3,
     title: "🫧 Listen GOLDEN HOUR: Part.4 Album Now",
     description: "Listen to ATEEZ's highly anticipated album on Spotify & Apple Music!",
     spotifyUrl: "https://open.spotify.com/embed/album/1FBxW4I6azDVjGallQ4wQk?utm_source=generator",
     urgent: true
   },
-    {
+  {
     id: 4,
     title: "\"Adrenaline\" on Musick Bank!",
     description: "Watch ATEEZ put on an electrifying performance of \"Adrenaline\". Watch it now!",
     videoUrl: "https://www.youtube.com/embed/0PeuZB1FniM?si=4yVEpQKVTIxgffW3",
-    urgent: true
+        links: [
+      { url: "https://www.youtube.com/embed/0PeuZB1FniM?si=4yVEpQKVTIxgffW3", label: "Watch on YouTube", color: "orange" }
+    ],
+    urgent: false
   },
-      {
+  {
     id: 5,
     title: "\"NASA\" on Musick Bank!",
     description: "Watch ATEEZ mesmerise with their performance of \"NASA\". Watch it now!",
     videoUrl: "https://www.youtube.com/embed/CN3vOi5wKCk?si=r8vajgtQYQ_Smj0Q",
-    urgent: true
+        links: [
+      { url: "https://www.youtube.com/embed/CN3vOi5wKCk?si=r8vajgtQYQ_Smj0Q", label: "Watch on YouTube", color: "orange" }
+    ],
+    urgent: false
   },
-        {
+  {
     id: 6,
     title: "YUNHO on Lee Mujin Service",
     description: "Watch Yunho shine on Lee Mujin Service!",
@@ -610,8 +616,8 @@ export default function Home() {
                   <Button
                     size="lg"
                     className={`text-lg px-8 py-6 ${hasPlayedToday
-                        ? 'bg-gray-500 hover:bg-gray-500 cursor-not-allowed text-white'
-                        : 'bg-white text-gray-800 hover:bg-gray-200'
+                      ? 'bg-gray-500 hover:bg-gray-500 cursor-not-allowed text-white'
+                      : 'bg-white text-gray-800 hover:bg-gray-200'
                       }`}
                     onClick={handleQuizClick}
                     disabled={hasPlayedToday || checkingPlayStatus}
