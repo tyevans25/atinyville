@@ -36,27 +36,41 @@ const campaignUpdates = [
     title: "\"Adrenaline\" Music Video Out Now!",
     description: "ATEEZ's new music video for \"Adrenaline\" is here. Watch it now!",
     videoUrl: "https://www.youtube.com/embed/vqkfEUqjl6Y?si=N-36Jk4xkZN8bGas",
-    urgent: false
+    urgent: true
   },
     {
-    id: 4,
+    id: 3,
     title: "🫧 Listen GOLDEN HOUR: Part.4 Album Now",
     description: "Listen to ATEEZ's highly anticipated album on Spotify & Apple Music!",
     spotifyUrl: "https://open.spotify.com/embed/album/1FBxW4I6azDVjGallQ4wQk?utm_source=generator",
     urgent: true
   },
+    {
+    id: 4,
+    title: "\"Adrenaline\" on Musick Bank!",
+    description: "Watch ATEEZ put on an electrifying performance of \"Adrenaline\". Watch it now!",
+    videoUrl: "https://www.youtube.com/embed/0PeuZB1FniM?si=4yVEpQKVTIxgffW3",
+    urgent: true
+  },
+      {
+    id: 5,
+    title: "\"NASA\" on Musick Bank!",
+    description: "Watch ATEEZ mesmerise with their performance of \"NASA\". Watch it now!",
+    videoUrl: "https://www.youtube.com/embed/CN3vOi5wKCk?si=r8vajgtQYQ_Smj0Q",
+    urgent: true
+  },
         {
-    id: 3,
+    id: 6,
     title: "YUNHO on Lee Mujin Service",
     description: "Watch Yunho shine on Lee Mujin Service!",
     videoUrl: "https://www.youtube.com/embed/p4Q221AMiss?si=x_7DlMMnfpj9LAjb",
     links: [
       { url: "https://www.youtube.com/embed/p4Q221AMiss?si=x_7DlMMnfpj9LAjb", label: "Watch on YouTube", color: "orange" }
     ],
-    urgent: true
+    urgent: false
   },
   {
-    id: 5,
+    id: 7,
     title: "🏆 Daily ATEEZ Quiz",
     description: "Can you top the leaderboard?",
     links: [

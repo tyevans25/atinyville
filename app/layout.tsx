@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "ATINYTOWN",
-  description: "ATINY comminity platform!",
+  description: "ATINY community platform!",
   icons: {
     icon: '/favicon.ico',
     apple: '/apple-touch-icon.png',
