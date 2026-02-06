@@ -33,74 +33,30 @@ const campaignUpdates = [
   },
   {
     id: 2,
-    title: "🫧 GOLDEN HOUR: Part.4 PREVIEW LIVE",
-    description: "Watch the preview live for ATEEZ's highly anticipated album! (They'll probably spoil stuff)",
-    videoUrl: "https://www.youtube.com/embed/ct3_SOh-d-o?si=xkks96PcRt_YSndf",
-    urgent: false
-  },
-      {
-    id: 3,
-    title: "\"Adrenaline\" MV Teaser 2",
-    description: "More of the title song \"Adrenaline\"!",
-    videoUrl: "https://www.youtube.com/embed/ao0q70VFBt0?si=hM10zGSpSk7gB-3t",
-    links: [
-      { url: "https://www.youtube.com/embed/ao0q70VFBt0?si=hM10zGSpSk7gB-3t", label: "Watch on YouTube", color: "orange" }
-    ],
+    title: "\"Adrenaline\" Music Video Out Now!",
+    description: "ATEEZ's new music video for \"Adrenaline\" is here. Watch it now!",
+    videoUrl: "https://www.youtube.com/embed/vqkfEUqjl6Y?si=N-36Jk4xkZN8bGas",
     urgent: false
   },
     {
     id: 4,
-    title: "\"Adrenaline\" MV Teaser 1",
-    description: "Sneak peek of the title song \"Adrenaline\"!",
-    videoUrl: "https://www.youtube.com/embed/nvCan9BZqAY?si=1W4iVupHMxZG7FFt",
-    links: [
-      { url: "https://youtu.be/nvCan9BZqAY?si=1W4iVupHMxZG7FFt", label: "Watch on YouTube", color: "orange" }
-    ],
-    urgent: false
-  },
-  {
-    id: 5,
-    title: "GOLDEN HOUR: Part.4 Album Teaser",
-    description: "Get a sneak peek of the upcoming album!",
-    videoUrl: "https://www.youtube.com/embed/hPdS8GVb_9w?si=6QaxkRWpqqY7eNkG",
-    links: [
-      { url: "https://linktr.ee/atzinfo", label: "Pre-Order", color: "purple" }
-    ],
-    urgent: false
+    title: "🫧 Listen GOLDEN HOUR: Part.4 Album Now",
+    description: "Listen to ATEEZ's highly anticipated album on Spotify & Apple Music!",
+    spotifyUrl: "https://www.youtube.com/embed/vqkfEUqjl6Y?si=N-36Jk4xkZN8bGas",
+    urgent: true
   },
         {
-    id: 6,
+    id: 3,
     title: "YUNHO on Lee Mujin Service",
     description: "Watch Yunho shine on Lee Mujin Service!",
     videoUrl: "https://www.youtube.com/embed/p4Q221AMiss?si=x_7DlMMnfpj9LAjb",
     links: [
       { url: "https://www.youtube.com/embed/p4Q221AMiss?si=x_7DlMMnfpj9LAjb", label: "Watch on YouTube", color: "orange" }
     ],
-    urgent: false
-  },
-  {
-    id: 7,
-    title: "🫧 Pre-Save GOLDEN HOUR: Part.4",
-    description: "Pre-save the highly anticipated album on Spotify & Apple Music!",
-    spotifyUrl: "https://open.spotify.com/embed/prerelease/2Mnno3uSsiVdOpKJL4Vz5b?utm_source=generator",
-    links: [
-      { url: "https://open.spotify.com/prerelease/2Mnno3uSsiVdOpKJL4Vz5b?si=a70b8c79107d4aa5", label: "Spotify", color: "green" },
-      { url: "https://ateez.sng.to/golden-hour-part-4", label: "Apple Music", color: "pink" }
-    ],
     urgent: true
   },
   {
-    id: 8,
-    title: "🛒 Pre-Order GOLDEN HOUR: Part.4",
-    description: "Pre-order physical albums!",
-    imageUrl: "https://image.static.bstage.in/cdn-cgi/image/metadata=none,dpr=1,f=auto,width=640/ateez/dea14100-3e72-4fd3-9303-67a3201448c0/072b473d-4b13-458d-8375-783ba2ccac0f/ori.jpg",
-    links: [
-      { url: "https://linktr.ee/atzinfo", label: "Pre-Order", color: "purple" }
-    ],
-    urgent: false
-  },
-  {
-    id: 9,
+    id: 5,
     title: "🏆 Daily ATEEZ Quiz",
     description: "Can you top the leaderboard?",
     links: [
@@ -366,7 +322,7 @@ export default function Home() {
                       <div className="flex-1">
                         {campaignUpdates[currentSlide].urgent && (
                           <span className="inline-block bg-red-500 text-white text-xs font-bold px-2 py-1 rounded mb-2">
-                            URGENT
+                            OUT NOW
                           </span>
                         )}
                         <h3 className="text-2xl font-bold mb-2 text-white">
@@ -390,7 +346,7 @@ export default function Home() {
                           </div>
                         )}
 
-                        {campaignUpdates[currentSlide].imageUrl && (
+                        {/* {campaignUpdates[currentSlide].imageUrl && (
                           <div className="aspect-video rounded-lg overflow-hidden bg-black mb-4">
                             <img
                               src={campaignUpdates[currentSlide].imageUrl}
@@ -398,7 +354,7 @@ export default function Home() {
                               className="w-full h-full object-cover"
                             />
                           </div>
-                        )}
+                        )} */}
 
                         {campaignUpdates[currentSlide].spotifyUrl && (
                           <div className="rounded-lg overflow-hidden mb-4">
