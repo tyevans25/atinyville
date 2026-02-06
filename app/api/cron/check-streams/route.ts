@@ -329,12 +329,16 @@ export async function GET(request: Request) {
     
     if (communityDaily) {
       // Get ALL user contributions for today
-      const userDailyKeys = await kv.keys(`community:daily:user:*:${today}`)
+      const pattern = `community:daily:user:*:${today}`
+      const userDailyKeys = await kv.keys(pattern)
       let totalDailyStreams = 0
+      
+      console.log(`🔍 Found ${userDailyKeys.length} contributor keys matching: ${pattern}`)
       
       for (const key of userDailyKeys) {
         const userStreams = await kv.get<number>(key) || 0
         totalDailyStreams += userStreams
+        console.log(`  ${key}: ${userStreams} streams`)
       }
       
       await kv.set(communityDailyKey, { ...communityDaily, current: totalDailyStreams }, { ex: 86400 })
