@@ -154,7 +154,7 @@ export default function StreamingHub() {
           <div>
             <h2 className="text-2xl font-bold text-white mb-4">Here are your recent tracks!</h2>
             <p className="text-gray-300 text-sm mb-4">
-              While goals are updated every 30 minutes, your recent streams are updated based on stats.fm
+              While goals are updated every hourly, your recent streams are updated based on stats.fm
             </p>
             <RecentTracksCard />
           </div>
