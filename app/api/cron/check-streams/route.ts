@@ -174,8 +174,8 @@ export async function GET(request: Request) {
           continue
         }
 
-        // ⏱️ RATE LIMITING: Wait 1 second between each user
-        await delay(1000)
+        // ⏱️ RATE LIMITING: Removed delays to prevent timeout
+        // If you get rate limited, add back: await delay(100)
 
         const lastProcessedKey = `user:${userId}:last_processed`
         const lastProcessed = await kv.get<number>(lastProcessedKey) || 0
