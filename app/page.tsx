@@ -42,7 +42,7 @@ const campaignUpdates = [
     id: 4,
     title: "🫧 Listen GOLDEN HOUR: Part.4 Album Now",
     description: "Listen to ATEEZ's highly anticipated album on Spotify & Apple Music!",
-    spotifyUrl: "https://www.youtube.com/embed/vqkfEUqjl6Y?si=N-36Jk4xkZN8bGas",
+    spotifyUrl: "https://open.spotify.com/embed/album/1FBxW4I6azDVjGallQ4wQk?utm_source=generator",
     urgent: true
   },
         {
