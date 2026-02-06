@@ -324,23 +324,49 @@ export async function GET(request: Request) {
 
     console.log(`📊 Summary: ${usersProcessed} processed, ${usersSkipped} skipped`)
 
-    // --- Update goal totals ---
-    if (communityDaily && newDailyStreams > 0) {
-      const current = (communityDaily.current || 0) + newDailyStreams
-      await kv.set(communityDailyKey, { ...communityDaily, current }, { ex: 86400 })
-      console.log(`✅ Updated daily goal: +${newDailyStreams} streams`)
+    // --- RECALCULATE goal totals from ALL user contributions ---
+    // This ensures accuracy even if cron was missed or users joined mid-day
+    
+    if (communityDaily) {
+      // Get ALL user contributions for today
+      const userDailyKeys = await kv.keys(`community:daily:user:*:${today}`)
+      let totalDailyStreams = 0
+      
+      for (const key of userDailyKeys) {
+        const userStreams = await kv.get<number>(key) || 0
+        totalDailyStreams += userStreams
+      }
+      
+      await kv.set(communityDailyKey, { ...communityDaily, current: totalDailyStreams }, { ex: 86400 })
+      console.log(`✅ Daily goal recalculated: ${totalDailyStreams} total streams (${userDailyKeys.length} contributors)`)
     }
 
-    if (dailySongGoal && newDailySongStreams > 0) {
-      const current = (dailySongGoal.current || 0) + newDailySongStreams
-      await kv.set(dailySongGoalKey, { ...dailySongGoal, current }, { ex: 86400 })
-      console.log(`✅ Updated song goal: +${newDailySongStreams} streams`)
+    if (dailySongGoal) {
+      // Get ALL user contributions for song goal today
+      const userSongKeys = await kv.keys(`daily:streams:*:${today}`)
+      let totalSongStreams = 0
+      
+      for (const key of userSongKeys) {
+        const userStreams = await kv.get<number>(key) || 0
+        totalSongStreams += userStreams
+      }
+      
+      await kv.set(dailySongGoalKey, { ...dailySongGoal, current: totalSongStreams }, { ex: 86400 })
+      console.log(`✅ Song goal recalculated: ${totalSongStreams} total streams (${userSongKeys.length} contributors)`)
     }
 
-    if (communityWeekly && newWeeklyStreams > 0) {
-      const current = (communityWeekly.current || 0) + newWeeklyStreams
-      await kv.set(communityWeeklyKey, { ...communityWeekly, current }, { ex: 604800 })
-      console.log(`✅ Updated weekly goal: +${newWeeklyStreams} streams`)
+    if (communityWeekly) {
+      // Get ALL user contributions for this week
+      const userWeeklyKeys = await kv.keys(`community:weekly:user:*:${weekKey}`)
+      let totalWeeklyStreams = 0
+      
+      for (const key of userWeeklyKeys) {
+        const userStreams = await kv.get<number>(key) || 0
+        totalWeeklyStreams += userStreams
+      }
+      
+      await kv.set(communityWeeklyKey, { ...communityWeekly, current: totalWeeklyStreams }, { ex: 604800 })
+      console.log(`✅ Weekly goal recalculated: ${totalWeeklyStreams} total streams (${userWeeklyKeys.length} contributors)`)
     }
 
     return NextResponse.json({
