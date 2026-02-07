@@ -1,13 +1,42 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Menu, X, Trophy, TrendingUp, ShoppingBag, Map, Play } from "lucide-react"
 import { UserButton, SignInButton, useUser } from "@clerk/nextjs"
+
+// Get badge tier based on streak
+const getBadgeTier = (streak: number) => {
+  if (streak >= 30) return { emoji: '🏴‍☠️', label: 'Captain ATINY' }
+  if (streak >= 14) return { emoji: '⭐', label: 'Star ATINY' }
+  if (streak >= 7) return { emoji: '🔥', label: 'Fire ATINY' }
+  if (streak >= 1) return { emoji: '🌱', label: 'Sprout ATINY' }
+  return null
+}
 
 export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { isSignedIn, user } = useUser()
+  const [streakData, setStreakData] = useState<{ currentStreak: number } | null>(null)
+
+  // Fetch streak data when signed in
+  useEffect(() => {
+    if (isSignedIn) {
+      fetchStreak()
+    }
+  }, [isSignedIn])
+
+  const fetchStreak = async () => {
+    try {
+      const response = await fetch('/api/streak')
+      if (response.ok) {
+        const data = await response.json()
+        setStreakData(data)
+      }
+    } catch (error) {
+      console.error('Error fetching streak:', error)
+    }
+  }
 
   const navItems = [
     { name: "Streaming Hub", href: "/streaming", icon: TrendingUp },
@@ -16,6 +45,8 @@ export default function Navigation() {
     { name: "Variety", href: "/variety", icon: Play },
     { name: "Leaderboard", href: "/leaderboard", icon: Trophy },
   ]
+
+  const badge = streakData ? getBadgeTier(streakData.currentStreak) : null
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/10">
@@ -49,9 +80,21 @@ export default function Navigation() {
             <div className="ml-4 pl-4 border-l border-white/10">
               {isSignedIn ? (
                 <div className="flex items-center gap-3">
-                  <span className="text-sm text-gray-300">
-                    {user.firstName || user.username || 'ATINY'}
-                  </span>
+                  {/* Username with Badge and Streak */}
+                  <div className="flex flex-col items-end leading-tight">
+                    {badge && (
+                      <div className="flex items-center gap-1 text-sm">
+                        <span>{badge.emoji}</span>
+                        <span className="text-gray-300 font-medium">{badge.label}</span>
+                      </div>
+                    )}
+                    {streakData && streakData.currentStreak > 0 && (
+                      <div className="flex items-center gap-1 text-xs mt-0.5">
+                        <span className="ml-3.5">🔥</span>
+                        <span className="text-white font-semibold">{streakData.currentStreak}</span>
+                      </div>
+                    )}
+                  </div>
                   <UserButton 
                     afterSignOutUrl="/"
                     appearance={{
@@ -102,11 +145,26 @@ export default function Navigation() {
               {/* Mobile Auth */}
               <div className="pt-4 border-t border-white/10">
                 {isSignedIn ? (
-                  <div className="flex items-center gap-3">
-                    <UserButton afterSignOutUrl="/" />
-                    <span className="text-gray-300">
-                      {user.firstName || user.username || 'ATINY'}
-                    </span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <UserButton afterSignOutUrl="/" />
+                      <div className="flex flex-col">
+                        <span className="text-gray-300">
+                          {user.firstName || user.username || 'ATINY'}
+                        </span>
+                        {badge && (
+                          <span className="text-xs text-gray-400">
+                            {badge.emoji} {badge.label}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    {streakData && streakData.currentStreak > 0 && (
+                      <div className="flex items-center gap-1 text-sm">
+                        <span>🔥</span>
+                        <span className="text-white font-semibold">{streakData.currentStreak}</span>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <SignInButton mode="modal">
