@@ -44,7 +44,7 @@ const getRandomGif = (current: number, target: number): string => {
     
     let category: string
     if (progress >= 1) {
-        category = 'celebration'
+        category = 'complete'
     } else if (progress >= 0.33) {
         category = 'progress'
     } else {
