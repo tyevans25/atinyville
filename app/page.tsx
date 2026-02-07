@@ -47,26 +47,46 @@ const campaignUpdates = [
   },
   {
     id: 4,
-    title: "\"Adrenaline\" on Musick Bank!",
-    description: "Watch ATEEZ put on an electrifying performance of \"Adrenaline\". Watch it now!",
+    title: "\"Adrenaline\" on Music Bank!",
+    description: "Watch ATEEZ put on an electrifying performance of \"Adrenaline\" on Music Bank. Watch it now!",
     videoUrl: "https://www.youtube.com/embed/0PeuZB1FniM?si=4yVEpQKVTIxgffW3",
-        links: [
+    links: [
       { url: "https://www.youtube.com/embed/0PeuZB1FniM?si=4yVEpQKVTIxgffW3", label: "Watch on YouTube", color: "orange" }
     ],
     urgent: false
   },
   {
     id: 5,
-    title: "\"NASA\" on Musick Bank!",
-    description: "Watch ATEEZ mesmerise with their performance of \"NASA\". Watch it now!",
+    title: "\"NASA\" on Music Bank!",
+    description: "Watch ATEEZ mesmerise with their performance of \"NASA\" on Music Bank. Watch it now!",
     videoUrl: "https://www.youtube.com/embed/CN3vOi5wKCk?si=r8vajgtQYQ_Smj0Q",
-        links: [
+    links: [
       { url: "https://www.youtube.com/embed/CN3vOi5wKCk?si=r8vajgtQYQ_Smj0Q", label: "Watch on YouTube", color: "orange" }
     ],
     urgent: false
   },
   {
     id: 6,
+    title: "\"Adrenaline\" on Music Core!",
+    description: "Watch ATEEZ put on an amazing performance of \"Adrenaline\" on Music Core. Watch it now!",
+    videoUrl: "https://www.youtube.com/embed/tDuZLK78BEk?si=qGPDk8TS_ymtON66",
+    links: [
+      { url: "https://www.youtube.com/embed/tDuZLK78BEk?si=qGPDk8TS_ymtON66", label: "Watch on YouTube", color: "orange" }
+    ],
+    urgent: false
+  },
+  {
+    id: 7,
+    title: "\"NASA\" on Music Core!",
+    description: "Watch ATEEZ mesmerise with their performance of \"NASA\" on Music Core. Watch it now!",
+    videoUrl: "https://www.youtube.com/embed/mNLzeeTiYd8?si=d3RvFTthYEMK23d6",
+    links: [
+      { url: "https://www.youtube.com/embed/mNLzeeTiYd8?si=d3RvFTthYEMK23d6", label: "Watch on YouTube", color: "orange" }
+    ],
+    urgent: false
+  },
+  {
+    id: 7,
     title: "YUNHO on Lee Mujin Service",
     description: "Watch Yunho shine on Lee Mujin Service!",
     videoUrl: "https://www.youtube.com/embed/p4Q221AMiss?si=x_7DlMMnfpj9LAjb",
@@ -89,22 +109,6 @@ const campaignUpdates = [
 // EDIT THIS: Add upcoming events here (dates in KST)
 const upcomingEvents = [
   {
-    id: 9,
-    date: "2026-02-05",
-    time: "14:00:00",
-    title: "MV Teaser 2",
-    description: "MV teaser 2 released",
-    type: "teaser"
-  },
-  {
-    id: 10,
-    date: "2026-02-06",
-    time: "14:00:00",
-    title: "GOLDEN HOUR Part.4 Album Release",
-    description: "GOLDEN HOUR Part.4 album released",
-    type: "release"
-  },
-  {
     id: 11,
     date: "2026-02-07",
     time: "18:00:00",
@@ -113,35 +117,11 @@ const upcomingEvents = [
     type: "release"
   },
   {
-    id: 12,
-    date: "2026-02-06",
-    time: "22:00:00",
-    title: "ATEEZ on 'The Seasons' KBS Music Talk Show",
-    description: "'Music Talk Show appearance",
-    type: "promotion"
-  },
-  {
     id: 13,
     date: "2026-02-08",
     time: "20:00:00",
     title: "ATEEZ on '1N2D' KBS Variety Show",
     description: "'1N2D' Variety Show appearance",
-    type: "promotion"
-  },
-  {
-    id: 14,
-    date: "2026-02-06",
-    time: "17:05:00",
-    title: "ATEEZ Comeback Stage on KBS Music Bank",
-    description: "Comeback stage on KBS Music Bank",
-    type: "promotion"
-  },
-  {
-    id: 15,
-    date: "2026-02-05",
-    time: "20:00:00",
-    title: "ATEEZ GOLDEN HOUR Part.4 Preview Live",
-    description: "Album preview live stream",
     type: "promotion"
   },
   {
@@ -211,6 +191,22 @@ const upcomingEvents = [
     date: "2026-02-12",
     title: "ATEEZ @ The Performance",
     description: "ATEEZ headlines Mynavi'The Performance' live concert event, Day 2",
+    type: "performance"
+  },
+  {
+    id: 25,
+    date: "2026-02-08",
+    time: "18:00:00",
+    title: "MINGI on SBBSKPOP variety show 'Snap! Cuteness! What An Idol!'",
+    description: "MINGI appears on SBBSKPOP variety show 'Snap! Cuteness! What An Idol!'",
+    type: "performance"
+  },
+    {
+    id: 26,
+    date: "2026-02-09",
+    time: "14:00:00",
+    title: "'Adrenaline' NO1 Remix Version Release",
+    description: "'Adrenaline' NO1 remix version released",
     type: "performance"
   }
 ]

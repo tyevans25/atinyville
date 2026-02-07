@@ -1,6 +1,13 @@
 import { kv } from '@vercel/kv'
 import { NextResponse } from 'next/server'
 
+// Helper: Get current date in KST (Korea Standard Time, UTC+9)
+function getKSTDate(): string {
+  const now = new Date()
+  const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000))
+  return kstTime.toISOString().split('T')[0]
+}
+
 export async function POST(request: Request) {
   try {
     const { userId, username, score } = await request.json()
@@ -12,7 +19,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const today = new Date().toISOString().split('T')[0]
+    const today = getKSTDate() // Use KST date instead of local
     const playKey = `played:${userId}:${today}`
 
     // Check if already played
@@ -39,7 +46,7 @@ export async function POST(request: Request) {
       })
     }
 
-    // Mark as played today
+    // Mark as played today (24 hour TTL)
     await kv.set(playKey, true, { ex: 86400 })
 
     // Get rank

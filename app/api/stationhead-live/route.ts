@@ -2,11 +2,11 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
   try {
-    const username = 'atinytown' // Your Stationhead username
+    const username = 'bluebirdfm' // Your Stationhead username
     
     const response = await fetch(`https://stationhead.com/api/station/${username}`, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; ATINYTOWNBot/1.0)'
+        'User-Agent': 'Mozilla/5.0 (compatible; BLUEBIRDFMBot/1.0)'
       }
     })
 
