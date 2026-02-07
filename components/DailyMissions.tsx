@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckCircle, Circle, Music } from "lucide-react"
 import { useUser } from "@clerk/nextjs"
+import { useMissionStreak } from "@/hooks/useMissionStreak"
 
 interface Mission {
     id: string
@@ -17,6 +18,7 @@ export default function DailyMissions() {
     const { isSignedIn } = useUser()
     const [missions, setMissions] = useState<Mission[]>([])
     const [loading, setLoading] = useState(true)
+    const { updateStreak, checkAllMissionsComplete } = useMissionStreak()
 
     useEffect(() => {
         if (isSignedIn) {
@@ -28,6 +30,19 @@ export default function DailyMissions() {
             setLoading(false)
         }
     }, [isSignedIn])
+
+    // Check if all missions complete and update streak
+    useEffect(() => {
+        if (missions && missions.length > 0) {
+            const allComplete = checkAllMissionsComplete(missions)
+            
+            if (allComplete) {
+                // Update streak!
+                updateStreak()
+                console.log('🔥 All missions complete! Streak updated!')
+            }
+        }
+    }, [missions, checkAllMissionsComplete, updateStreak])
 
     const fetchMissions = async () => {
         try {

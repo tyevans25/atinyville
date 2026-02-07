@@ -14,6 +14,7 @@ import { useUser } from "@clerk/nextjs"
 import RecentTracksCard from "@/components/RecentTracksCard"
 import StreamingGuideButton from '@/components/StreamingGuide'
 import StationheadLiveBanner from '@/components/StationheadLiveBanner'
+import CommunityPlaylists from '@/components/CommunityPlaylists'
 
 export default function StreamingHub() {
   const { isSignedIn } = useUser()
@@ -52,6 +53,7 @@ export default function StreamingHub() {
       setLoading(false)
     }
   }
+
 
   return (
     <>
@@ -159,47 +161,19 @@ export default function StreamingHub() {
             <RecentTracksCard />
           </div>
 
-          {/* Curated Streaming Playlist */}
+          {/* Community Playlists */}
           <Card className="glass-card">
             <CardHeader className="glass-header-blue text-white">
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5" />
-                ATINYTOWN Streaming Playlist
+                ATINYTOWN Streaming Playlists
               </CardTitle>
               <CardDescription className="text-gray-300">
-                Curated ATEEZ playlist optimized for streaming
+                Curated ATEEZ playlists optimized for streaming by ATINYs
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-6 space-y-4">
-              <p className="text-gray-300">
-                Follow our official ATINYTOWN playlist on Spotify! Updated regularly with streaming priorities and comeback tracks.
-              </p>
-
-              {/* Spotify Embed */}
-              <div className="rounded-lg overflow-hidden border border-white/20">
-                <iframe
-                  src="https://open.spotify.com/embed/playlist/5isPnJGmao1bXq0W5lOVkN?utm_source=generator&theme=0"
-                  width="100%"
-                  height="380"
-                  frameBorder="0"
-                  allowFullScreen
-                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                  loading="lazy"
-                  className="w-full"
-                />
-              </div>
-
-              <Button
-                className="w-full bg-white hover:bg-gray-200 text-gray-800"
-                onClick={() => window.open('https://open.spotify.com/playlist/5isPnJGmao1bXq0W5lOVkN', '_blank')}
-              >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                Open in Spotify
-              </Button>
-
-              <p className="text-xs text-gray-400 text-center">
-                💡 Feel free to share your own playlists on X (@AtinyTown_)! ATINY made playlists will also be shared here!
-              </p>
+            <CardContent className="p-6">
+              <CommunityPlaylists />
             </CardContent>
           </Card>
 
