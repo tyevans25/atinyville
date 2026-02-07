@@ -206,6 +206,9 @@ export async function GET(request: Request) {
         usersProcessed++
         console.log(`✅ Processing ${newStreams.length} new streams for ${statsfmUsername}`)
 
+        // --- Track total ATEEZ streams (all time) ---
+        await kv.incrby(`user:${userId}:total_streams`, newStreams.length)
+
         // --- Process streams for each goal ---
         
         // Community Daily Goal (ANY ATEEZ)
@@ -221,7 +224,14 @@ export async function GET(request: Request) {
 
             const userDailyKey = `community:daily:user:${userId}:${today}`
             const currentUserDaily = await kv.get<number>(userDailyKey) || 0
-            await kv.set(userDailyKey, currentUserDaily + todayStreams.length, { ex: 86400 })
+            const newTotal = currentUserDaily + todayStreams.length
+            await kv.set(userDailyKey, newTotal, { ex: 86400 })
+            
+            // Update best day if today is higher
+            const currentHighest = await kv.get<number>(`user:${userId}:highest_daily_streams`) || 0
+            if (newTotal > currentHighest) {
+              await kv.set(`user:${userId}:highest_daily_streams`, newTotal)
+            }
           }
         }
 
