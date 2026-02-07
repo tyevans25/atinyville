@@ -373,6 +373,82 @@ export async function GET(request: Request) {
       console.log(`✅ Weekly goal recalculated: ${totalWeeklyStreams} total streams (${userWeeklyKeys.length} contributors)`)
     }
 
+    // --- CHECK AND UPDATE STREAKS FOR ALL USERS ---
+    console.log(`🔥 Checking streaks for all users...`)
+    
+    const yesterday = getYesterdayKST()
+    let streaksUpdated = 0
+    
+    // Get all users
+    const allUserKeys = await kv.keys("user:*:statsfm")
+    
+    for (const userKey of allUserKeys) {
+      try {
+        const userId = userKey.split(":")[1]
+        
+        // Check if user completed ALL missions today
+        if (missions && missions.length > 0) {
+          let allMissionsComplete = true
+          
+          for (const mission of missions) {
+            const progressKey = `mission:progress:${userId}:${today}:${mission.id}`
+            const progress = await kv.get<number>(progressKey) || 0
+            
+            if (progress < mission.target) {
+              allMissionsComplete = false
+              break
+            }
+          }
+          
+          if (allMissionsComplete) {
+            // User completed all missions! Update streak
+            const streakKey = `streak:${userId}`
+            const lastActiveKey = `streak:${userId}:last_active`
+            const longestKey = `streak:${userId}:longest`
+            
+            const currentStreak = await kv.get<number>(streakKey) || 0
+            const lastActive = await kv.get<string>(lastActiveKey)
+            const longestStreak = await kv.get<number>(longestKey) || 0
+            
+            // Check if already completed today
+            if (lastActive === today) {
+              continue // Already updated today
+            }
+            
+            // Calculate new streak
+            let newStreak = 1
+            if (lastActive === yesterday) {
+              // Consecutive day!
+              newStreak = currentStreak + 1
+            } else if (lastActive && lastActive < yesterday) {
+              // Streak broken, reset to 1
+              newStreak = 1
+            }
+            
+            // Save streak
+            await kv.set(streakKey, newStreak)
+            await kv.set(lastActiveKey, today)
+            
+            // Update longest if needed
+            if (newStreak > longestStreak) {
+              await kv.set(longestKey, newStreak)
+            }
+            
+            // Track total mission sets completed
+            await kv.incr(`user:${userId}:total_mission_sets`)
+            
+            streaksUpdated++
+            console.log(`  🔥 Updated streak for user ${userId}: ${newStreak} days`)
+          }
+        }
+      } catch (error) {
+        console.error(`❌ Error checking streak for ${userKey}:`, error)
+        continue
+      }
+    }
+    
+    console.log(`✅ Updated ${streaksUpdated} streaks`)
+
     return NextResponse.json({
       success: true,
       processed: {
