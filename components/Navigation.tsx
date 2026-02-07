@@ -30,10 +30,10 @@ export default function Navigation() {
 
   const fetchStreak = async () => {
     try {
-      const response = await fetch('/api/streak')
+      const response = await fetch('/api/user-stats')
       if (response.ok) {
         const data = await response.json()
-        setStreakData(data)
+        setStreakData({ currentStreak: data.stats.currentStreak })
       }
     } catch (error) {
       console.error('Error fetching streak:', error)
