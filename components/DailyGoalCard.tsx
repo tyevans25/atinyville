@@ -19,7 +19,7 @@ const safeNumber = (value: unknown, fallback = 0): number => {
 }
 
 // Member names and their possible variations
-const members = ['hongjoong', 'seonghwa', 'yunho', 'yeosang', 'san', 'mingi', 'wooyoung', 'jongho', 'mingi-san']
+const members = ['hongjoong', 'seonghwa', 'yunho', 'yeosang', 'san', 'mingi', 'wooyoung', 'jongho']
 
 // Generate all possible GIF paths
 const getAllPossibleGifs = (category: string): string[] => {
@@ -38,26 +38,34 @@ const getAllPossibleGifs = (category: string): string[] => {
     return gifs
 }
 
+// Shuffle array using Fisher-Yates algorithm
+const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array]
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+    return shuffled
+}
+
 // Get random GIF based on progress tier
 const getRandomGif = (current: number, target: number): string => {
     const progress = current / target
     
     let category: string
     if (progress >= 1) {
-        category = 'complete'
+        category = 'celebration'
     } else if (progress >= 0.33) {
         category = 'progress'
     } else {
         category = 'motivation'
     }
     
-    // Get all possible GIFs for this category
-    const possibleGifs = getAllPossibleGifs(category)
+    // Get all possible GIFs for this category and SHUFFLE them
+    const possibleGifs = shuffleArray(getAllPossibleGifs(category))
     
-    // Pick a random one
-    const randomGif = possibleGifs[Math.floor(Math.random() * possibleGifs.length)]
-    
-    return randomGif
+    // Pick the first one from shuffled array (truly random)
+    return possibleGifs[0]
 }
 
 // Get message based on progress
