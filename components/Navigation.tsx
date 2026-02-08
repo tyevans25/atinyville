@@ -8,11 +8,11 @@ import StreakModal from "@/components/StreakModal"
 
 // Get badge tier based on streak
 const getBadgeTier = (streak: number) => {
-  if (streak >= 30) return { emoji: '🏴‍☠️', label: 'Captain ATINY' }
-  if (streak >= 14) return { emoji: '⭐', label: 'Star ATINY' }
-  if (streak >= 7) return { emoji: '🔥', label: 'Fire ATINY' }
-  if (streak >= 1) return { emoji: '🌱', label: 'Sprout ATINY' }
-  return null
+  if (streak >= 30) return { image: 'cap_RH.svg', label: "Captain's Right Hand" }
+  if (streak >= 14) return { image: '1st_mate.svg', label: 'First Mate' }
+  if (streak >= 7) return { image: 'corsair.svg', label: 'Corsair' }
+  if (streak >= 1) return { image: 'wayfinder.svg', label: 'Wayfinder' }
+  return { image: 'deckhand.svg', label: 'Deckhand' } // Default badge for 0 streak
 }
 
 export default function Navigation() {
@@ -90,7 +90,7 @@ export default function Navigation() {
                         className="flex flex-col items-end leading-tight hover:opacity-80 transition cursor-pointer"
                       >
                         <div className="flex items-center gap-1 text-sm">
-                          <span>{badge.emoji}</span>
+                          <span>{badge.image}</span>
                           <span className="text-gray-300 font-medium">{badge.label}</span>
                         </div>
                         <div className="flex items-center gap-1 text-xs mt-0.5">
@@ -164,7 +164,7 @@ export default function Navigation() {
                               }}
                               className="text-xs text-gray-400 text-left hover:text-white transition"
                             >
-                              {badge.emoji} {badge.label}
+                              {badge.image} {badge.label}
                             </button>
                           )}
                         </div>

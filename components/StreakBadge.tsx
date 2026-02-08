@@ -10,33 +10,37 @@ interface StreakBadgeProps {
 const getBadgeTier = (streak: number) => {
   if (streak >= 30) {
     return {
-      emoji: '🏴‍☠️',
-      label: 'Captain ATINY',
+      image: 'cap_RH.svg',
+      label: "Captain's Right Hand",
       color: 'from-purple-500 to-pink-500'
     }
   }
   if (streak >= 14) {
     return {
-      emoji: '⭐',
-      label: 'Star ATINY',
+      image: '1st_mate.svg',
+      label: 'First Mate',
       color: 'from-yellow-400 to-orange-400'
     }
   }
   if (streak >= 7) {
     return {
-      emoji: '🔥',
-      label: 'Fire ATINY',
+      image: 'corsair.svg',
+      label: 'Corsair',
       color: 'from-red-500 to-orange-500'
     }
   }
   if (streak >= 1) {
     return {
-      emoji: '🌱',
-      label: 'Sprout ATINY',
+      image: 'wayfinder.svg',
+      label: 'Wayfinder',
       color: 'from-green-400 to-emerald-400'
     }
   }
-  return null
+  return {
+    image: 'deckhand.svg',
+    label: 'Deckhand',
+    color: 'from-gray-400 to-gray-500'
+  }
 }
 
 export default function StreakBadge({ streak, size = 'md', showLabel = false }: StreakBadgeProps) {
@@ -55,7 +59,7 @@ export default function StreakBadge({ streak, size = 'md', showLabel = false }: 
       className={`inline-flex items-center gap-1 rounded-full bg-gradient-to-r ${badge.color} text-white font-semibold ${sizeClasses[size]}`}
       title={badge.label}
     >
-      <span>{badge.emoji}</span>
+      <span>{badge.image}</span>
       {showLabel && <span>{badge.label}</span>}
     </div>
   )
