@@ -23,7 +23,7 @@ export const BADGES: Badge[] = [
     {
     id: 'streak_1',
     name: 'Day 1 Sprout',
-    image: '/badges/streak_1.png',
+    image: '/badges/streak_1.svg',
     description: '1-day streak',
     category: 'streak',
     condition: (stats) => stats.currentStreak >= 1 || stats.longestStreak >= 1
@@ -31,7 +31,7 @@ export const BADGES: Badge[] = [
   {
     id: 'streak_7',
     name: 'Budding Flower',
-    image: '/badges/streak_7.png',
+    image: '/badges/streak_7.svg',
     description: '7-day streak',
     category: 'streak',
     condition: (stats) => stats.currentStreak >= 7 || stats.longestStreak >= 7
@@ -39,7 +39,7 @@ export const BADGES: Badge[] = [
   {
     id: 'streak_14',
     name: 'Fortnight Fighter',
-    image: '/badges/streak_14.png',
+    image: '/badges/streak_14.svg',
     description: '14-day streak',
     category: 'streak',
     condition: (stats) => stats.currentStreak >= 14 || stats.longestStreak >= 14
@@ -47,7 +47,7 @@ export const BADGES: Badge[] = [
   {
     id: 'streak_30',
     name: 'Monthly Master',
-    image: '/badges/streak_30.png',
+    image: '/badges/streak_30.svg',
     description: '30-day streak',
     category: 'streak',
     condition: (stats) => stats.longestStreak >= 30
@@ -55,7 +55,7 @@ export const BADGES: Badge[] = [
   {
     id: 'streak_50',
     name: 'Bronze Dedication',
-    image: '/badges/streak_50.png',
+    image: '/badges/streak_50.svg',
     description: '50-day streak',
     category: 'streak',
     condition: (stats) => stats.longestStreak >= 50
@@ -63,7 +63,7 @@ export const BADGES: Badge[] = [
   {
     id: 'streak_100',
     name: 'Silver Commitment',
-    image: '/badges/streak_100.png',
+    image: '/badges/streak_100.svg',
     description: '100-day streak',
     category: 'streak',
     condition: (stats) => stats.longestStreak >= 100
@@ -73,7 +73,7 @@ export const BADGES: Badge[] = [
   {
     id: 'streams_100',
     name: 'Getting Started',
-    image: '/badges/streams_100.png',
+    image: '/badges/streams_100.svg',
     description: '100 total streams',
     category: 'streams',
     condition: (stats) => stats.totalStreams >= 100
@@ -81,7 +81,7 @@ export const BADGES: Badge[] = [
   {
     id: 'streams_500',
     name: 'Warmed Up',
-    image: '/badges/streams_500.png',
+    image: '/badges/streams_500.svg',
     description: '500 total streams',
     category: 'streams',
     condition: (stats) => stats.totalStreams >= 500
@@ -89,7 +89,7 @@ export const BADGES: Badge[] = [
   {
     id: 'streams_1000',
     name: 'Serious Business',
-    image: '/badges/streams_1000.png',
+    image: '/badges/streams_1000.svg',
     description: '1,000 total streams',
     category: 'streams',
     condition: (stats) => stats.totalStreams >= 1000
@@ -97,7 +97,7 @@ export const BADGES: Badge[] = [
   {
     id: 'streams_2500',
     name: 'Deckhand',
-    image: '/badges/streams_2500.png',
+    image: '/badges/streams_2500.svg',
     description: '2,500 total streams',
     category: 'streams',
     condition: (stats) => stats.totalStreams >= 2500
@@ -105,7 +105,7 @@ export const BADGES: Badge[] = [
   {
     id: 'streams_5000',
     name: "On Captain's Crew",
-    image: '/badges/streams_5000.png',
+    image: '/badges/streams_5000.svg',
     description: '5,000 total streams',
     category: 'streams',
     condition: (stats) => stats.totalStreams >= 5000
@@ -113,7 +113,7 @@ export const BADGES: Badge[] = [
   {
     id: 'streams_10000',
     name: "Captain's Right Hand",
-    image: '/badges/streams_10000.png',
+    image: '/badges/streams_10000.svg',
     description: '10,000 total streams',
     category: 'streams',
     condition: (stats) => stats.totalStreams >= 10000
@@ -121,7 +121,7 @@ export const BADGES: Badge[] = [
     {
     id: 'streams_20000',
     name: "Captain's Parrot",
-    image: '/badges/streams_20000.png',
+    image: '/badges/streams_20000.svg',
     description: '20,000 total streams',
     category: 'streams',
     condition: (stats) => stats.totalStreams >= 20000
@@ -157,7 +157,7 @@ export const BADGES: Badge[] = [
   {
     id: 'first_mission',
     name: 'Successful Hit',
-    image: '/badges/first_mission.png',
+    image: '/badges/first_mission.svg',
     description: 'Completed first mission set',
     category: 'milestone',
     condition: (stats) => stats.totalMissionSets >= 1
@@ -165,7 +165,7 @@ export const BADGES: Badge[] = [
   {
     id: 'missions_10',
     name: 'Accomplished Hitman',
-    image: '/badges/missions_10.png',
+    image: '/badges/missions_10.svg',
     description: 'Completed 10 mission sets',
     category: 'milestone',
     condition: (stats) => stats.totalMissionSets >= 10

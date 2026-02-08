@@ -45,7 +45,6 @@ export async function GET(request: Request) {
           usersProcessed++
           totalStreamsBackfilled += total
         }
-
       } catch (error) {
         console.error(`❌ Error processing user ${userKey}:`, error)
         continue
