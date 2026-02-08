@@ -45,6 +45,16 @@ const campaignUpdates = [
     spotifyUrl: "https://open.spotify.com/embed/album/1FBxW4I6azDVjGallQ4wQk?utm_source=generator",
     urgent: true
   },
+    {
+    id: 4,
+    title: "ATEEZ on KBS 1N2D!",
+    description: "ATEEZ returns to 1N2D and are hilarious as usual!",
+    videoUrl: "hhttps://www.youtube.com/embed/bfhzzSQ2YCI?si=tLnuRMqykmkKpaRT",
+    links: [
+      { url: "https://www.youtube.com/embed/bfhzzSQ2YCI?si=tLnuRMqykmkKpaRT", label: "Watch on YouTube", color: "orange" }
+    ],
+    urgent: false
+  },
   {
     id: 4,
     title: "\"Adrenaline\" on Music Bank!",
@@ -95,6 +105,7 @@ const campaignUpdates = [
     ],
     urgent: false
   },
+
   {
     id: 7,
     title: "🏆 Daily ATEEZ Quiz",

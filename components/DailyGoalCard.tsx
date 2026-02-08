@@ -18,25 +18,46 @@ const safeNumber = (value: unknown, fallback = 0): number => {
     return typeof value === "number" && !Number.isNaN(value) ? value : fallback
 }
 
-// Member names and their possible variations
-const members = ['hongjoong', 'seonghwa', 'yunho', 'yeosang', 'san', 'mingi', 'wooyoung', 'jongho']
+// REPLACE the getAllPossibleGifs and getRandomGif functions with this:
 
-// Generate all possible GIF paths
-const getAllPossibleGifs = (category: string): string[] => {
-    const gifs: string[] = []
-    
-    members.forEach(member => {
-        // Try base name (e.g., hongjoong.gif)
-        gifs.push(`/gifs/${category}/${member}.gif`)
-        
-        // Try numbered variations (e.g., hongjoong2.gif, hongjoong3.gif, etc.)
-        for (let i = 2; i <= 10; i++) {
-            gifs.push(`/gifs/${category}/${member}${i}.gif`)
-        }
-    })
-    
-    return gifs
-}
+// Define EXACT GIFs that exist in each folder
+const celebrationGifs = [
+  '/gifs/complete/hongjoong.GIF',
+  '/gifs/complete/jongho.gif',
+  '/gifs/complete/mingi.GIF',
+  '/gifs/complete/minig-san.GIF', // Note: typo in your filename
+  '/gifs/complete/san.GIF',
+  '/gifs/complete/seonghwa.GIF',
+  '/gifs/complete/wooyoung.GIF',
+  '/gifs/complete/yeosang.GIF',
+  '/gifs/complete/yunho.GIF',
+  '/gifs/complete/yunho2.GIF'
+]
+
+const progressGifs = [
+  '/gifs/progress/hongjoong.GIF',
+  '/gifs/progress/jongho.GIF',
+  '/gifs/progress/jongho2.gif',
+  '/gifs/progress/mingi.GIF',
+  '/gifs/progress/san.GIF',
+  '/gifs/progress/seonghwa.GIF',
+  '/gifs/progress/wooyoung.GIF',
+  '/gifs/progress/yeosang.GIF',
+  '/gifs/progress/yunho.GIF'
+]
+
+const motivationGifs = [
+  '/gifs/motivation/hongjoong.GIF',
+  '/gifs/motivation/hongjoong2.GIF',
+  '/gifs/motivation/jongho.GIF',
+  '/gifs/motivation/mingi.GIF',
+  '/gifs/motivation/san.GIF',
+  '/gifs/motivation/seonghwa.GIF',
+  '/gifs/motivation/wooyoung.GIF',
+  '/gifs/motivation/yeosang.gif',
+  '/gifs/motivation/yunho.GIF',
+  '/gifs/motivation/yunho2.GIF'
+]
 
 // Shuffle array using Fisher-Yates algorithm
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -52,20 +73,18 @@ const shuffleArray = <T,>(array: T[]): T[] => {
 const getRandomGif = (current: number, target: number): string => {
     const progress = current / target
     
-    let category: string
+    let gifsToChooseFrom: string[]
     if (progress >= 1) {
-        category = 'celebration'
+        gifsToChooseFrom = celebrationGifs
     } else if (progress >= 0.33) {
-        category = 'progress'
+        gifsToChooseFrom = progressGifs
     } else {
-        category = 'motivation'
+        gifsToChooseFrom = motivationGifs
     }
     
-    // Get all possible GIFs for this category and SHUFFLE them
-    const possibleGifs = shuffleArray(getAllPossibleGifs(category))
-    
-    // Pick the first one from shuffled array (truly random)
-    return possibleGifs[0]
+    // Shuffle and pick first
+    const shuffled = shuffleArray(gifsToChooseFrom)
+    return shuffled[0]
 }
 
 // Get message based on progress

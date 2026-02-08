@@ -16,11 +16,68 @@ const safeNumber = (value: unknown, fallback = 0): number => {
     return typeof value === "number" && !Number.isNaN(value) ? value : fallback
 }
 
+// Define GIFs for weekly goal
+const celebrationGifs = [
+  '/gifs/complete/hongjoong.GIF',
+  '/gifs/complete/jongho.gif',
+  '/gifs/complete/mingi.GIF',
+  '/gifs/complete/minig-san.GIF',
+  '/gifs/complete/san.GIF',
+  '/gifs/complete/seonghwa.GIF',
+  '/gifs/complete/wooyoung.GIF',
+  '/gifs/complete/yeosang.GIF',
+  '/gifs/complete/yunho.GIF',
+  '/gifs/complete/yunho2.GIF'
+]
+
+const motivationGifs = [
+  '/gifs/motivation/hongjoong.GIF',
+  '/gifs/motivation/hongjoong2.GIF',
+  '/gifs/motivation/jongho.GIF',
+  '/gifs/motivation/mingi.GIF',
+  '/gifs/motivation/san.GIF',
+  '/gifs/motivation/seonghwa.GIF',
+  '/gifs/motivation/wooyoung.GIF',
+  '/gifs/motivation/yeosang.gif',
+  '/gifs/motivation/yunho.GIF',
+  '/gifs/motivation/yunho2.GIF'
+]
+
+// Shuffle array
+const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array]
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+    return shuffled
+}
+
+// Get random GIF based on progress
+const getRandomGif = (current: number, target: number): string => {
+    const progress = current / target
+    
+    const gifsToChooseFrom = progress >= 0.5 ? celebrationGifs : motivationGifs
+    const shuffled = shuffleArray(gifsToChooseFrom)
+    return shuffled[0]
+}
+
+// Get message based on progress
+const getProgressMessage = (current: number, target: number): string => {
+    const progress = current / target
+    
+    if (progress >= 1) return "🎉 Week Complete!"
+    if (progress >= 0.5) return "💪 Halfway there!"
+    return "🏴‍☠️ Let's go ATINY!"
+}
+
 export default function WeeklyGoalCard() {
     const { isSignedIn } = useUser()
     const [goalData, setGoalData] = useState<WeeklyGoalData | null>(null)
     const [loading, setLoading] = useState(true)
     const [daysRemaining, setDaysRemaining] = useState(0)
+    const [currentGif, setCurrentGif] = useState<string>("")
+    const [gifError, setGifError] = useState(false)
 
     useEffect(() => {
         fetchGoalData()
@@ -35,6 +92,18 @@ export default function WeeklyGoalCard() {
         }
     }, [isSignedIn])
 
+    // Update GIF when goal data changes
+    useEffect(() => {
+        if (goalData) {
+            const target = safeNumber(goalData.target)
+            const current = safeNumber(goalData.current)
+            
+            const newGif = getRandomGif(current, target)
+            setCurrentGif(newGif)
+            setGifError(false)
+        }
+    }, [goalData])
+
     const calculateDaysRemaining = () => {
         // Get current time in KST (UTC+9)
         const now = new Date()
@@ -42,9 +111,6 @@ export default function WeeklyGoalCard() {
         const dayOfWeek = nowKST.getUTCDay() // 0 = Sunday, 1 = Monday, ..., 4 = Thursday
         
         // Calculate days until next Thursday (week resets Thursday at midnight KST)
-        // If today is Thursday (4), next reset is in 7 days
-        // If today is Friday (5), next reset is in 6 days
-        // If today is Wednesday (3), next reset is in 1 day
         const daysUntilThursday = (4 - dayOfWeek + 7) % 7
         
         setDaysRemaining(daysUntilThursday === 0 ? 7 : daysUntilThursday)
@@ -65,6 +131,21 @@ export default function WeeklyGoalCard() {
             setGoalData(null)
         } finally {
             setLoading(false)
+        }
+    }
+
+    // Handle GIF load error
+    const handleGifError = () => {
+        if (goalData) {
+            const target = safeNumber(goalData.target)
+            const current = safeNumber(goalData.current)
+            
+            const newGif = getRandomGif(current, target)
+            if (newGif !== currentGif) {
+                setCurrentGif(newGif)
+            } else {
+                setGifError(true)
+            }
         }
     }
 
@@ -154,6 +235,21 @@ export default function WeeklyGoalCard() {
                         <span className="text-green-400">{Math.round(progress)}%</span>
                     </div>
                 </div>
+
+                {/* Dynamic GIF based on progress */}
+                {currentGif && !gifError && (
+                    <div className="bg-white/5 border border-white/10 rounded-lg p-4 text-center">
+                        <img 
+                            src={currentGif} 
+                            alt="Progress reaction"
+                            className="w-32 h-32 mx-auto rounded-lg object-cover mb-2"
+                            onError={handleGifError}
+                        />
+                        <p className="text-white font-semibold">
+                            {getProgressMessage(current, target)}
+                        </p>
+                    </div>
+                )}
 
                 {/* User Contribution */}
                 {isSignedIn && userStreams > 0 && (
