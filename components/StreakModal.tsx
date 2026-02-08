@@ -18,28 +18,27 @@ const getTierInfo = (streak: number) => {
   return { image: '/tiers/deckhand.svg', name: 'Deckhand', description: "You're just getting started. Earn your keep.", next: 'Wayfinder', target: 1, progress: 0, rank: 0 }
 }
 
-// Get week days following Thursday-Wednesday reset in KST
-const getWeekDaysKST = (currentStreak: number) => {
+// Get week days in user's local timezone (Thursday-Wednesday week)
+const getWeekDaysLocal = (currentStreak: number) => {
   const now = new Date()
-  const kstNow = new Date(now.getTime() + (9 * 60 * 60 * 1000))
   
-  // Get current day of week (0 = Sunday, 4 = Thursday)
-  const kstDay = kstNow.getUTCDay()
+  // Get current day of week in LOCAL time (0 = Sunday, 4 = Thursday)
+  const localDay = now.getDay()
   
-  // Calculate days since last Thursday
-  const daysSinceThursday = (kstDay + 7 - 4) % 7
+  // Calculate days since last Thursday (local time)
+  const daysSinceThursday = (localDay + 7 - 4) % 7
   
-  // Get the date of this week's Thursday (start of week)
-  const thisWeekThursday = new Date(kstNow)
-  thisWeekThursday.setUTCDate(kstNow.getUTCDate() - daysSinceThursday)
-  thisWeekThursday.setUTCHours(0, 0, 0, 0)
+  // Get the date of this week's Thursday (start of week) in local time
+  const thisWeekThursday = new Date(now)
+  thisWeekThursday.setDate(now.getDate() - daysSinceThursday)
+  thisWeekThursday.setHours(0, 0, 0, 0)
   
   const days = []
   const dayLabels = ['T', 'F', 'S', 'S', 'M', 'T', 'W'] // Thu, Fri, Sat, Sun, Mon, Tue, Wed
   
   for (let i = 0; i < 7; i++) {
     const date = new Date(thisWeekThursday)
-    date.setUTCDate(thisWeekThursday.getUTCDate() + i)
+    date.setDate(thisWeekThursday.getDate() + i)
     
     // Check if this day is completed based on streak
     // A day is completed if it's within the streak count, counting backwards from today
@@ -87,7 +86,7 @@ export default function StreakModal({ isOpen, onClose }: StreakModalProps) {
   const tier = stats ? getTierInfo(stats.currentStreak) : null
   const daysRemaining = tier?.next ? (tier.target! - (stats?.currentStreak || 0)) : 0
 
-  const weekDays = getWeekDaysKST(stats?.currentStreak || 0)
+  const weekDays = getWeekDaysLocal(stats?.currentStreak || 0)
   const completedDays = weekDays.filter(d => d.completed).length
 
   return (
@@ -247,7 +246,7 @@ export default function StreakModal({ isOpen, onClose }: StreakModalProps) {
                     </div>
                   ))}
                 </div>
-                <p className="text-[10px] text-gray-500 text-center mt-2">Week resets Thursday 12AM KST</p>
+                <p className="text-[10px] text-gray-500 text-center mt-2">Week resets every Thursday 12AM KST</p>
               </div>
 
               {/* Achievements - With hover tooltip */}
