@@ -3,15 +3,15 @@ import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
   try {
+    // Auth commented out for one-time run
     // const authHeader = request.headers.get("authorization")
     // if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     // }
 
-    // Get optional pagination params from URL
     const url = new URL(request.url)
     const startIndex = parseInt(url.searchParams.get('start') || '0')
-    const batchSize = parseInt(url.searchParams.get('batch') || '20') // Process 20 users at a time
+    const batchSize = parseInt(url.searchParams.get('batch') || '20')
 
     console.log(`🔄 Starting backfill from index ${startIndex}, batch size ${batchSize}...`)
 
@@ -20,7 +20,6 @@ export async function GET(request: Request) {
     
     console.log(`📊 Total users found: ${totalUsers}`)
 
-    // Get the slice of users for this batch
     const batchKeys = userKeys.slice(startIndex, startIndex + batchSize)
     
     if (batchKeys.length === 0) {
@@ -34,35 +33,34 @@ export async function GET(request: Request) {
 
     let usersProcessed = 0
     let totalStreamsBackfilled = 0
-    const results: { userId: string; streams: number }[] = []
+    const results: { userId: string; streams: number; weeksFound: number }[] = []
     const errors: string[] = []
 
     for (const userKey of batchKeys) {
       try {
         const userId = userKey.split(":")[1]
         
-        const userDailyKeys = await kv.keys(`community:daily:user:${userId}:*`)
+        // Get WEEKLY contribution keys instead of daily
+        const userWeeklyKeys = await kv.keys(`community:weekly:user:${userId}:*`)
         
-        if (userDailyKeys.length === 0) {
-          results.push({ userId, streams: 0 })
+        if (userWeeklyKeys.length === 0) {
+          results.push({ userId, streams: 0, weeksFound: 0 })
           continue
         }
 
-        // Batch fetch all values at once
-        const values = await kv.mget<number[]>(...userDailyKeys)
+        // Batch fetch all weekly values
+        const values = await kv.mget<number[]>(...userWeeklyKeys)
         const total = values.reduce((sum, val) => sum + (val || 0), 0)
 
         if (total > 0) {
-          // Get existing value to avoid overwriting higher values
-          const existing = await kv.get<number>(`user:${userId}:total_streams`) || 0
-          const newTotal = Math.max(existing, total)
-          
-          await kv.set(`user:${userId}:total_streams`, newTotal)
+          // Overwrite with the correct total from weekly data
+          await kv.set(`user:${userId}:total_streams`, total)
           usersProcessed++
-          totalStreamsBackfilled += newTotal
-          results.push({ userId, streams: newTotal })
+          totalStreamsBackfilled += total
+          results.push({ userId, streams: total, weeksFound: userWeeklyKeys.length })
+          console.log(`✅ User ${userId}: ${total} streams from ${userWeeklyKeys.length} weeks`)
         } else {
-          results.push({ userId, streams: 0 })
+          results.push({ userId, streams: 0, weeksFound: userWeeklyKeys.length })
         }
       } catch (error) {
         const errMsg = `Error processing ${userKey}: ${error}`

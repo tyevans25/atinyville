@@ -141,6 +141,9 @@ export default function StreakModal({ isOpen, onClose }: StreakModalProps) {
                     </span>
                   </div>
                   
+                  {/* Tier description */}
+                  <p className="text-xs text-gray-400 italic mb-2">{tier?.description}</p>
+
                   {/* Streak count */}
                   <div className="flex items-center gap-1 mb-2">
                     <span className="text-3xl font-black text-white">{stats?.currentStreak || 0}</span>
