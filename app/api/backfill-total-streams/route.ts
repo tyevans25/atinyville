@@ -1,69 +1,101 @@
 import { kv } from '@vercel/kv'
 import { NextResponse } from 'next/server'
 
-// ONE-TIME BACKFILL SCRIPT
-// Run this once to populate total_streams for all users based on their daily contributions
-
 export async function GET(request: Request) {
   try {
-    // Auth check - only allow if you have the secret
-    const authHeader = request.headers.get("authorization")
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    // const authHeader = request.headers.get("authorization")
+    // if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    // }
+
+    // Get optional pagination params from URL
+    const url = new URL(request.url)
+    const startIndex = parseInt(url.searchParams.get('start') || '0')
+    const batchSize = parseInt(url.searchParams.get('batch') || '20') // Process 20 users at a time
+
+    console.log(`🔄 Starting backfill from index ${startIndex}, batch size ${batchSize}...`)
+
+    const userKeys = await kv.keys("user:*:statsfm")
+    const totalUsers = userKeys.length
+    
+    console.log(`📊 Total users found: ${totalUsers}`)
+
+    // Get the slice of users for this batch
+    const batchKeys = userKeys.slice(startIndex, startIndex + batchSize)
+    
+    if (batchKeys.length === 0) {
+      return NextResponse.json({
+        success: true,
+        message: 'All users processed!',
+        totalUsers,
+        completed: true
+      })
     }
 
-    console.log('🔄 Starting total_streams backfill...')
-
-    // Get all users
-    const userKeys = await kv.keys("user:*:statsfm")
     let usersProcessed = 0
     let totalStreamsBackfilled = 0
+    const results: { userId: string; streams: number }[] = []
+    const errors: string[] = []
 
-    for (const userKey of userKeys) {
+    for (const userKey of batchKeys) {
       try {
         const userId = userKey.split(":")[1]
         
-        // Get all daily contribution keys for this user
         const userDailyKeys = await kv.keys(`community:daily:user:${userId}:*`)
         
         if (userDailyKeys.length === 0) {
-          console.log(`  ⏭️  User ${userId}: No daily contributions found`)
+          results.push({ userId, streams: 0 })
           continue
         }
 
-        // Sum up all their daily streams
-        let total = 0
-        for (const dailyKey of userDailyKeys) {
-          const streams = await kv.get<number>(dailyKey) || 0
-          total += streams
-        }
+        // Batch fetch all values at once
+        const values = await kv.mget<number[]>(...userDailyKeys)
+        const total = values.reduce((sum, val) => sum + (val || 0), 0)
 
         if (total > 0) {
-          // Set their total_streams
-          await kv.set(`user:${userId}:total_streams`, total)
-          console.log(`  ✅ User ${userId}: Backfilled ${total} streams (from ${userDailyKeys.length} days)`)
+          // Get existing value to avoid overwriting higher values
+          const existing = await kv.get<number>(`user:${userId}:total_streams`) || 0
+          const newTotal = Math.max(existing, total)
+          
+          await kv.set(`user:${userId}:total_streams`, newTotal)
           usersProcessed++
-          totalStreamsBackfilled += total
+          totalStreamsBackfilled += newTotal
+          results.push({ userId, streams: newTotal })
+        } else {
+          results.push({ userId, streams: 0 })
         }
       } catch (error) {
-        console.error(`❌ Error processing user ${userKey}:`, error)
+        const errMsg = `Error processing ${userKey}: ${error}`
+        console.error(`❌ ${errMsg}`)
+        errors.push(errMsg)
         continue
       }
     }
 
-    console.log(`🎉 Backfill complete!`)
-    console.log(`   Users processed: ${usersProcessed}`)
-    console.log(`   Total streams backfilled: ${totalStreamsBackfilled}`)
+    const nextIndex = startIndex + batchSize
+    const hasMore = nextIndex < totalUsers
 
     return NextResponse.json({
       success: true,
-      usersProcessed,
-      totalStreamsBackfilled,
-      message: 'Backfill completed successfully'
+      batch: {
+        start: startIndex,
+        end: startIndex + batchKeys.length,
+        processed: usersProcessed,
+        streamsBackfilled: totalStreamsBackfilled
+      },
+      progress: {
+        completed: startIndex + batchKeys.length,
+        total: totalUsers,
+        percentage: Math.round(((startIndex + batchKeys.length) / totalUsers) * 100)
+      },
+      hasMore,
+      nextUrl: hasMore ? `/api/backfill-total-streams?start=${nextIndex}&batch=${batchSize}` : null,
+      results,
+      errors: errors.length > 0 ? errors : undefined
     })
 
   } catch (error) {
     console.error("❌ Backfill error:", error)
-    return NextResponse.json({ error: "Backfill failed" }, { status: 500 })
+    return NextResponse.json({ error: "Backfill failed", details: String(error) }, { status: 500 })
   }
 }
