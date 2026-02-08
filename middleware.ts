@@ -14,7 +14,6 @@ const isPublicRoute = createRouteMatcher([
   "/api/cron(.*)", 
   "/api/user-stats",
   "/api/streak",
-  "/api/backfill-total-streams",  // ← ADD THIS
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/api/quiz/check-played",

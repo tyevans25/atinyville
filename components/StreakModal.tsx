@@ -11,11 +11,49 @@ interface StreakModalProps {
 }
 
 const getTierInfo = (streak: number) => {
-  if (streak >= 30) return { image: '/tiers/cap_RH.svg', name: "Captain's Right Hand", description: "Standing closest to the helm as the Captain's most trusted advisor. Hold the course.",next: null, progress: 100, rank: 4 }
-  if (streak >= 14) return { image: '/tiers/1st_mate.svg', name: 'First Mate', description: "You've survived treacharous paths and made the trusted circle. Maintain it.", next: "Captain's Right Hand", target: 30, progress: ((streak - 14) / 16) * 100, rank: 3 }
-  if (streak >= 7) return { image: '/tiers/corsair.svg', name: 'Corsair', description: "A daring pirate of the high seas, Keep moving forward to the next adventure.", next: 'First Mate', target: 14, progress: ((streak - 7) / 7) * 100, rank: 2 }
+  if (streak >= 30) return { image: '/tiers/cap_RH.svg', name: "Captain's Right Hand", description: "Standing closest to the helm as the Captain's most trusted advisor. Hold the course.", next: null, progress: 100, rank: 4 }
+  if (streak >= 14) return { image: '/tiers/1st_mate.svg', name: 'First Mate', description: "You've survived treacherous paths and made the trusted circle. Maintain it.", next: "Captain's Right Hand", target: 30, progress: ((streak - 14) / 16) * 100, rank: 3 }
+  if (streak >= 7) return { image: '/tiers/corsair.svg', name: 'Corsair', description: "A daring pirate of the high seas. Keep moving forward to the next adventure.", next: 'First Mate', target: 14, progress: ((streak - 7) / 7) * 100, rank: 2 }
   if (streak >= 1) return { image: '/tiers/wayfinder.svg', name: 'Wayfinder', description: "You're navigating the vast ocean and learning life at sea. Don't lose direction.", next: 'Corsair', target: 7, progress: ((streak - 1) / 6) * 100, rank: 1 }
   return { image: '/tiers/deckhand.svg', name: 'Deckhand', description: "You're just getting started. Earn your keep.", next: 'Wayfinder', target: 1, progress: 0, rank: 0 }
+}
+
+// Get week days following Thursday-Wednesday reset in KST
+const getWeekDaysKST = (currentStreak: number) => {
+  const now = new Date()
+  const kstNow = new Date(now.getTime() + (9 * 60 * 60 * 1000))
+  
+  // Get current day of week (0 = Sunday, 4 = Thursday)
+  const kstDay = kstNow.getUTCDay()
+  
+  // Calculate days since last Thursday
+  const daysSinceThursday = (kstDay + 7 - 4) % 7
+  
+  // Get the date of this week's Thursday (start of week)
+  const thisWeekThursday = new Date(kstNow)
+  thisWeekThursday.setUTCDate(kstNow.getUTCDate() - daysSinceThursday)
+  thisWeekThursday.setUTCHours(0, 0, 0, 0)
+  
+  const days = []
+  const dayLabels = ['T', 'F', 'S', 'S', 'M', 'T', 'W'] // Thu, Fri, Sat, Sun, Mon, Tue, Wed
+  
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(thisWeekThursday)
+    date.setUTCDate(thisWeekThursday.getUTCDate() + i)
+    
+    // Check if this day is completed based on streak
+    // A day is completed if it's within the streak count, counting backwards from today
+    const daysFromToday = daysSinceThursday - i
+    const completed = daysFromToday >= 0 && daysFromToday < currentStreak
+    
+    days.push({
+      day: dayLabels[i],
+      completed,
+      isToday: i === daysSinceThursday
+    })
+  }
+  
+  return days
 }
 
 export default function StreakModal({ isOpen, onClose }: StreakModalProps) {
@@ -49,21 +87,7 @@ export default function StreakModal({ isOpen, onClose }: StreakModalProps) {
   const tier = stats ? getTierInfo(stats.currentStreak) : null
   const daysRemaining = tier?.next ? (tier.target! - (stats?.currentStreak || 0)) : 0
 
-  const getWeekDays = () => {
-    const days = []
-    const now = new Date()
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(now)
-      date.setDate(date.getDate() - i)
-      days.push({
-        day: date.toLocaleDateString('en-US', { weekday: 'short' })[0],
-        completed: i <= (stats?.currentStreak || 0) - 1 && (stats?.currentStreak || 0) > 0
-      })
-    }
-    return days
-  }
-
-  const weekDays = getWeekDays()
+  const weekDays = getWeekDaysKST(stats?.currentStreak || 0)
   const completedDays = weekDays.filter(d => d.completed).length
 
   return (
@@ -179,7 +203,7 @@ export default function StreakModal({ isOpen, onClose }: StreakModalProps) {
               <div className="bg-black/40 rounded-xl border border-white/5 px-4 py-3">
                 <div className="flex justify-between text-center">
                   <div className="flex-1">
-                    <div className="text-xl font-bold text-white">{stats?.totalStreams.toLocaleString() || 0}</div>
+                    <div className="text-xl font-bold text-white">{stats?.totalStreams?.toLocaleString() || 0}</div>
                     <div className="text-[10px] uppercase tracking-wider text-gray-500">Total Streams</div>
                   </div>
                   <div className="w-px bg-white/10" />
@@ -195,7 +219,7 @@ export default function StreakModal({ isOpen, onClose }: StreakModalProps) {
                 </div>
               </div>
 
-              {/* Weekly Streak - Game style */}
+              {/* Weekly Streak - Thursday to Wednesday (KST) */}
               <div className="bg-white/[0.02] rounded-xl p-4 border border-white/5">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-semibold text-gray-300 uppercase tracking-wider">Weekly Streak</span>
@@ -203,9 +227,9 @@ export default function StreakModal({ isOpen, onClose }: StreakModalProps) {
                 </div>
                 <div className="flex gap-2">
                   {weekDays.map((day, i) => (
-                    <div key={i} className="flex-1">
+                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
                       <div 
-                        className={`h-10 rounded-lg flex items-center justify-center text-xs font-bold transition-all
+                        className={`w-full h-10 rounded-lg flex items-center justify-center text-xs font-bold transition-all relative
                           ${day.completed 
                             ? 'text-white shadow-lg' 
                             : 'bg-gray-800 text-gray-600 border border-gray-700/50'}`}
@@ -215,13 +239,18 @@ export default function StreakModal({ isOpen, onClose }: StreakModalProps) {
                         } : {}}
                       >
                         {day.completed ? '✓' : day.day}
+                        {/* Today indicator */}
+                        {day.isToday && (
+                          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-blue-400" />
+                        )}
                       </div>
                     </div>
                   ))}
                 </div>
+                <p className="text-[10px] text-gray-500 text-center mt-2">Week resets Thursday 12AM KST</p>
               </div>
 
-              {/* Achievements - No borders, bigger badges */}
+              {/* Achievements - With hover tooltip */}
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-xs font-semibold text-gray-300 uppercase tracking-wider">
@@ -234,7 +263,7 @@ export default function StreakModal({ isOpen, onClose }: StreakModalProps) {
                   {badges.map((badge) => (
                     <div
                       key={badge.id}
-                      className="flex flex-col items-center group"
+                      className="flex flex-col items-center group relative"
                     >
                       <div className="relative w-20 h-24">
                         {/* Subtle glow on hover */}
@@ -249,6 +278,14 @@ export default function StreakModal({ isOpen, onClose }: StreakModalProps) {
                       <p className="text-xs font-medium text-gray-300 mt-2 text-center max-w-[80px]">
                         {badge.name}
                       </p>
+                      
+                      {/* Hover tooltip */}
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 border border-white/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 w-48 shadow-xl">
+                        <p className="text-xs font-semibold text-white mb-1">{badge.name}</p>
+                        <p className="text-[10px] text-gray-400">{badge.description}</p>
+                        {/* Tooltip arrow */}
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800" />
+                      </div>
                     </div>
                   ))}
                   
