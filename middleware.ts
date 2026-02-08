@@ -12,8 +12,9 @@ const isPublicRoute = createRouteMatcher([
   "/variety",
   "/api/quiz/leaderboard",
   "/api/cron(.*)", 
-  "/api/user-stats",      // ← ADD (so middleware doesn't block)
-  "/api/streak",          // ← ADD
+  "/api/user-stats",
+  "/api/streak",
+  "/api/backfill-total-streams",  // ← ADD THIS
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/api/quiz/check-played",
