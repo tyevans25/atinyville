@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useState, useEffect } from "react"
 import { Menu, X, Trophy, TrendingUp, ShoppingBag, Map, Play } from "lucide-react"
 import { UserButton, SignInButton, useUser } from "@clerk/nextjs"
@@ -8,11 +9,11 @@ import StreakModal from "@/components/StreakModal"
 
 // Get badge tier based on streak
 const getBadgeTier = (streak: number) => {
-  if (streak >= 30) return { image: 'cap_RH.svg', label: "Captain's Right Hand" }
-  if (streak >= 14) return { image: '1st_mate.svg', label: 'First Mate' }
-  if (streak >= 7) return { image: 'corsair.svg', label: 'Corsair' }
-  if (streak >= 1) return { image: 'wayfinder.svg', label: 'Wayfinder' }
-  return { image: 'deckhand.svg', label: 'Deckhand' } // Default badge for 0 streak
+  if (streak >= 30) return { image: '/tiers/cap_RH.svg', label: "Captain's Right Hand" }
+  if (streak >= 14) return { image: '/tiers/1st_mate.svg', label: 'First Mate' }
+  if (streak >= 7) return { image: '/tiers/corsair.svg', label: 'Corsair' }
+  if (streak >= 1) return { image: '/tiers/wayfinder.svg', label: 'Wayfinder' }
+  return { image: '/tiers/deckhand.svg', label: 'Deckhand' }
 }
 
 export default function Navigation() {
@@ -21,7 +22,6 @@ export default function Navigation() {
   const { isSignedIn, user } = useUser()
   const [streakData, setStreakData] = useState<{ currentStreak: number } | null>(null)
 
-  // Fetch streak data when signed in
   useEffect(() => {
     if (isSignedIn) {
       fetchStreak()
@@ -83,19 +83,25 @@ export default function Navigation() {
               <div className="ml-4 pl-4 border-l border-white/10">
                 {isSignedIn ? (
                   <div className="flex items-center gap-3">
-                    {/* Username with Badge and Streak - CLICKABLE */}
+                    {/* Badge and Streak - CLICKABLE */}
                     {badge && streakData && streakData.currentStreak > 0 && (
                       <button
                         onClick={() => setModalOpen(true)}
-                        className="flex flex-col items-end leading-tight hover:opacity-80 transition cursor-pointer"
+                        className="flex items-center gap-2 hover:opacity-80 transition cursor-pointer"
                       >
-                        <div className="flex items-center gap-1 text-sm">
-                          <span>{badge.image}</span>
-                          <span className="text-gray-300 font-medium">{badge.label}</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-xs mt-0.5">
-                          <span className="ml-3.5">🔥</span>
-                          <span className="text-white font-semibold">{streakData.currentStreak}</span>
+                        <Image
+                          src={badge.image}
+                          alt={badge.label}
+                          width={28}
+                          height={32}
+                          className="object-contain"
+                        />
+                        <div className="flex flex-col items-start leading-tight">
+                          <span className="text-gray-300 font-medium text-sm">{badge.label}</span>
+                          <div className="flex items-center gap-1 text-xs">
+                            <span>🔥</span>
+                            <span className="text-white font-semibold">{streakData.currentStreak}</span>
+                          </div>
                         </div>
                       </button>
                     )}
@@ -162,9 +168,16 @@ export default function Navigation() {
                                 setModalOpen(true)
                                 setMobileMenuOpen(false)
                               }}
-                              className="text-xs text-gray-400 text-left hover:text-white transition"
+                              className="flex items-center gap-1.5 text-xs text-gray-400 text-left hover:text-white transition mt-0.5"
                             >
-                              {badge.image} {badge.label}
+                              <Image
+                                src={badge.image}
+                                alt={badge.label}
+                                width={16}
+                                height={18}
+                                className="object-contain"
+                              />
+                              <span>{badge.label}</span>
                             </button>
                           )}
                         </div>

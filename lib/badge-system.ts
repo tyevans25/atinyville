@@ -22,49 +22,49 @@ export const BADGES: Badge[] = [
   // STREAK BADGES
     {
     id: 'streak_1',
-    name: 'Day 1 Sprout',
+    name: 'First Day Survivor',
     image: '/badges/streak_1.svg',
-    description: '1-day streak',
+    description: 'Completed 1st daily mission set',
     category: 'streak',
     condition: (stats) => stats.currentStreak >= 1 || stats.longestStreak >= 1
   },
   {
     id: 'streak_7',
-    name: 'Budding Flower',
+    name: 'Becoming Part of the Crew',
     image: '/badges/streak_7.svg',
-    description: '7-day streak',
+    description: 'Completed daily mission sets for 7 consecutive days',
     category: 'streak',
     condition: (stats) => stats.currentStreak >= 7 || stats.longestStreak >= 7
   },
   {
     id: 'streak_14',
-    name: 'Fortnight Fighter',
+    name: 'Sailing Strong',
     image: '/badges/streak_14.svg',
-    description: '14-day streak',
+    description: 'Completed daily mission sets for 14 consecutive days',
     category: 'streak',
     condition: (stats) => stats.currentStreak >= 14 || stats.longestStreak >= 14
   },
   {
     id: 'streak_30',
-    name: 'Monthly Master',
+    name: 'Oath of the Voyage',
     image: '/badges/streak_30.svg',
-    description: '30-day streak',
+    description: 'Completed daily mission sets for 30 consecutive days',
     category: 'streak',
     condition: (stats) => stats.longestStreak >= 30
   },
   {
     id: 'streak_50',
-    name: 'Bronze Dedication',
+    name: 'Unbroken Course',
     image: '/badges/streak_50.svg',
-    description: '50-day streak',
+    description: 'Completed daily mission sets for 50 consecutive days',
     category: 'streak',
     condition: (stats) => stats.longestStreak >= 50
   },
   {
     id: 'streak_100',
-    name: 'Silver Commitment',
+    name: 'Beyond the Horizon',
     image: '/badges/streak_100.svg',
-    description: '100-day streak',
+    description: 'Completed daily mission sets for 100 consecutive days',
     category: 'streak',
     condition: (stats) => stats.longestStreak >= 100
   },
@@ -72,7 +72,7 @@ export const BADGES: Badge[] = [
   // TOTAL STREAMS BADGES
   {
     id: 'streams_100',
-    name: 'Getting Started',
+    name: 'Signal Spotted',
     image: '/badges/streams_100.svg',
     description: '100 total streams',
     category: 'streams',
@@ -80,7 +80,7 @@ export const BADGES: Badge[] = [
   },
   {
     id: 'streams_500',
-    name: 'Warmed Up',
+    name: 'Raising the Flag',
     image: '/badges/streams_500.svg',
     description: '500 total streams',
     category: 'streams',
@@ -88,7 +88,7 @@ export const BADGES: Badge[] = [
   },
   {
     id: 'streams_1000',
-    name: 'Serious Business',
+    name: 'Charting the Course',
     image: '/badges/streams_1000.svg',
     description: '1,000 total streams',
     category: 'streams',
@@ -96,7 +96,7 @@ export const BADGES: Badge[] = [
   },
   {
     id: 'streams_2500',
-    name: 'Deckhand',
+    name: 'Steady on the Helm',
     image: '/badges/streams_2500.svg',
     description: '2,500 total streams',
     category: 'streams',
@@ -104,7 +104,7 @@ export const BADGES: Badge[] = [
   },
   {
     id: 'streams_5000',
-    name: "On Captain's Crew",
+    name: "Heard Across the Seas",
     image: '/badges/streams_5000.svg',
     description: '5,000 total streams',
     category: 'streams',
@@ -112,7 +112,7 @@ export const BADGES: Badge[] = [
   },
   {
     id: 'streams_10000',
-    name: "Captain's Right Hand",
+    name: "The Voyage Deepens",
     image: '/badges/streams_10000.svg',
     description: '10,000 total streams',
     category: 'streams',
@@ -120,7 +120,7 @@ export const BADGES: Badge[] = [
   },
     {
     id: 'streams_20000',
-    name: "Captain's Parrot",
+    name: "Uncharted Waters",
     image: '/badges/streams_20000.svg',
     description: '20,000 total streams',
     category: 'streams',
@@ -156,7 +156,7 @@ export const BADGES: Badge[] = [
   // MILESTONE BADGES
   {
     id: 'first_mission',
-    name: 'Successful Hit',
+    name: '1st Orders Received',
     image: '/badges/first_mission.svg',
     description: 'Completed first mission set',
     category: 'milestone',
@@ -164,7 +164,7 @@ export const BADGES: Badge[] = [
   },
   {
     id: 'missions_10',
-    name: 'Accomplished Hitman',
+    name: 'Earning My Sea Legs',
     image: '/badges/missions_10.svg',
     description: 'Completed 10 mission sets',
     category: 'milestone',

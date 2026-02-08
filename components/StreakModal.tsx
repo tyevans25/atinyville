@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
+import Image from 'next/image'
 import { type Badge, type UserStats } from '@/lib/badge-system'
 
 interface StreakModalProps {
@@ -10,11 +11,11 @@ interface StreakModalProps {
 }
 
 const getTierInfo = (streak: number) => {
-  if (streak >= 30) return { emoji: '🏴‍☠️', name: 'Captain ATINY', next: null, progress: 100, rank: 4 }
-  if (streak >= 14) return { emoji: '⭐', name: 'Star ATINY', next: 'Captain ATINY', target: 30, progress: ((streak - 14) / 16) * 100, rank: 3 }
-  if (streak >= 7) return { emoji: '🔥', name: 'Fire ATINY', next: 'Star ATINY', target: 14, progress: ((streak - 7) / 7) * 100, rank: 2 }
-  if (streak >= 1) return { emoji: '🌱', name: 'Sprout ATINY', next: 'Fire ATINY', target: 7, progress: ((streak - 1) / 6) * 100, rank: 1 }
-  return { emoji: '❓', name: 'No Tier', next: 'Sprout ATINY', target: 1, progress: 0, rank: 0 }
+  if (streak >= 30) return { image: '/tiers/cap_RH.svg', name: "Captain's Right Hand", next: null, progress: 100, rank: 4 }
+  if (streak >= 14) return { image: '/tiers/1st_mate.svg', name: 'First Mate', next: "Captain's Right Hand", target: 30, progress: ((streak - 14) / 16) * 100, rank: 3 }
+  if (streak >= 7) return { image: '/tiers/corsair.svg', name: 'Corsair', next: 'First Mate', target: 14, progress: ((streak - 7) / 7) * 100, rank: 2 }
+  if (streak >= 1) return { image: '/tiers/wayfinder.svg', name: 'Wayfinder', next: 'Corsair', target: 7, progress: ((streak - 1) / 6) * 100, rank: 1 }
+  return { image: '/tiers/deckhand.svg', name: 'Deckhand', next: 'Wayfinder', target: 1, progress: 0, rank: 0 }
 }
 
 export default function StreakModal({ isOpen, onClose }: StreakModalProps) {
@@ -93,7 +94,7 @@ export default function StreakModal({ isOpen, onClose }: StreakModalProps) {
                   animation: 'pulse 2s ease-in-out infinite'
                 }}
               />
-              <span className="text-sm font-semibold text-blue-400 uppercase tracking-wider">Player Stats</span>
+              <span className="text-sm font-semibold text-blue-400 uppercase tracking-wider">ATINY Stats</span>
             </div>
             <button
               onClick={onClose}
@@ -107,32 +108,25 @@ export default function StreakModal({ isOpen, onClose }: StreakModalProps) {
             <div className="p-12 text-center text-gray-400">Loading...</div>
           ) : (
             <div className="p-5 space-y-5">
-              {/* Main Display - Lightstick inspired orb with streak number */}
+              {/* Main Display - Tier image with streak number */}
               <div className="flex items-center gap-5">
-                {/* Glowing orb with streak number */}
+                {/* Tier badge image */}
                 <div className="relative flex-shrink-0">
                   {/* Outer glow */}
                   <div 
-                    className="absolute inset-0 rounded-full blur-xl opacity-50"
+                    className="absolute inset-0 blur-xl opacity-50"
                     style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)' }}
                   />
-                  {/* Main orb */}
-                  <div 
-                    className="relative w-24 h-24 rounded-full flex items-center justify-center shadow-2xl"
-                    style={{ 
-                      background: 'linear-gradient(135deg, #3b82f6, #8b5cf6, #7c3aed)',
-                      boxShadow: '0 0 40px rgba(139, 92, 246, 0.3)'
-                    }}
-                  >
-                    {/* Inner dark circle */}
-                    <div className="w-20 h-20 rounded-full bg-gray-900/80 backdrop-blur flex flex-col items-center justify-center">
-                      <span className="text-4xl font-black text-white leading-none">
-                        {stats?.currentStreak || 0}
-                      </span>
-                      <span className="text-[9px] uppercase tracking-widest text-gray-400 mt-0.5">
-                        day streak
-                      </span>
-                    </div>
+                  {/* Tier image */}
+                  <div className="relative w-24 h-28">
+                    {tier?.image && (
+                      <Image
+                        src={tier.image}
+                        alt={tier.name}
+                        fill
+                        className="object-contain drop-shadow-lg"
+                      />
+                    )}
                   </div>
                   {/* Sparkle */}
                   <div className="absolute -top-1 -right-1 text-blue-400 text-sm animate-pulse">✦</div>
@@ -147,8 +141,14 @@ export default function StreakModal({ isOpen, onClose }: StreakModalProps) {
                     </span>
                   </div>
                   
+                  {/* Streak count */}
+                  <div className="flex items-center gap-1 mb-2">
+                    <span className="text-3xl font-black text-white">{stats?.currentStreak || 0}</span>
+                    <span className="text-sm text-gray-400">day streak</span>
+                  </div>
+                  
                   {tier?.next ? (
-                    <div className="mt-3">
+                    <div>
                       <div className="flex justify-between text-xs text-gray-400 mb-1.5">
                         <span>Progress to {tier.next}</span>
                         <span>{Math.round(tier.progress)}%</span>
@@ -167,7 +167,7 @@ export default function StreakModal({ isOpen, onClose }: StreakModalProps) {
                       </p>
                     </div>
                   ) : (
-                    <p className="text-sm text-green-400 mt-2">🏆 Highest level reached!</p>
+                    <p className="text-sm text-green-400">🏆 Highest level reached!</p>
                   )}
                 </div>
               </div>
@@ -233,13 +233,14 @@ export default function StreakModal({ isOpen, onClose }: StreakModalProps) {
                       key={badge.id}
                       className="flex flex-col items-center group"
                     >
-                      <div className="relative">
+                      <div className="relative w-20 h-24">
                         {/* Subtle glow on hover */}
                         <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <img 
+                        <Image 
                           src={badge.image} 
                           alt={badge.name}
-                          className="relative w-20 h-24 object-contain drop-shadow-lg transition-transform group-hover:scale-105"
+                          fill
+                          className="object-contain drop-shadow-lg transition-transform group-hover:scale-105"
                         />
                       </div>
                       <p className="text-xs font-medium text-gray-300 mt-2 text-center max-w-[80px]">
@@ -278,7 +279,7 @@ export default function StreakModal({ isOpen, onClose }: StreakModalProps) {
                 <p className="text-white font-medium text-sm">
                   {stats && stats.currentStreak > 0 
                     ? `🔥 You're on fire! Don't break your ${stats.currentStreak}-day streak!`
-                    : "🌱 Complete your first mission set to start your streak!"}
+                    : "Complete your first mission set to start your streak!"}
                 </p>
               </div>
             </div>
