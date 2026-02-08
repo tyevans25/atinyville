@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
 import { Target, ExternalLink, Music, Clock, Users } from "lucide-react"
 import { useUser } from "@clerk/nextjs"
 import Link from "next/link"
+import Image from "next/image"
 
 interface DailyGoalData {
     song?: unknown
@@ -21,11 +21,56 @@ const safeNumber = (value: unknown, fallback = 0): number => {
         : fallback
 }
 
+// Motivation GIFs (when progress < 0.9)
+const motivationGifs = [
+  '/gifs/motivation/hongjoong.GIF',
+  '/gifs/motivation/hongjoong2.GIF',
+  '/gifs/motivation/jongho.GIF',
+  '/gifs/motivation/mingi.GIF',
+  '/gifs/motivation/san.GIF',
+  '/gifs/motivation/seonghwa.GIF',
+  '/gifs/motivation/wooyoung.GIF',
+  '/gifs/motivation/yeosang.gif',
+  '/gifs/motivation/yunho.GIF',
+  '/gifs/motivation/yunho2.GIF'
+]
+
+// Celebration GIFs (when progress >= 0.9)
+const celebrationGifs = [
+  '/gifs/complete/hongjoong.GIF',
+  '/gifs/complete/jongho.gif',
+  '/gifs/complete/mingi.GIF',
+  '/gifs/complete/minig-san.GIF',
+  '/gifs/complete/san.GIF',
+  '/gifs/complete/seonghwa.GIF',
+  '/gifs/complete/wooyoung.GIF',
+  '/gifs/complete/yeosang.GIF',
+  '/gifs/complete/yunho.GIF',
+  '/gifs/complete/yunho2.GIF'
+]
+
+// Shuffle array for true randomness
+const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array]
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+    return shuffled
+}
+
+// Get random gif from array
+const getRandomGif = (gifs: string[]) => {
+    const shuffled = shuffleArray(gifs)
+    return shuffled[0]
+}
+
 export default function DailyGoalSlide() {
     const { isSignedIn } = useUser()
     const [goalData, setGoalData] = useState<DailyGoalData | null>(null)
     const [loading, setLoading] = useState(true)
     const [timeRemaining, setTimeRemaining] = useState("")
+    const [currentGif, setCurrentGif] = useState<string>("")
 
     useEffect(() => {
         fetchGoalData()
@@ -57,6 +102,22 @@ export default function DailyGoalSlide() {
         const timer = setInterval(updateTimer, 1000)
         return () => clearInterval(timer)
     }, [])
+
+    // Update GIF when goal data changes
+    useEffect(() => {
+        if (goalData) {
+            const target = safeNumber(goalData.target)
+            const current = safeNumber(goalData.current)
+            const progress = target > 0 ? current / target : 0
+            
+            // Progress >= 0.9 → celebration, < 0.9 → motivation
+            if (progress >= 0.9) {
+                setCurrentGif(getRandomGif(celebrationGifs))
+            } else {
+                setCurrentGif(getRandomGif(motivationGifs))
+            }
+        }
+    }, [goalData])
 
     const fetchGoalData = async () => {
         try {
@@ -117,6 +178,7 @@ export default function DailyGoalSlide() {
 
     const progress = target > 0 ? (current / target) * 100 : 0
     const remaining = Math.max(target - current, 0)
+    const isNearComplete = progress >= 90
 
     return (
         <div className="p-4 md:p-6">
@@ -143,6 +205,27 @@ export default function DailyGoalSlide() {
                 <h4 className="text-2xl font-bold text-white glow-text">"{song}"</h4>
             </div>
 
+            {/* GIF Section */}
+            {currentGif && (
+                <div className="mb-4 rounded-xl overflow-hidden border border-white/10">
+                    <div className="relative w-full h-32 sm:h-40">
+                        <Image
+                            src={currentGif}
+                            alt={isNearComplete ? "Celebration!" : "Keep going!"}
+                            fill
+                            className="object-cover"
+                            unoptimized
+                        />
+                        {/* Overlay with message */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end justify-center pb-2">
+                            <span className="text-white text-sm font-semibold">
+                                {isNearComplete ? "🎉 Almost there!" : "💪 Keep streaming!"}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Description */}
             <p className="text-gray-300 mb-4 text-sm">
                 Complete the daily mission together with other ATINYs! When we reach {target.toLocaleString()} streams, 
@@ -167,7 +250,11 @@ export default function DailyGoalSlide() {
                 <div className="relative">
                     <div className="h-6 bg-white/20 rounded-full overflow-hidden backdrop-blur">
                         <div 
-                            className="h-full bg-gradient-to-r from-blue-500 to-blue-400 transition-all duration-500 flex items-center justify-end pr-2"
+                            className={`h-full transition-all duration-500 flex items-center justify-end pr-2 ${
+                                isNearComplete 
+                                    ? 'bg-gradient-to-r from-green-500 to-emerald-400' 
+                                    : 'bg-gradient-to-r from-blue-500 to-blue-400'
+                            }`}
                             style={{ width: `${Math.min(progress, 100)}%` }}
                         >
                             {progress > 10 && (
