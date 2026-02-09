@@ -23,30 +23,30 @@ const safeNumber = (value: unknown, fallback = 0): number => {
 
 // Motivation GIFs (when progress < 0.9)
 const motivationGifs = [
-  '/gifs/motivation/hongjoong.GIF',
-  '/gifs/motivation/hongjoong2.GIF',
-  '/gifs/motivation/jongho.GIF',
-  '/gifs/motivation/mingi.GIF',
-  '/gifs/motivation/san.GIF',
-  '/gifs/motivation/seonghwa.GIF',
-  '/gifs/motivation/wooyoung.GIF',
-  '/gifs/motivation/yeosang.gif',
-  '/gifs/motivation/yunho.GIF',
-  '/gifs/motivation/yunho2.GIF'
+    '/gifs/motivation/hongjoong.GIF',
+    '/gifs/motivation/hongjoong2.GIF',
+    '/gifs/motivation/jongho.GIF',
+    '/gifs/motivation/mingi.GIF',
+    '/gifs/motivation/san.GIF',
+    '/gifs/motivation/seonghwa.GIF',
+    '/gifs/motivation/wooyoung.GIF',
+    '/gifs/motivation/yeosang.gif',
+    '/gifs/motivation/yunho.GIF',
+    '/gifs/motivation/yunho2.GIF'
 ]
 
 // Celebration GIFs (when progress >= 0.9)
 const celebrationGifs = [
-  '/gifs/complete/hongjoong.GIF',
-  '/gifs/complete/jongho.gif',
-  '/gifs/complete/mingi.GIF',
-  '/gifs/complete/minig-san.GIF',
-  '/gifs/complete/san.GIF',
-  '/gifs/complete/seonghwa.GIF',
-  '/gifs/complete/wooyoung.GIF',
-  '/gifs/complete/yeosang.GIF',
-  '/gifs/complete/yunho.GIF',
-  '/gifs/complete/yunho2.GIF'
+    '/gifs/complete/hongjoong.GIF',
+    '/gifs/complete/jongho.gif',
+    '/gifs/complete/mingi.GIF',
+    '/gifs/complete/minig-san.GIF',
+    '/gifs/complete/san.GIF',
+    '/gifs/complete/seonghwa.GIF',
+    '/gifs/complete/wooyoung.GIF',
+    '/gifs/complete/yeosang.GIF',
+    '/gifs/complete/yunho.GIF',
+    '/gifs/complete/yunho2.GIF'
 ]
 
 // Shuffle array for true randomness
@@ -84,17 +84,17 @@ export default function DailyGoalSlide() {
             // Get current time in KST (UTC+9)
             const now = new Date()
             const nowKST = new Date(now.getTime() + (9 * 60 * 60 * 1000))
-            
+
             // Get midnight KST tomorrow
             const tomorrowKST = new Date(nowKST)
             tomorrowKST.setUTCDate(tomorrowKST.getUTCDate() + 1)
             tomorrowKST.setUTCHours(0, 0, 0, 0)
-            
+
             const diff = tomorrowKST.getTime() - nowKST.getTime()
             const hours = Math.floor(diff / (1000 * 60 * 60))
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
             const seconds = Math.floor((diff % (1000 * 60)) / 1000)
-            
+
             setTimeRemaining(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`)
         }
 
@@ -109,7 +109,7 @@ export default function DailyGoalSlide() {
             const target = safeNumber(goalData.target)
             const current = safeNumber(goalData.current)
             const progress = target > 0 ? current / target : 0
-            
+
             // Progress >= 0.9 → celebration, < 0.9 → motivation
             if (progress >= 0.9) {
                 setCurrentGif(getRandomGif(celebrationGifs))
@@ -208,7 +208,7 @@ export default function DailyGoalSlide() {
             {/* GIF Section */}
             {currentGif && (
                 <div className="mb-4 rounded-xl overflow-hidden border border-white/10">
-                    <div className="relative w-full h-32 sm:h-40">
+                    <div className="relative w-full aspect-square sm:aspect-video">
                         <Image
                             src={currentGif}
                             alt={isNearComplete ? "Celebration!" : "Keep going!"}
@@ -228,7 +228,7 @@ export default function DailyGoalSlide() {
 
             {/* Description */}
             <p className="text-gray-300 mb-4 text-sm">
-                Complete the daily mission together with other ATINYs! When we reach {target.toLocaleString()} streams, 
+                Complete the daily mission together with other ATINYs! When we reach {target.toLocaleString()} streams,
                 everyone who contributed can celebrate. Teamwork makes the dream work! 🤍
             </p>
 
@@ -249,12 +249,11 @@ export default function DailyGoalSlide() {
                 {/* Progress Bar */}
                 <div className="relative">
                     <div className="h-6 bg-white/20 rounded-full overflow-hidden backdrop-blur">
-                        <div 
-                            className={`h-full transition-all duration-500 flex items-center justify-end pr-2 ${
-                                isNearComplete 
-                                    ? 'bg-gradient-to-r from-green-500 to-emerald-400' 
+                        <div
+                            className={`h-full transition-all duration-500 flex items-center justify-end pr-2 ${isNearComplete
+                                    ? 'bg-gradient-to-r from-green-500 to-emerald-400'
                                     : 'bg-gradient-to-r from-blue-500 to-blue-400'
-                            }`}
+                                }`}
                             style={{ width: `${Math.min(progress, 100)}%` }}
                         >
                             {progress > 10 && (
