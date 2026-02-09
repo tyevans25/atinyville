@@ -14,11 +14,8 @@ interface Stream {
 }
 
 interface StreamData {
-  totalStreams: number
-  goalStreams: number
-  username: string
-  date: string
   recentStreams?: Stream[]
+  username?: string
 }
 
 export default function RecentTracksCard() {
@@ -39,7 +36,7 @@ export default function RecentTracksCard() {
 
   const fetchStreams = async () => {
     try {
-      const response = await fetch("/api/user-streams")
+      const response = await fetch("/api/recent-tracks")
       if (response.ok) {
         const data = await response.json()
         setStreamData(data)
@@ -115,7 +112,7 @@ export default function RecentTracksCard() {
         <CardContent className="p-6">
           <div className="text-center py-8">
             <Music className="w-12 h-12 text-white/50 mx-auto mb-3" />
-            <p className="text-gray-300">No ATEEZ streams today yet</p>
+            <p className="text-gray-300">No ATEEZ streams found</p>
             <p className="text-sm text-gray-400 mt-2">Start streaming to see your tracks here!</p>
           </div>
         </CardContent>
@@ -132,7 +129,7 @@ export default function RecentTracksCard() {
             Recent Tracks
           </div>
           <span className="text-sm font-normal text-gray-300">
-            {streamData.recentStreams.length} most recent streams
+            {streamData.recentStreams.length} recent ATEEZ streams
           </span>
         </CardTitle>
       </CardHeader>
@@ -150,7 +147,6 @@ export default function RecentTracksCard() {
                   alt={stream.trackName}
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    // Fallback to music icon if image fails
                     e.currentTarget.style.display = 'none'
                     const parent = e.currentTarget.parentElement
                     if (parent) {
