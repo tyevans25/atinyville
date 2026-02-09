@@ -207,21 +207,21 @@ export default function DailyGoalSlide() {
 
             {/* GIF Section */}
             {currentGif && (
-                <div className="mb-4 rounded-xl overflow-hidden border border-white/10">
-                    <div className="relative w-full aspect-square sm:aspect-video">
+                <div className="mb-4 rounded-xl overflow-hidden border border-white/10 mx-auto w-full max-w-[200px] sm:max-w-[250px]">
+                    <div className="relative aspect-square">
                         <Image
                             src={currentGif}
                             alt={isNearComplete ? "Celebration!" : "Keep going!"}
                             fill
-                            className="object-cover"
+                            className="object-contain"
                             unoptimized
                         />
-                        {/* Overlay with message */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end justify-center pb-2">
-                            <span className="text-white text-sm font-semibold">
-                                {isNearComplete ? "🎉 Almost there!" : "💪 Keep streaming!"}
-                            </span>
-                        </div>
+                    </div>
+                    {/* Message below GIF instead of overlay */}
+                    <div className="bg-black/40 py-2 text-center">
+                        <span className="text-white text-sm font-semibold">
+                            {isNearComplete ? "🎉 Almost there!" : "💪 Keep streaming!"}
+                        </span>
                     </div>
                 </div>
             )}
@@ -251,8 +251,8 @@ export default function DailyGoalSlide() {
                     <div className="h-6 bg-white/20 rounded-full overflow-hidden backdrop-blur">
                         <div
                             className={`h-full transition-all duration-500 flex items-center justify-end pr-2 ${isNearComplete
-                                    ? 'bg-gradient-to-r from-green-500 to-emerald-400'
-                                    : 'bg-gradient-to-r from-blue-500 to-blue-400'
+                                ? 'bg-gradient-to-r from-green-500 to-emerald-400'
+                                : 'bg-gradient-to-r from-blue-500 to-blue-400'
                                 }`}
                             style={{ width: `${Math.min(progress, 100)}%` }}
                         >
