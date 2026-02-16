@@ -156,7 +156,7 @@ export default function ManualRefreshButton() {
 
       {/* Tier Info */}
       <div className="text-xs text-gray-400 text-center pt-2 border-t border-white/10">
-        <p>Upgrade tier for faster auto-refresh rates</p>
+        <p>Manually refresh your streams</p>
       </div>
     </div>
   )
