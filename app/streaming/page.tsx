@@ -15,7 +15,7 @@ import RecentTracksCard from "@/components/RecentTracksCard"
 import StreamingGuideButton from '@/components/StreamingGuide'
 import StationheadLiveBanner from '@/components/StationheadLiveBanner'
 import CommunityPlaylists from '@/components/CommunityPlaylists'
-import ManualRefreshButton from '@/components/ManualRefreshButton'
+import CompactRefreshButton from "@/components/ManualRefreshButton"
 
 export default function StreamingHub() {
   const { isSignedIn } = useUser()
@@ -97,6 +97,7 @@ export default function StreamingHub() {
                           <p className="text-3xl font-bold text-green-400">{goalStreams}</p>
                           <p className="text-gray-400 text-xs">Daily Goal Song</p>
                         </div>
+                        <CompactRefreshButton />
                       </>
                     ) : (
                       <Button
@@ -146,7 +147,6 @@ export default function StreamingHub() {
           {/* Manual Refresh Button */}
           {isSignedIn && (
             <div>
-              <ManualRefreshButton />
             </div>
           )}
           {/* Daily Missions */}

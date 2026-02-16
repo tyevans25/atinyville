@@ -6,13 +6,13 @@ import kv from "@vercel/kv"
 const MAX_REFRESHES = 3
 const COOLDOWN_WINDOW = 15 * 60 * 1000 // 15 minutes in milliseconds
 
-// Tier-based auto-refresh intervals (in minutes)
+// Tier intervals
 const TIER_INTERVALS = {
-  free: 60,      // 1 hour
-  bronze: 30,    // 30 minutes
-  silver: 15,    // 15 minutes
-  gold: 10,      // 10 minutes
-  platinum: 5    // 5 minutes
+  free: 60,
+  bronze: 30,
+  silver: 15,
+  gold: 10,
+  platinum: 5
 }
 
 export async function POST() {
@@ -45,13 +45,20 @@ export async function POST() {
 
     // Add current refresh to list
     recentRefreshes.push(now)
-    await kv.set(cooldownKey, recentRefreshes, { ex: 300 }) // Expire after 5 min
+    await kv.set(cooldownKey, recentRefreshes, { ex: 900 }) // Expire after 15 min
 
     // Get user tier
     const userTier = await kv.get<string>(`user:${userId}:tier`) || 'free'
 
-    // Trigger manual stream check
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/cron/check-streams`, {
+    // Get base URL - try multiple sources
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+                    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+                    'https://atinytown.com'
+
+    console.log('🔗 Calling cron at:', `${baseUrl}/api/cron/check-streams`)
+
+    // Trigger manual stream check via cron endpoint
+    const response = await fetch(`${baseUrl}/api/cron/check-streams`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -65,14 +72,18 @@ export async function POST() {
     })
 
     if (!response.ok) {
-      throw new Error('Failed to check streams')
+      const errorText = await response.text()
+      console.error('Cron call failed:', response.status, errorText)
+      throw new Error(`Failed to check streams: ${response.status}`)
     }
 
     const data = await response.json()
 
     return NextResponse.json({ 
       success: true,
-      message: "Streams refreshed successfully!",
+      message: data.newStreams > 0 
+        ? `✅ Found ${data.newStreams} new stream${data.newStreams === 1 ? '' : 's'}!`
+        : "No new streams found",
       refreshesRemaining: MAX_REFRESHES - recentRefreshes.length,
       newStreams: data.newStreams || 0,
       nextAutoRefresh: TIER_INTERVALS[userTier as keyof typeof TIER_INTERVALS] || 60
@@ -80,7 +91,10 @@ export async function POST() {
 
   } catch (error) {
     console.error("Error in manual refresh:", error)
-    return NextResponse.json({ error: "Failed to refresh streams" }, { status: 500 })
+    return NextResponse.json({ 
+      error: "Failed to refresh streams",
+      message: error instanceof Error ? error.message : "Something went wrong. Please try again."
+    }, { status: 500 })
   }
 }
 
