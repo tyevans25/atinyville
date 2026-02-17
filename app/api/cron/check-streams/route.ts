@@ -1,6 +1,5 @@
 import { kv } from "@vercel/kv"
 import { NextResponse } from "next/server"
-import { use } from "react"
 
 // ATEEZ artist ID on stats.fm
 const ATEEZ_ARTIST_ID = 164828
@@ -697,4 +696,8 @@ export async function POST(request: Request) {
     console.error("❌ Cron error:", error)
     return NextResponse.json({ error: "Cron failed" }, { status: 500 })
   }
+}
+
+export async function GET(request: Request) {
+  return POST(request)
 }
