@@ -5,29 +5,23 @@ import { auth } from '@clerk/nextjs/server'
 // Helper: Get current week key (Thursday-Wednesday weeks in KST)
 function getCurrentWeekKey(): string {
   const now = new Date()
-  const kstNow = new Date(now.getTime() + (9 * 60 * 60 * 1000))
+  const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000)
   
-  // Get current day of week (0 = Sunday, 4 = Thursday)
-  const kstDay = kstNow.getUTCDay()
-  
-  // Calculate days since last Thursday
+  // Find most recent Thursday
+  const kstDay = kstNow.getUTCDay() // 0=Sun, 4=Thu
   const daysSinceThursday = (kstDay + 7 - 4) % 7
   
-  // Get the date of this week's Thursday
-  const thisWeekThursday = new Date(kstNow)
-  thisWeekThursday.setUTCDate(kstNow.getUTCDate() - daysSinceThursday)
-  thisWeekThursday.setUTCHours(0, 0, 0, 0)
+  const thursday = new Date(kstNow)
+  thursday.setUTCDate(kstNow.getUTCDate() - daysSinceThursday)
+  thursday.setUTCHours(0, 0, 0, 0)
   
-  // Calculate week number based on Thursdays
-  const year = thisWeekThursday.getUTCFullYear()
-  const startOfYear = new Date(Date.UTC(year, 0, 1))
-  const firstThursday = new Date(startOfYear)
-  const daysUntilThursday = (4 - startOfYear.getUTCDay() + 7) % 7
-  firstThursday.setUTCDate(1 + daysUntilThursday)
+  // Get ISO week number of that Thursday
+  const jan4 = new Date(Date.UTC(thursday.getUTCFullYear(), 0, 4))
+  const weekNumber = Math.ceil(
+    ((thursday.getTime() - jan4.getTime()) / 86400000 + jan4.getUTCDay() + 1) / 7
+  )
   
-  const weekNumber = Math.floor((thisWeekThursday.getTime() - firstThursday.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1
-  
-  return `${year}-W${String(weekNumber).padStart(2, '0')}`
+  return `${thursday.getUTCFullYear()}-W${String(weekNumber).padStart(2, "0")}`
 }
 
 // GET: Fetch this week's total ATEEZ goal and user's streams

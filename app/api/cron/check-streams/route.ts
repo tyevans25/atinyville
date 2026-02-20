@@ -33,20 +33,22 @@ function getYesterdayKST(): string {
 function getCurrentWeekKey(): string {
   const now = new Date()
   const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000)
-  const kstDay = kstNow.getUTCDay()
+  
+  // Find most recent Thursday
+  const kstDay = kstNow.getUTCDay() // 0=Sun, 4=Thu
   const daysSinceThursday = (kstDay + 7 - 4) % 7
-  const thisWeekThursday = new Date(kstNow)
-  thisWeekThursday.setUTCDate(kstNow.getUTCDate() - daysSinceThursday)
-  thisWeekThursday.setUTCHours(0, 0, 0, 0)
-  const year = thisWeekThursday.getUTCFullYear()
-  const startOfYear = new Date(Date.UTC(year, 0, 1))
-  const firstThursday = new Date(startOfYear)
-  const daysUntilThursday = (4 - startOfYear.getUTCDay() + 7) % 7
-  firstThursday.setUTCDate(1 + daysUntilThursday)
-  const weekNumber = Math.floor(
-    (thisWeekThursday.getTime() - firstThursday.getTime()) / (7 * 24 * 60 * 60 * 1000)
+  
+  const thursday = new Date(kstNow)
+  thursday.setUTCDate(kstNow.getUTCDate() - daysSinceThursday)
+  thursday.setUTCHours(0, 0, 0, 0)
+  
+  // Get ISO week number of that Thursday
+  const jan4 = new Date(Date.UTC(thursday.getUTCFullYear(), 0, 4))
+  const weekNumber = Math.ceil(
+    ((thursday.getTime() - jan4.getTime()) / 86400000 + jan4.getUTCDay() + 1) / 7
   )
-  return `${year}-W${String(weekNumber).padStart(2, "0")}`
+  
+  return `${thursday.getUTCFullYear()}-W${String(weekNumber).padStart(2, "0")}`
 }
 
 /* =========================
