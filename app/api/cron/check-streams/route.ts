@@ -86,6 +86,7 @@ async function recalculateGoalTotals(
     for (const key of userWeeklyKeys) {
       total += (await kv.get<number>(key)) || 0
     }
+    
     await kv.set(`community:weekly:${weekKey}`, { ...communityWeekly, current: total }, { ex: 604800 })
     console.log(`✅ Weekly goal recalculated: ${total} streams`)
   }
@@ -220,6 +221,9 @@ async function processSingleUser(
       const streamWeekKey = `${streamYear}-W${String(streamWeekNumber).padStart(2, "0")}`
       return streamWeekKey === weekKey
     })
+
+    console.log(`Weekly check: ${newStreams.length} new streams, ${weekStreams.length} matched weekKey ${weekKey}`)
+    
     if (weekStreams.length > 0) {
       const userWeeklyKey = `community:weekly:user:${userId}:${weekKey}`
       const current = (await kv.get<number>(userWeeklyKey)) || 0
@@ -385,6 +389,9 @@ export async function POST(request: Request) {
             const streamWeekKey = `${streamYear}-W${String(streamWeekNumber).padStart(2, "0")}`
             return streamWeekKey === weekKey
           })
+
+          console.log(`Weekly check: ${newStreams.length} new streams, ${weekStreams.length} matched weekKey ${weekKey}`)
+
           if (weekStreams.length > 0) {
             newWeeklyStreams += weekStreams.length
             const userWeeklyKey = `community:weekly:user:${userId}:${weekKey}`

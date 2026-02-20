@@ -24,7 +24,9 @@ export async function POST() {
     let totalStreams = 0
 
     const todayStart = new Date()
-    todayStart.setUTCHours(0, 0, 0, 0)
+    const todayStartKST = new Date(todayStart.getTime() + (9 * 60 * 60 * 1000))
+    todayStartKST.setUTCHours(0, 0, 0, 0)
+    const todayStartUTC = new Date(todayStartKST.getTime() - (9 * 60 * 60 * 1000))
 
     for (const userKey of allUserKeys) {
       const statsfmUsername = await kv.get<string>(userKey)
@@ -42,13 +44,13 @@ export async function POST() {
 
         if (data.items && Array.isArray(data.items)) {
           const userStreams = data.items.filter((stream: any) => {
-            const streamDate = new Date(stream.endTime)
-            const isToday = streamDate >= todayStart
-            const isAteez = stream.artistIds?.includes(ATEEZ_ARTIST_ID)
-            const matchesSong = stream.trackName?.toLowerCase().includes(goal.song.toLowerCase())
-            
-            return isToday && isAteez && matchesSong
-          }).length
+          const streamDate = new Date(stream.endTime)
+          const isToday = streamDate >= todayStartUTC  // ← here
+          const isAteez = stream.artistIds?.includes(ATEEZ_ARTIST_ID)
+          const matchesSong = stream.trackName?.toLowerCase().includes(goal.song.toLowerCase())
+          
+          return isToday && isAteez && matchesSong
+        }).length
 
           totalStreams += userStreams
         }
