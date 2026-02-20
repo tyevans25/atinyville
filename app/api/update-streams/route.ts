@@ -3,9 +3,15 @@ import { NextResponse } from "next/server"
 
 const ATEEZ_ARTIST_ID = 164828
 
+function getKSTDate(): string {
+  const now = new Date()
+  const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000))
+  return kstTime.toISOString().split('T')[0]
+}
+
 export async function POST() {
   try {
-    const today = new Date().toISOString().split("T")[0]
+    const today = getKSTDate()
     const goalKey = `daily:goal:${today}`
     const goal = await kv.get<any>(goalKey)
 

@@ -141,7 +141,7 @@ async function processSingleUser(
   const statsfmUsername = await kv.get<string>(`user:${userId}:statsfm`)
   if (!statsfmUsername) return { newStreams: 0 }
 
-  const lastProcessedKey = `user:${userId}:last_processed_manual`
+  const lastProcessedKey = `user:${userId}:last_processed`
   const lastProcessed = (await kv.get<number>(lastProcessedKey)) || 0
 
   const res = await fetch(`https://api.stats.fm/api/v1/users/${statsfmUsername}/streams?limit=500`)
@@ -302,7 +302,7 @@ export async function POST(request: Request) {
         const statsfmUsername = await kv.get<string>(key)
         if (!statsfmUsername) { usersSkipped++; continue }
 
-        const lastProcessedKey = `user:${userId}:last_processed_cron`
+        const lastProcessedKey = `user:${userId}:last_processed`
         const lastProcessed = (await kv.get<number>(lastProcessedKey)) || 0
 
         const res = await fetch(`https://api.stats.fm/api/v1/users/${statsfmUsername}/streams?limit=500`)

@@ -5,14 +5,21 @@ import { auth } from '@clerk/nextjs/server'
 // Helper to get current week key (e.g., "2026-W05")
 function getCurrentWeekKey(): string {
   const now = new Date()
-  const year = now.getFullYear()
-  
-  // Get week number (ISO 8601)
-  const startOfYear = new Date(year, 0, 1)
-  const days = Math.floor((now.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000))
-  const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7)
-  
-  return `${year}-W${String(weekNumber).padStart(2, '0')}`
+  const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000)
+  const kstDay = kstNow.getUTCDay()
+  const daysSinceThursday = (kstDay + 7 - 4) % 7
+  const thisWeekThursday = new Date(kstNow)
+  thisWeekThursday.setUTCDate(kstNow.getUTCDate() - daysSinceThursday)
+  thisWeekThursday.setUTCHours(0, 0, 0, 0)
+  const year = thisWeekThursday.getUTCFullYear()
+  const startOfYear = new Date(Date.UTC(year, 0, 1))
+  const firstThursday = new Date(startOfYear)
+  const daysUntilThursday = (4 - startOfYear.getUTCDay() + 7) % 7
+  firstThursday.setUTCDate(1 + daysUntilThursday)
+  const weekNumber = Math.floor(
+    (thisWeekThursday.getTime() - firstThursday.getTime()) / (7 * 24 * 60 * 60 * 1000)
+  )
+  return `${year}-W${String(weekNumber).padStart(2, "0")}`
 }
 
 // GET: Fetch this week's goal and user's streams
@@ -22,7 +29,7 @@ export async function GET() {
     const weekKey = getCurrentWeekKey()
     
     // Get this week's goal
-    const goalKey = `weekly:goal:${weekKey}`
+    const goalKey = `community:weekly:${weekKey}`
     const goal = await kv.get<{
       song: string
       target: number
@@ -36,7 +43,7 @@ export async function GET() {
     // Get user's personal streams if logged in
     let userStreams = 0
     if (userId) {
-      const userStreamsKey = `weekly:streams:${userId}:${weekKey}`
+      const userStreamsKey = `community:weekly:user:${userId}:${weekKey}`
       userStreams = await kv.get<number>(userStreamsKey) || 0
     }
 
@@ -69,7 +76,7 @@ export async function POST(request: Request) {
     }
 
     const weekKey = getCurrentWeekKey()
-    const goalKey = `weekly:goal:${weekKey}`
+    const goalKey = `community:weekly:goal:${weekKey}`
 
     // Check if goal already exists
     const existingGoal = await kv.get(goalKey)
