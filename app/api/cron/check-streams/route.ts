@@ -209,18 +209,14 @@ async function processSingleUser(
       const kstDate = new Date(new Date(s.endTime).getTime() + 9 * 60 * 60 * 1000)
       const streamDay = kstDate.getUTCDay()
       const daysSinceThursday = (streamDay + 7 - 4) % 7
-      const streamWeekThursday = new Date(kstDate)
-      streamWeekThursday.setUTCDate(kstDate.getUTCDate() - daysSinceThursday)
-      streamWeekThursday.setUTCHours(0, 0, 0, 0)
-      const streamYear = streamWeekThursday.getUTCFullYear()
-      const startOfYear = new Date(Date.UTC(streamYear, 0, 1))
-      const firstThursday = new Date(startOfYear)
-      const daysUntilThursday = (4 - startOfYear.getUTCDay() + 7) % 7
-      firstThursday.setUTCDate(1 + daysUntilThursday)
-      const streamWeekNumber = Math.floor(
-        (streamWeekThursday.getTime() - firstThursday.getTime()) / (7 * 24 * 60 * 60 * 1000)
+      const thursday = new Date(kstDate)
+      thursday.setUTCDate(kstDate.getUTCDate() - daysSinceThursday)
+      thursday.setUTCHours(0, 0, 0, 0)
+      const jan4 = new Date(Date.UTC(thursday.getUTCFullYear(), 0, 4))
+      const streamWeekNumber = Math.ceil(
+        ((thursday.getTime() - jan4.getTime()) / 86400000 + jan4.getUTCDay() + 1) / 7
       )
-      const streamWeekKey = `${streamYear}-W${String(streamWeekNumber).padStart(2, "0")}`
+      const streamWeekKey = `${thursday.getUTCFullYear()}-W${String(streamWeekNumber).padStart(2, "0")}`
       return streamWeekKey === weekKey
     })
 
@@ -377,18 +373,14 @@ export async function POST(request: Request) {
             const kstDate = new Date(new Date(s.endTime).getTime() + 9 * 60 * 60 * 1000)
             const streamDay = kstDate.getUTCDay()
             const daysSinceThursday = (streamDay + 7 - 4) % 7
-            const streamWeekThursday = new Date(kstDate)
-            streamWeekThursday.setUTCDate(kstDate.getUTCDate() - daysSinceThursday)
-            streamWeekThursday.setUTCHours(0, 0, 0, 0)
-            const streamYear = streamWeekThursday.getUTCFullYear()
-            const startOfYear = new Date(Date.UTC(streamYear, 0, 1))
-            const firstThursday = new Date(startOfYear)
-            const daysUntilThursday = (4 - startOfYear.getUTCDay() + 7) % 7
-            firstThursday.setUTCDate(1 + daysUntilThursday)
-            const streamWeekNumber = Math.floor(
-              (streamWeekThursday.getTime() - firstThursday.getTime()) / (7 * 24 * 60 * 60 * 1000)
+            const thursday = new Date(kstDate)
+            thursday.setUTCDate(kstDate.getUTCDate() - daysSinceThursday)
+            thursday.setUTCHours(0, 0, 0, 0)
+            const jan4 = new Date(Date.UTC(thursday.getUTCFullYear(), 0, 4))
+            const streamWeekNumber = Math.ceil(
+              ((thursday.getTime() - jan4.getTime()) / 86400000 + jan4.getUTCDay() + 1) / 7
             )
-            const streamWeekKey = `${streamYear}-W${String(streamWeekNumber).padStart(2, "0")}`
+            const streamWeekKey = `${thursday.getUTCFullYear()}-W${String(streamWeekNumber).padStart(2, "0")}`
             return streamWeekKey === weekKey
           })
 
