@@ -19,7 +19,7 @@ function getCurrentWeekKey(): string {
   const jan4 = new Date(Date.UTC(thursday.getUTCFullYear(), 0, 4))
   const weekNumber = Math.ceil(
     ((thursday.getTime() - jan4.getTime()) / 86400000 + jan4.getUTCDay() + 1) / 7
-  )
+  ) + 1
   
   return `${thursday.getUTCFullYear()}-W${String(weekNumber).padStart(2, "0")}`
 }
