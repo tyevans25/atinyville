@@ -1,24 +1,19 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
 import { quizQuestions, type Question } from "@/data/questions"
-import { Clock, Trophy, Play, User } from "lucide-react"
+import { Clock, Trophy, Play, User, ExternalLink } from "lucide-react"
 import Link from "next/link"
 import { useUser } from "@clerk/nextjs"
 
 export default function Quiz() {
   const { isSignedIn, user } = useUser()
-  
-  // Username state
+
   const [username, setUsername] = useState("")
   const [usernameSubmitted, setUsernameSubmitted] = useState(false)
   const [usernameError, setUsernameError] = useState("")
   const [checkingUsername, setCheckingUsername] = useState(false)
 
-  // Quiz state management
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [score, setScore] = useState(0)
@@ -27,7 +22,6 @@ export default function Quiz() {
   const [quizCompleted, setQuizCompleted] = useState(false)
   const [speedBonus, setSpeedBonus] = useState(0)
 
-  // Results state
   const [submittingScore, setSubmittingScore] = useState(false)
   const [userRank, setUserRank] = useState<number | null>(null)
   const [isNewBest, setIsNewBest] = useState(false)
@@ -35,17 +29,14 @@ export default function Quiz() {
   const currentQuestion = quizQuestions[currentQuestionIndex]
   const progress = ((currentQuestionIndex + 1) / quizQuestions.length) * 100
 
-  // Auto-check if user is signed in
   useEffect(() => {
     if (isSignedIn && user && !usernameSubmitted) {
-      // Use Clerk username only
       const clerkUsername = user.username || 'ATINY'
       setUsername(clerkUsername)
       handleUsernameSubmit(null, clerkUsername)
     }
   }, [isSignedIn, user])
 
-  // Timer logic - counts UP instead of down
   useEffect(() => {
     if (!isAnswered && usernameSubmitted) {
       const timer = setTimeout(() => setTimeElapsed(timeElapsed + 1), 1000)
@@ -53,7 +44,6 @@ export default function Quiz() {
     }
   }, [timeElapsed, isAnswered, usernameSubmitted])
 
-  // Calculate speed bonus - decreases by 10 points every 3 seconds
   const calculateSpeedBonus = () => {
     if (timeElapsed <= 3) return 50
     if (timeElapsed <= 6) return 40
@@ -63,7 +53,6 @@ export default function Quiz() {
     return 0
   }
 
-  // Get current bonus to show in UI
   const getCurrentBonus = () => {
     if (isAnswered) return speedBonus
     return calculateSpeedBonus()
@@ -71,49 +60,27 @@ export default function Quiz() {
 
   const handleUsernameSubmit = async (e: React.FormEvent | null, presetUsername?: string) => {
     if (e) e.preventDefault()
-    
     const usernameToCheck = presetUsername || username.trim()
-    
-    if (!usernameToCheck) {
-      setUsernameError("Please enter a username")
-      return
-    }
-
-    if (usernameToCheck.length < 3) {
-      setUsernameError("Username must be at least 3 characters")
-      return
-    }
-
-    if (usernameToCheck.length > 20) {
-      setUsernameError("Username must be less than 20 characters")
-      return
-    }
-
+    if (!usernameToCheck) { setUsernameError("Please enter a username"); return }
+    if (usernameToCheck.length < 3) { setUsernameError("Username must be at least 3 characters"); return }
+    if (usernameToCheck.length > 20) { setUsernameError("Username must be less than 20 characters"); return }
     setCheckingUsername(true)
     setUsernameError("")
-
     try {
-      // Check if user already played today
       const response = await fetch('/api/quiz/check-played', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: usernameToCheck })
       })
-
       const data = await response.json()
-
       if (data.hasPlayed) {
-        setUsernameError("You already played today! Come back tomorrow for a new attempt. 🏴‍☠️")
+        setUsernameError("You already played today! Come back tomorrow. 🏴‍☠️")
         setCheckingUsername(false)
         return
       }
-
-      if (presetUsername) {
-        setUsername(presetUsername)
-      }
+      if (presetUsername) setUsername(presetUsername)
       setUsernameSubmitted(true)
     } catch (error) {
-      console.error('Error checking username:', error)
       setUsernameError("Something went wrong. Please try again.")
     } finally {
       setCheckingUsername(false)
@@ -121,17 +88,12 @@ export default function Quiz() {
   }
 
   const handleAnswerSelect = (answerIndex: number) => {
-    if (!isAnswered) {
-      setSelectedAnswer(answerIndex)
-    }
+    if (!isAnswered) setSelectedAnswer(answerIndex)
   }
 
   const handleSubmitAnswer = () => {
     if (isAnswered) return
-
     setIsAnswered(true)
-    
-    // Check if answer is correct
     if (selectedAnswer === currentQuestion.correctAnswer) {
       const bonus = calculateSpeedBonus()
       setSpeedBonus(bonus)
@@ -154,20 +116,14 @@ export default function Quiz() {
 
   const submitScoreToLeaderboard = async () => {
     setSubmittingScore(true)
-    
     try {
       const response = await fetch('/api/quiz/submit-score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: username.trim(), score })
       })
-
       const data = await response.json()
-
-      if (data.success) {
-        setUserRank(data.rank)
-        setIsNewBest(data.isNewBest)
-      }
+      if (data.success) { setUserRank(data.rank); setIsNewBest(data.isNewBest) }
     } catch (error) {
       console.error('Error submitting score:', error)
     } finally {
@@ -175,294 +131,248 @@ export default function Quiz() {
     }
   }
 
-  // Sign-in prompt screen for non-authenticated users
+  const cardStyle: React.CSSProperties = {
+    background: "rgba(22,32,56,0.85)",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: 14,
+    overflow: "hidden",
+  }
+
+  const btnPrimary: React.CSSProperties = {
+    background: "#e6edf3", color: "#0d1117",
+    border: "none", borderRadius: 10, padding: "12px 24px",
+    fontSize: 14, fontWeight: 800, cursor: "pointer",
+    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+  }
+
+  const btnOutline: React.CSSProperties = {
+    background: "transparent", color: "#e6edf3",
+    border: "1px solid rgba(255,255,255,0.15)", borderRadius: 10, padding: "12px 24px",
+    fontSize: 13, fontWeight: 700, cursor: "pointer",
+    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+  }
+
+  // ── Sign-in required ────────────────────────────────────────
   if (!usernameSubmitted && !isSignedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 w-20 h-20 bg-primary rounded-full flex items-center justify-center">
-              <Trophy className="w-10 h-10 text-white" />
+      <div style={{ minHeight: "100vh", background: "#0d1117", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <div style={{ ...cardStyle, width: "100%", maxWidth: 420 }}>
+          <div style={{ height: 2, background: "linear-gradient(90deg,#3b82f6,#8b5cf6,#ec4899)" }} />
+          <div style={{ padding: 40, textAlign: "center" }}>
+            <div style={{ width: 72, height: 72, borderRadius: "50%", background: "rgba(88,166,255,0.15)", border: "1px solid rgba(88,166,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+              <Trophy style={{ width: 32, height: 32, color: "#58a6ff" }} />
             </div>
-            <CardTitle className="text-3xl">Sign In Required</CardTitle>
-            <CardDescription>
+            <h2 style={{ color: "#e6edf3", fontSize: 22, fontWeight: 900, margin: "0 0 8px" }}>Sign In Required</h2>
+            <p style={{ color: "#8b949e", fontSize: 13, lineHeight: 1.6, margin: "0 0 24px" }}>
               Please sign in on the homepage to take the ATEEZ Streaming Quiz!
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-              <p className="text-sm text-purple-800 mb-2">
-                📝 <strong>Why sign in?</strong>
-              </p>
-              <ul className="text-xs text-purple-700 space-y-1 ml-4">
-                <li>• Track your scores on the leaderboard</li>
-                <li>• One quiz attempt per day</li>
-                <li>• Compete with other ATINYs!</li>
+            </p>
+            <div style={{ background: "rgba(88,166,255,0.08)", border: "1px solid rgba(88,166,255,0.2)", borderRadius: 10, padding: 16, marginBottom: 24, textAlign: "left" }}>
+              <p style={{ color: "#58a6ff", fontSize: 12, fontWeight: 700, margin: "0 0 8px" }}>Why sign in?</p>
+              <ul style={{ color: "#8b949e", fontSize: 12, lineHeight: 1.8, margin: 0, paddingLeft: 16 }}>
+                <li>Track your scores on the leaderboard</li>
+                <li>One quiz attempt per day</li>
+                <li>Compete with other ATINYs!</li>
               </ul>
             </div>
-
-            <div className="flex gap-3">
-              <a href="/" className="flex-1">
-                <Button className="w-full" size="lg">
-                  Go to Homepage
-                </Button>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <a href="/" style={{ textDecoration: "none" }}>
+                <button style={{ ...btnPrimary, width: "100%" }}>Go to Homepage</button>
               </a>
-            </div>
-
-            <div className="text-center pt-4">
-              <Link href="/leaderboard">
-                <Button variant="ghost" className="text-purple-600">
-                  View Leaderboard
-                </Button>
+              <Link href="/leaderboard" style={{ textDecoration: "none" }}>
+                <button style={{ ...btnOutline, width: "100%" }}>View Leaderboard</button>
               </Link>
             </div>
-
-            <div className="text-center pt-2">
-              <a href="/">
-                <Button variant="ghost" className="text-purple-600">
-                  Back to Hub
-                </Button>
-              </a>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     )
   }
 
-  // Loading state while checking authentication
+  // ── Loading ─────────────────────────────────────────────────
   if (!usernameSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-8 text-center">
-            <p className="text-gray-600">Loading...</p>
-          </CardContent>
-        </Card>
+      <div style={{ minHeight: "100vh", background: "#0d1117", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <p style={{ color: "#8b949e", fontSize: 13 }}>Loading...</p>
       </div>
     )
   }
 
-  // Results screen
+  // ── Results ─────────────────────────────────────────────────
   if (quizCompleted) {
     const maxScore = quizQuestions.reduce((sum, q) => sum + q.points + 50, 0)
     const percentage = Math.round((score / maxScore) * 100)
-    
+
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center p-4">
-        <Card className="w-full max-w-2xl">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 w-20 h-20 bg-primary rounded-full flex items-center justify-center">
-              <Trophy className="w-10 h-10 text-white" />
+      <div style={{ minHeight: "100vh", background: "#0d1117", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <div style={{ ...cardStyle, width: "100%", maxWidth: 520 }}>
+          <div style={{ height: 2, background: "linear-gradient(90deg,#3b82f6,#8b5cf6,#ec4899)" }} />
+          <div style={{ padding: 40 }}>
+            <div style={{ textAlign: "center", marginBottom: 28 }}>
+              <div style={{ width: 72, height: 72, borderRadius: "50%", background: "rgba(88,166,255,0.15)", border: "1px solid rgba(88,166,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+                <Trophy style={{ width: 32, height: 32, color: "#58a6ff" }} />
+              </div>
+              <h2 style={{ color: "#e6edf3", fontSize: 24, fontWeight: 900, margin: "0 0 6px" }}>Quiz Complete!</h2>
+              <p style={{ color: "#8b949e", fontSize: 14, margin: 0 }}>Great job, {username}! 🏴‍☠️</p>
             </div>
-            <CardTitle className="text-3xl">Quiz Complete!</CardTitle>
-            <CardDescription>Great job, {username}! 🏴‍☠️</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="text-center">
-              <p className="text-6xl font-bold text-primary mb-2">{score}</p>
-              <p className="text-muted-foreground">Total Points</p>
-              {isNewBest && (
-                <p className="text-green-600 font-semibold mt-2">🎉 New Personal Best!</p>
-              )}
+
+            <div style={{ textAlign: "center", marginBottom: 20 }}>
+              <p style={{ color: "#58a6ff", fontSize: 64, fontWeight: 900, lineHeight: 1, margin: "0 0 4px" }}>{score}</p>
+              <p style={{ color: "#484f58", fontSize: 13, margin: 0 }}>Total Points</p>
+              {isNewBest && <p style={{ color: "#22c55e", fontSize: 13, fontWeight: 700, marginTop: 8 }}>🎉 New Personal Best!</p>}
             </div>
-            
+
             {userRank && (
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center">
-                <p className="text-sm text-purple-600 font-semibold mb-1">Your Rank</p>
-                <p className="text-4xl font-bold text-purple-600">#{userRank}</p>
+              <div style={{ background: "rgba(88,166,255,0.08)", border: "1px solid rgba(88,166,255,0.2)", borderRadius: 10, padding: 16, textAlign: "center", marginBottom: 20 }}>
+                <p style={{ color: "#484f58", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 6px" }}>Your Rank</p>
+                <p style={{ color: "#58a6ff", fontSize: 42, fontWeight: 900, margin: 0 }}>#{userRank}</p>
               </div>
             )}
 
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Accuracy</span>
-                <span className="font-semibold">{percentage}%</span>
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                <span style={{ color: "#8b949e", fontSize: 12 }}>Accuracy</span>
+                <span style={{ color: "#e6edf3", fontSize: 12, fontWeight: 700 }}>{percentage}%</span>
               </div>
-              <Progress value={percentage} max={100} />
+              <div style={{ height: 6, background: "rgba(255,255,255,0.08)", borderRadius: 3, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${percentage}%`, background: "linear-gradient(90deg,#3b82f6,#8b5cf6)", borderRadius: 3, transition: "width 0.6s ease" }} />
+              </div>
             </div>
 
-            <div className="bg-secondary p-4 rounded-lg space-y-2">
-              <p className="text-sm font-semibold">Share your score on Twitter!</p>
-              <Button 
-                className="w-full"
-                onClick={() => {
-                  const text = `I just scored ${score} points on the ATEEZ Streaming Quiz! 🏴‍☠️${userRank ? ` Ranked #${userRank}!` : ''} Can you beat my score, ATINY?\n\n#ATEEZ #에이티즈`
-                  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank')
-                }}
-              >
+            <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: 16, marginBottom: 20 }}>
+              <p style={{ color: "#e6edf3", fontSize: 13, fontWeight: 700, margin: "0 0 10px" }}>Share your score on Twitter!</p>
+              <button style={{ ...btnPrimary, width: "100%" }} onClick={() => {
+                const text = `I just scored ${score} points on the ATEEZ Streaming Quiz! 🏴‍☠️${userRank ? ` Ranked #${userRank}!` : ''} Can you beat my score, ATINY?\n\n#ATEEZ #에이티즈`
+                window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank')
+              }}>
                 Share on Twitter
-              </Button>
+              </button>
             </div>
 
-            <div className="flex gap-3">
-              <Link href="/leaderboard" className="flex-1">
-                <Button variant="outline" className="w-full text-gray-900 hover:text-gray-900">
-                  View Leaderboard
-                </Button>
+            <div style={{ display: "flex", gap: 10 }}>
+              <Link href="/leaderboard" style={{ flex: 1, textDecoration: "none" }}>
+                <button style={{ ...btnOutline, width: "100%" }}>View Leaderboard</button>
               </Link>
-              <a href="/" className="flex-1">
-                <Button variant="outline" className="w-full text-gray-900 hover:text-gray-900">
-                  Back to Hub
-                </Button>
+              <a href="/" style={{ flex: 1, textDecoration: "none" }}>
+                <button style={{ ...btnOutline, width: "100%" }}>Back to Hub</button>
               </a>
             </div>
 
-            <p className="text-xs text-center text-gray-500">
+            <p style={{ color: "#484f58", fontSize: 11, textAlign: "center", marginTop: 16 }}>
               Come back tomorrow to play again and improve your rank!
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     )
   }
 
-  // Quiz screen
+  // ── Quiz screen ─────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 p-4">
-      <div className="max-w-4xl mx-auto py-8 space-y-6">
-        {/* Header with progress */}
-        <div className="space-y-2">
-          <div className="flex justify-between items-center text-white">
-            <div className="flex items-center gap-2">
-              <User className="w-5 h-5" />
-              <span className="font-semibold">{username}</span>
+    <div style={{ minHeight: "100vh", background: "#0d1117", padding: "24px 16px" }}>
+      <div style={{ maxWidth: 720, margin: "0 auto", display: "flex", flexDirection: "column", gap: 16 }}>
+
+        {/* Progress bar + stats */}
+        <div style={{ ...cardStyle, padding: "16px 20px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <User style={{ width: 14, height: 14, color: "#484f58" }} />
+              <span style={{ color: "#e6edf3", fontSize: 13, fontWeight: 700 }}>{username}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Trophy className="w-5 h-5" />
-              <span className="font-semibold">{score} points</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <Trophy style={{ width: 14, height: 14, color: "#FFD700" }} />
+              <span style={{ color: "#e6edf3", fontSize: 13, fontWeight: 700 }}>{score} pts</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5" />
-              <span className="font-semibold">{timeElapsed}s</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <Clock style={{ width: 14, height: 14, color: "#484f58" }} />
+              <span style={{ color: "#e6edf3", fontSize: 13, fontWeight: 700 }}>{timeElapsed}s</span>
               {!isAnswered && getCurrentBonus() > 0 && (
-                <span className="text-xs bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full ml-2 font-bold">
-                  ⚡ +{getCurrentBonus()} bonus
+                <span style={{ fontSize: 11, background: "rgba(234,179,8,0.2)", color: "#FFD700", border: "1px solid rgba(234,179,8,0.3)", padding: "2px 8px", borderRadius: 20, fontWeight: 700 }}>
+                  ⚡ +{getCurrentBonus()}
                 </span>
               )}
             </div>
           </div>
-          <Progress value={progress} max={100} className="bg-white/20" />
-          <p className="text-white/80 text-sm">
-            Question {currentQuestionIndex + 1} of {quizQuestions.length}
-          </p>
+          <div style={{ height: 4, background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden", marginBottom: 8 }}>
+            <div style={{ height: "100%", width: `${progress}%`, background: "linear-gradient(90deg,#3b82f6,#8b5cf6)", borderRadius: 2, transition: "width 0.3s ease" }} />
+          </div>
+          <p style={{ color: "#484f58", fontSize: 11, margin: 0 }}>Question {currentQuestionIndex + 1} of {quizQuestions.length}</p>
         </div>
 
-        {/* Question Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{currentQuestion.question}</CardTitle>
-            <CardDescription>
-              Worth {currentQuestion.points} points + speed bonus (50 pts max, decreases every 3 sec)
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Video Embed */}
+        {/* Question card */}
+        <div style={cardStyle}>
+          <div style={{ height: 2, background: "linear-gradient(90deg,#3b82f6,#8b5cf6,#ec4899)" }} />
+          <div style={{ padding: "20px 22px" }}>
+            <h3 style={{ color: "#e6edf3", fontSize: 17, fontWeight: 800, margin: "0 0 6px", lineHeight: 1.4 }}>{currentQuestion.question}</h3>
+            <p style={{ color: "#484f58", fontSize: 11, margin: "0 0 18px" }}>
+              Worth {currentQuestion.points} pts + speed bonus (50 max, decreases every 3s)
+            </p>
+
             {currentQuestion.videoUrl && (
-              <div className="aspect-video rounded-lg overflow-hidden bg-black">
-                <iframe
-                  width="100%"
-                  height="100%"
-                  src={currentQuestion.videoUrl}
-                  title="YouTube video"
+              <div style={{ borderRadius: 10, overflow: "hidden", background: "#000", aspectRatio: "16/9", marginBottom: 18 }}>
+                <iframe width="100%" height="100%" src={currentQuestion.videoUrl} title="YouTube video"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="w-full h-full"
-                />
+                  allowFullScreen style={{ display: "block", border: "none" }} />
               </div>
             )}
 
-            {/* Spotify Embed */}
             {currentQuestion.spotifyUrl && (
-              <div className="rounded-lg overflow-hidden">
-                <iframe
-                  src={currentQuestion.spotifyUrl}
-                  width="100%"
-                  height="152"
-                  frameBorder="0"
-                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                  loading="lazy"
-                />
+              <div style={{ borderRadius: 10, overflow: "hidden", marginBottom: 18 }}>
+                <iframe src={currentQuestion.spotifyUrl} width="100%" height="152" frameBorder="0"
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" />
               </div>
             )}
 
-            {/* Answer Options */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Answer options */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 10, marginBottom: 16 }}>
               {currentQuestion.options.map((option, index) => {
                 const isSelected = selectedAnswer === index
                 const isCorrect = index === currentQuestion.correctAnswer
                 const showResult = isAnswered
-                
-                let buttonClass = ""
+                let bg = "rgba(255,255,255,0.04)"
+                let border = "1px solid rgba(255,255,255,0.08)"
+                let color = "#e6edf3"
                 if (showResult) {
-                  if (isCorrect) {
-                    buttonClass = "bg-green-500 text-white border-green-600 hover:bg-green-500"
-                  } else if (isSelected && !isCorrect) {
-                    buttonClass = "bg-red-500 text-white border-red-600 hover:bg-red-500"
-                  } else {
-                    buttonClass = "text-gray-900" // Unselected answers after reveal
-                  }
+                  if (isCorrect) { bg = "rgba(34,197,94,0.15)"; border = "1px solid rgba(34,197,94,0.4)"; color = "#4ade80" }
+                  else if (isSelected) { bg = "rgba(239,68,68,0.15)"; border = "1px solid rgba(239,68,68,0.4)"; color = "#f87171" }
                 } else if (isSelected) {
-                  buttonClass = "bg-primary text-white"
-                } else {
-                  buttonClass = "text-gray-900" // Unselected answers before answering
+                  bg = "rgba(88,166,255,0.15)"; border = "1px solid rgba(88,166,255,0.4)"; color = "#58a6ff"
                 }
-
                 return (
-                  <Button
-                    key={index}
-                    variant={isSelected && !showResult ? "default" : "outline"}
-                    className={`h-auto py-4 text-left justify-start ${buttonClass}`}
-                    onClick={() => handleAnswerSelect(index)}
-                    disabled={isAnswered}
-                  >
-                    <span className="font-semibold mr-2">{String.fromCharCode(65 + index)}.</span>
+                  <button key={index} onClick={() => handleAnswerSelect(index)} disabled={isAnswered}
+                    style={{ background: bg, border, borderRadius: 10, padding: "14px 16px", color, fontSize: 13, fontWeight: 600, cursor: isAnswered ? "default" : "pointer", textAlign: "left", transition: "all 0.15s" }}>
+                    <span style={{ fontWeight: 900, marginRight: 8, opacity: 0.6 }}>{String.fromCharCode(65 + index)}.</span>
                     {option}
-                  </Button>
+                  </button>
                 )
               })}
             </div>
 
-            {/* Show explanation after answering */}
+            {/* Explanation */}
             {isAnswered && currentQuestion.explanation && (
-              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-                <p className="text-sm font-semibold mb-1">
+              <div style={{ background: "rgba(88,166,255,0.08)", border: "1px solid rgba(88,166,255,0.2)", borderRadius: 10, padding: 14, marginBottom: 16 }}>
+                <p style={{ color: "#e6edf3", fontSize: 13, fontWeight: 700, margin: "0 0 4px" }}>
                   {selectedAnswer === currentQuestion.correctAnswer ? "Correct! 🎉" : "Not quite!"}
                 </p>
-                <p className="text-sm text-muted-foreground">
-                  {currentQuestion.explanation}
-                </p>
+                <p style={{ color: "#8b949e", fontSize: 12, lineHeight: 1.6, margin: 0 }}>{currentQuestion.explanation}</p>
                 {speedBonus > 0 && (
-                  <p className="text-sm font-semibold text-primary mt-2">
-                    Speed Bonus: +{speedBonus} points! ⚡
-                  </p>
+                  <p style={{ color: "#FFD700", fontSize: 12, fontWeight: 700, margin: "8px 0 0" }}>⚡ Speed Bonus: +{speedBonus} points!</p>
                 )}
               </div>
             )}
 
-            {/* Action Buttons */}
-            <div className="flex gap-3">
-              {!isAnswered ? (
-                <Button 
-                  onClick={handleSubmitAnswer}
-                  disabled={selectedAnswer === null}
-                  className="flex-1"
-                  size="lg"
-                >
-                  Submit Answer
-                </Button>
-              ) : (
-                <Button 
-                  onClick={handleNextQuestion}
-                  className="flex-1"
-                  size="lg"
-                >
-                  {currentQuestionIndex < quizQuestions.length - 1 ? "Next Question" : "See Results"}
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+            {/* Action button */}
+            {!isAnswered ? (
+              <button onClick={handleSubmitAnswer} disabled={selectedAnswer === null}
+                style={{ ...btnPrimary, width: "100%", opacity: selectedAnswer === null ? 0.4 : 1 }}>
+                Submit Answer
+              </button>
+            ) : (
+              <button onClick={handleNextQuestion} style={{ ...btnPrimary, width: "100%" }}>
+                {currentQuestionIndex < quizQuestions.length - 1 ? "Next Question →" : "See Results"}
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   )

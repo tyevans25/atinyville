@@ -17,115 +17,105 @@ interface Video {
   notes: string
 }
 
-interface VideoCardProps {
-  video: Video
-}
-
-export default function VideoCard({ video }: VideoCardProps) {
+export default function VideoCard({ video }: { video: Video }) {
   const [showPlayer, setShowPlayer] = useState(false)
 
   return (
     <>
-      <div className="glass-card overflow-hidden group">
+      <div style={{
+        background: "rgba(22,32,56,0.85)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        borderRadius: 12,
+        overflow: "hidden",
+      }}
+        className="group"
+      >
         {/* Thumbnail */}
-        <div
-          className="relative aspect-video cursor-pointer"
-          onClick={() => setShowPlayer(true)}
-        >
-          <img 
-            src={video.thumbnail} 
-            alt={video.title}
-            className="w-full h-full object-cover"
-          />
+        <div style={{ position: "relative", aspectRatio: "16/9", cursor: "pointer" }} onClick={() => setShowPlayer(true)}>
+          <img src={video.thumbnail} alt={video.title} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
 
           {/* Play overlay */}
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center">
-              <Play className="w-8 h-8 text-black ml-1" fill="black" />
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity" style={{
+            position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)",
+            display: "flex", alignItems: "center", justifyContent: "center"
+          }}>
+            <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(255,255,255,0.9)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Play style={{ width: 24, height: 24, color: "#0d1117", marginLeft: 3 }} fill="#0d1117" />
             </div>
           </div>
-          
-          {/* Duration badge */}
+
           {video.duration && (
-            <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-xs font-semibold text-white">
+            <div style={{ position: "absolute", bottom: 8, right: 8, background: "rgba(0,0,0,0.8)", padding: "2px 8px", borderRadius: 4, color: "white", fontSize: 11, fontWeight: 700 }}>
               {video.duration}
             </div>
           )}
         </div>
-        
+
         {/* Info */}
-        <div className="p-4">
-          <h3 className="text-white font-semibold line-clamp-2 mb-2 text-sm min-h-[2.5rem]">
+        <div style={{ padding: "12px 14px" }}>
+          <h3 style={{ color: "#e6edf3", fontSize: 13, fontWeight: 600, margin: "0 0 10px", lineHeight: 1.4, minHeight: "2.5rem", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
             {video.title}
           </h3>
-          
-          <div className="flex flex-wrap gap-2 mb-3">
+
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
             {video.category && (
-              <span className="px-2 py-1 bg-blue-500/20 text-blue-300 rounded text-xs">
+              <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 4, background: "rgba(88,166,255,0.15)", color: "#58a6ff", border: "1px solid rgba(88,166,255,0.25)" }}>
                 {video.category}
               </span>
             )}
             {video.era && (
-              <span className="px-2 py-1 bg-purple-500/20 text-purple-300 rounded text-xs">
+              <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 4, background: "rgba(192,132,252,0.15)", color: "#c084fc", border: "1px solid rgba(192,132,252,0.25)" }}>
                 {video.era}
               </span>
             )}
           </div>
-          
-          {video.featuredMembers && video.featuredMembers.length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-2">
+
+          {video.featuredMembers?.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 8 }}>
               {video.featuredMembers.map((member, index) => (
-                <span 
-                  key={index}
-                  className="text-xs px-2 py-1 bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-pink-200 rounded-full border border-pink-500/30 shimmer-text font-medium relative overflow-hidden"
-                >
+                <span key={index} className="shimmer-member" style={{
+                  fontSize: 11, padding: "2px 10px", borderRadius: 999, fontWeight: 700,
+                  border: "1px solid rgba(236,72,153,0.3)",
+                }}>
                   {member}
                 </span>
               ))}
             </div>
           )}
-          
-          <p className="text-xs text-gray-500 mb-3">{video.year}</p>
-          
-          {/* Action buttons */}
-          <div className="flex gap-2">
-            <button 
-              onClick={() => setShowPlayer(true)}
-              className="flex-1 bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-2"
-            >
-              <Play className="w-3 h-3" />
+
+          <p style={{ color: "#484f58", fontSize: 11, margin: "0 0 12px" }}>{video.year}</p>
+
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={() => setShowPlayer(true)} style={{
+              flex: 1, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 8, padding: "8px 12px", color: "#e6edf3", fontSize: 12, fontWeight: 700,
+              cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6
+            }}>
+              <Play style={{ width: 11, height: 11 }} />
               Watch
             </button>
-            <button 
-              onClick={() => window.open(video.youtubeUrl, '_blank')}
-              className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-2"
-            >
-              <ExternalLink className="w-3 h-3" />
+            <button onClick={() => window.open(video.youtubeUrl, '_blank')} style={{
+              flex: 1, background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)",
+              borderRadius: 8, padding: "8px 12px", color: "#f87171", fontSize: 12, fontWeight: 700,
+              cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6
+            }}>
+              <ExternalLink style={{ width: 11, height: 11 }} />
               YouTube
             </button>
           </div>
         </div>
       </div>
-      
-      {/* Embedded Player Modal */}
+
+      {/* Modal */}
       {showPlayer && (
-        <div 
-          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
-          onClick={() => setShowPlayer(false)}
-        >
-          <button
-            className="absolute top-4 right-4 text-white hover:text-gray-300 text-2xl font-bold"
-            onClick={() => setShowPlayer(false)}
-          >
-            ✕
-          </button>
-          <div 
-            className="w-full max-w-5xl aspect-video"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 16, backdropFilter: "blur(4px)" }}
+          onClick={() => setShowPlayer(false)}>
+          <button style={{ position: "absolute", top: 16, right: 20, color: "#8b949e", background: "none", border: "none", fontSize: 22, cursor: "pointer", fontWeight: 700 }}
+            onClick={() => setShowPlayer(false)}>✕</button>
+          <div style={{ width: "100%", maxWidth: 900, aspectRatio: "16/9" }} onClick={e => e.stopPropagation()}>
             <iframe
               src={`https://www.youtube.com/embed/${video.youtubeId}?autoplay=1`}
-              className="w-full h-full rounded-lg"
+              style={{ width: "100%", height: "100%", borderRadius: 12, border: "none", display: "block" }}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />
@@ -133,30 +123,18 @@ export default function VideoCard({ video }: VideoCardProps) {
         </div>
       )}
 
-      <style jsx>{`
-        @keyframes shimmer {
-          0% {
-            background-position: -200% center;
-          }
-          100% {
-            background-position: 200% center;
-          }
-        }
-        
-        .shimmer-text {
-          background: linear-gradient(
-            90deg,
-            rgba(236, 72, 153, 0.3) 0%,
-            rgba(236, 72, 153, 0.8) 20%,
-            rgba(249, 168, 212, 1) 40%,
-            rgba(236, 72, 153, 0.8) 60%,
-            rgba(236, 72, 153, 0.3) 100%
-          );
+      <style>{`
+        .shimmer-member {
+          background: linear-gradient(90deg, rgba(236,72,153,0.3) 0%, rgba(236,72,153,0.8) 20%, rgba(249,168,212,1) 40%, rgba(236,72,153,0.8) 60%, rgba(236,72,153,0.3) 100%);
           background-size: 200% auto;
           background-clip: text;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
-          animation: shimmer 3s linear infinite;
+          animation: shimmerMember 3s linear infinite;
+        }
+        @keyframes shimmerMember {
+          0%   { background-position: -200% center; }
+          100% { background-position:  200% center; }
         }
       `}</style>
     </>

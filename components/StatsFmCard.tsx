@@ -1,179 +1,88 @@
 "use client"
-
+// ── StatsFmCard ────────────────────────────────────────────
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Music, Check, X } from "lucide-react"
 import { useUser } from "@clerk/nextjs"
 
 export default function StatsFmCard() {
-  const { isSignedIn, user } = useUser()
-  const [statsfmUsername, setStatsfmUsername] = useState("")
-  const [savedUsername, setSavedUsername] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState(false)
+  const { isSignedIn } = useUser()
+  const [username, setUsername]     = useState("")
+  const [saved, setSaved]           = useState<string | null>(null)
+  const [loading, setLoading]       = useState(false)
+  const [error, setError]           = useState("")
+  const [success, setSuccess]       = useState(false)
 
-  // Fetch existing username on load
-  useEffect(() => {
-    if (isSignedIn) {
-      fetchUsername()
-    }
-  }, [isSignedIn])
+  useEffect(() => { if (isSignedIn) fetchUsername() }, [isSignedIn])
 
   const fetchUsername = async () => {
     try {
-      const response = await fetch('/api/statsfm/username')
-      const data = await response.json()
-      if (data.statsfmUsername) {
-        setSavedUsername(data.statsfmUsername)
-      }
-    } catch (error) {
-      console.error('Error fetching username:', error)
-    }
+      const res = await fetch('/api/statsfm/username')
+      const data = await res.json()
+      if (data.statsfmUsername) setSaved(data.statsfmUsername)
+    } catch {}
   }
 
   const handleSave = async () => {
-    if (!statsfmUsername.trim()) {
-      setError('Please enter a username')
-      return
-    }
-
-    setLoading(true)
-    setError('')
-    setSuccess(false)
-
+    if (!username.trim()) { setError('Please enter a username'); return }
+    setLoading(true); setError(''); setSuccess(false)
     try {
-      const response = await fetch('/api/statsfm/username', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ statsfmUsername: statsfmUsername.trim() })
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        setError(data.error || 'Failed to save username')
-        setLoading(false)
-        return
-      }
-
-      setSavedUsername(data.username)
-      setSuccess(true)
-      setStatsfmUsername('')
-      
+      const res = await fetch('/api/statsfm/username', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ statsfmUsername: username.trim() }) })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Failed to save username'); return }
+      setSaved(data.username); setSuccess(true); setUsername('')
       setTimeout(() => setSuccess(false), 3000)
-    } catch (error) {
-      setError('Something went wrong. Please try again.')
-    } finally {
-      setLoading(false)
-    }
+    } catch { setError('Something went wrong. Please try again.') }
+    finally { setLoading(false) }
   }
 
-  const handleRemove = async () => {
-    // TODO: Add remove functionality if needed
-    setSavedUsername(null)
-  }
-
-  if (!isSignedIn) {
-    return (
-      <Card className="glass-card">
-        <CardHeader className="glass-header-blue text-white">
-          <CardTitle className="flex items-center gap-2">
-            <Music className="w-5 h-5" />
-            Track Your Streams
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <p className="text-gray-300 text-center">
-            Sign in to add your stats.fm username and track your contributions!
-          </p>
-        </CardContent>
-      </Card>
-    )
-  }
+  const inner = (
+    <div style={{ padding: "16px 20px" }}>
+      {!isSignedIn ? (
+        <p style={{ color: "#8b949e", textAlign: "center", fontSize: 13 }}>Sign in to add your stats.fm username and track your contributions!</p>
+      ) : saved ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)", borderRadius: 10, padding: "12px 14px" }}>
+            <Check style={{ width: 16, height: 16, color: "#22c55e", flexShrink: 0 }} />
+            <div>
+              <p style={{ color: "white", fontWeight: 700, fontSize: 13, margin: 0 }}>Connected!</p>
+              <p style={{ color: "#8b949e", fontSize: 12, margin: 0 }}>@{saved}</p>
+            </div>
+          </div>
+          <p style={{ color: "#8b949e", fontSize: 12 }}>Your streams are being tracked automatically. Check the daily goal to see your contribution!</p>
+          <button onClick={() => setSaved(null)} style={{ background: "none", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "#8b949e", fontSize: 12, padding: "7px 14px", cursor: "pointer" }}>Remove Username</button>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div>
+            <label style={{ color: "#8b949e", fontSize: 12, display: "block", marginBottom: 6 }}>Your stats.fm username:</label>
+            <input
+              type="text" value={username} onChange={e => setUsername(e.target.value)} placeholder="username" disabled={loading}
+              style={{ width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "9px 12px", color: "white", fontSize: 13, outline: "none", boxSizing: "border-box" }}
+            />
+            {error   && <p style={{ color: "#f87171", fontSize: 11, marginTop: 5, display: "flex", alignItems: "center", gap: 4 }}><X style={{ width: 12, height: 12 }} />{error}</p>}
+            {success && <p style={{ color: "#22c55e", fontSize: 11, marginTop: 5, display: "flex", alignItems: "center", gap: 4 }}><Check style={{ width: 12, height: 12 }} />Saved successfully!</p>}
+          </div>
+          <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 8, padding: "9px 12px" }}>
+            <p style={{ color: "#484f58", fontSize: 11, margin: 0 }}>💡 Make sure your stats.fm profile is <span style={{ color: "white" }}>public</span> so we can track your streams!</p>
+          </div>
+          <button onClick={handleSave} disabled={loading || !username.trim()} style={{ background: "#e6edf3", color: "#0d1117", fontWeight: 700, fontSize: 13, borderRadius: 8, padding: "10px 20px", border: "none", cursor: loading || !username.trim() ? "not-allowed" : "pointer", opacity: loading || !username.trim() ? 0.5 : 1 }}>
+            {loading ? 'Saving...' : 'Save Username'}
+          </button>
+        </div>
+      )}
+    </div>
+  )
 
   return (
-    <Card className="glass-card">
-      <CardHeader className="glass-header-blue text-white">
-        <CardTitle className="flex items-center gap-2">
-          <Music className="w-5 h-5" />
-          Track Your Streams
-        </CardTitle>
-        <CardDescription className="text-gray-300">
-          Add your stats.fm username to automatically track your daily streams
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="p-6 space-y-4">
-        {savedUsername ? (
-          // Already saved
-          <div className="space-y-4">
-            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 flex items-center gap-3">
-              <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
-              <div className="flex-1">
-                <p className="text-white font-semibold">Connected!</p>
-                <p className="text-sm text-gray-300">@{savedUsername}</p>
-              </div>
-            </div>
-            <p className="text-sm text-gray-400">
-              Your streams are being tracked automatically. Check the daily goal to see your contribution!
-            </p>
-            {// Add remove button
-            <Button 
-              variant="outline" 
-              className="w-full border-white/20 text-gray-300 hover:bg-white/10"
-              onClick={handleRemove}
-            >
-              Remove Username
-            </Button>
-            }
-          </div>
-        ) : (
-          // Not saved yet
-          <>
-            <div>
-              <label className="text-sm text-gray-300 mb-2 block">
-                Your stats.fm username:
-              </label>
-              <input
-                type="text"
-                value={statsfmUsername}
-                onChange={(e) => setStatsfmUsername(e.target.value)}
-                placeholder="username"
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                disabled={loading}
-              />
-              {error && (
-                <p className="text-red-400 text-sm mt-2 flex items-center gap-2">
-                  <X className="w-4 h-4" />
-                  {error}
-                </p>
-              )}
-              {success && (
-                <p className="text-green-400 text-sm mt-2 flex items-center gap-2">
-                  <Check className="w-4 h-4" />
-                  Saved successfully!
-                </p>
-              )}
-            </div>
-
-            <div className="bg-white/5 border border-white/10 rounded-lg p-3">
-              <p className="text-xs text-gray-400">
-                💡 Make sure your stats.fm profile is <span className="text-white font-semibold">public</span> so we can track your streams!
-              </p>
-            </div>
-
-            <Button 
-              onClick={handleSave}
-              disabled={loading || !statsfmUsername.trim()}
-              className="w-full bg-white hover:bg-gray-200 text-gray-800"
-              size="lg"
-            >
-              {loading ? 'Saving...' : 'Save Username'}
-            </Button>
-          </>
-        )}
-      </CardContent>
-    </Card>
+    <div>
+      <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.07)", display: "flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.02)" }}>
+        <Music style={{ width: 15, height: 15, color: "#58a6ff" }} />
+        <div>
+          <span style={{ color: "#e6edf3", fontWeight: 700, fontSize: 14 }}>Track Your Streams</span>
+          <p style={{ color: "#8b949e", fontSize: 11, margin: 0 }}>Add your stats.fm username to automatically track your daily streams</p>
+        </div>
+      </div>
+      {inner}
+    </div>
   )
 }

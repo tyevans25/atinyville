@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import VideoCard from '@/components/VideoCard'
 import Navigation from '@/components/Navigation'
-import { ChevronLeft, ChevronRight, Loader2, Search, Filter, RefreshCw } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Loader2, Search, Filter, RefreshCw, X } from 'lucide-react'
 
 interface Video {
   youtubeId: string
@@ -19,115 +19,51 @@ interface Video {
   notes: string
 }
 
-const CATEGORIES = [
-  'Music Video',
-  'Performance',
-  'Fan Cam',
-  'Variety',
-  'Guest',
-  'Fashion',
-  'Dance Practice',
-  'Behind the Scenes',
-  'Other'
-]
+const CATEGORIES = ['Music Video','Performance','Fan Cam','Variety','Guest','Fashion','Dance Practice','Behind the Scenes','Other']
 
-const ERAS = [
-  'All',
-  'GOLDEN HOUR : Part.4',
-  'GOLDEN HOUR : Part.3',
-  'GOLDEN HOUR : Part.1',
-  'GOLDEN HOUR : Part.2',
-  'THE WORLD EP.FIN : WILL',
-  'THE WORLD EP.2 : OUTLAW',
-  'THE WORLD EP.1 : MOVEMENT',
-  'ZERO : FEVER EPILOGUE',
-  'ZERO : FEVER Part.3',
-  'ZERO : FEVER Part.2',
-  'ZERO : FEVER Part.1',
-  'TREASURE EPILOGUE: Action to Answer',
-  'TREASURE EP.FIN: All to Action',
-  'TREASURE EP.3: One to All',
-  'TREASURE EP.2: Zero to One',
-  'TREASURE EP.1: All to Zero',
-  'Other'
-]
+const ERAS = ['All','GOLDEN HOUR : Part.4','GOLDEN HOUR : Part.3','GOLDEN HOUR : Part.1','GOLDEN HOUR : Part.2','THE WORLD EP.FIN : WILL','THE WORLD EP.2 : OUTLAW','THE WORLD EP.1 : MOVEMENT','ZERO : FEVER EPILOGUE','ZERO : FEVER Part.3','ZERO : FEVER Part.2','ZERO : FEVER Part.1','TREASURE EPILOGUE: Action to Answer','TREASURE EP.FIN: All to Action','TREASURE EP.3: One to All','TREASURE EP.2: Zero to One','TREASURE EP.1: All to Zero','Other']
 
-const MEMBERS = [
-  'Hongjoong',
-  'Seonghwa',
-  'Yunho',
-  'Yeosang',
-  'San',
-  'Mingi',
-  'Wooyoung',
-  'Jongho'
-]
+const MEMBERS = ['Hongjoong','Seonghwa','Yunho','Yeosang','San','Mingi','Wooyoung','Jongho']
 
-interface CategoryCarouselProps {
-  title: string
-  videos: Video[]
+const MEMBER_COLORS: Record<string, string> = {
+  Hongjoong: "#FF6B35", Seonghwa: "#B48EE0", Yunho: "#4FC3F7",
+  Yeosang: "#81C784", San: "#F06292", Mingi: "#FFD54F",
+  Wooyoung: "#CE93D8", Jongho: "#4DD0E1",
 }
 
-function CategoryCarousel({ title, videos }: CategoryCarouselProps) {
-  const scrollContainer = (direction: 'left' | 'right') => {
-    const container = document.getElementById(`carousel-${title}`)
-    if (container) {
-      const scrollAmount = direction === 'left' ? -400 : 400
-      container.scrollBy({ left: scrollAmount, behavior: 'smooth' })
-    }
+function CategoryCarousel({ title, videos }: { title: string; videos: Video[] }) {
+  const sorted = [...videos].sort((a, b) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime())
+  if (sorted.length === 0) return null
+
+  const scroll = (dir: 'left' | 'right') => {
+    const el = document.getElementById(`carousel-${title}`)
+    if (el) el.scrollBy({ left: dir === 'left' ? -400 : 400, behavior: 'smooth' })
   }
 
-  // Sort videos by date (newest first)
-  const sortedVideos = [...videos].sort((a, b) =>
-    new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime()
-  )
-
-  if (sortedVideos.length === 0) return null
-
   return (
-    <div className="mb-10">
-      {/* Category Header */}
-      <div className="flex items-center justify-between mb-4 px-2">
-        <h2 className="text-2xl font-bold text-white">{title}</h2>
-        <span className="text-sm text-gray-400 bg-white/5 px-3 py-1 rounded-full">
-          {sortedVideos.length} {sortedVideos.length === 1 ? 'video' : 'videos'}
+    <div style={{ marginBottom: 32 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, padding: "0 4px" }}>
+        <h2 style={{ color: "white", fontWeight: 800, fontSize: 18, margin: 0 }}>{title}</h2>
+        <span style={{ color: "#484f58", fontSize: 11, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", padding: "2px 10px", borderRadius: 20 }}>
+          {sorted.length} {sorted.length === 1 ? 'video' : 'videos'}
         </span>
       </div>
-
-      {/* Carousel */}
-      <div className="relative group">
-        {/* Left Arrow */}
-        {sortedVideos.length > 3 && (
-          <button
-            onClick={() => scrollContainer('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/80 hover:bg-black text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-xl"
-            aria-label="Scroll left"
-          >
-            <ChevronLeft className="w-6 h-6" />
+      <div style={{ position: "relative" }} className="group">
+        {sorted.length > 3 && (
+          <button onClick={() => scroll('left')} style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", zIndex: 10, width: 36, height: 36, borderRadius: "50%", background: "rgba(13,17,23,0.9)", border: "1px solid rgba(255,255,255,0.1)", color: "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }} className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <ChevronLeft style={{ width: 18, height: 18 }} />
           </button>
         )}
-
-        {/* Videos Container */}
-        <div
-          id={`carousel-${title}`}
-          className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-4 px-2"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          {sortedVideos.map(video => (
-            <div key={video.youtubeId} className="flex-shrink-0 w-80">
+        <div id={`carousel-${title}`} style={{ display: "flex", gap: 14, overflowX: "auto", paddingBottom: 8, scrollbarWidth: "none" }}>
+          {sorted.map(video => (
+            <div key={video.youtubeId} style={{ flexShrink: 0, width: 300 }}>
               <VideoCard video={video} />
             </div>
           ))}
         </div>
-
-        {/* Right Arrow */}
-        {sortedVideos.length > 3 && (
-          <button
-            onClick={() => scrollContainer('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/80 hover:bg-black text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-xl"
-            aria-label="Scroll right"
-          >
-            <ChevronRight className="w-6 h-6" />
+        {sorted.length > 3 && (
+          <button onClick={() => scroll('right')} style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)", zIndex: 10, width: 36, height: 36, borderRadius: "50%", background: "rgba(13,17,23,0.9)", border: "1px solid rgba(255,255,255,0.1)", color: "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }} className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <ChevronRight style={{ width: 18, height: 18 }} />
           </button>
         )}
       </div>
@@ -136,238 +72,177 @@ function CategoryCarousel({ title, videos }: CategoryCarouselProps) {
 }
 
 export default function MediaHubPage() {
-  const [videos, setVideos] = useState<Video[]>([])
-  const [loading, setLoading] = useState(true)
-  const [refreshing, setRefreshing] = useState(false)
-  const [selectedYear, setSelectedYear] = useState('all')
-  const [selectedEra, setSelectedEra] = useState('All')
+  const [videos, setVideos]                   = useState<Video[]>([])
+  const [loading, setLoading]                 = useState(true)
+  const [refreshing, setRefreshing]           = useState(false)
+  const [selectedYear, setSelectedYear]       = useState('all')
+  const [selectedEra, setSelectedEra]         = useState('All')
   const [selectedMembers, setSelectedMembers] = useState<string[]>([])
-  const [searchQuery, setSearchQuery] = useState('')
-  const [showMemberDropdown, setShowMemberDropdown] = useState(false)
+  const [searchQuery, setSearchQuery]         = useState('')
+  const [filtersOpen, setFiltersOpen]         = useState(false)
 
-  useEffect(() => {
-    fetchVideos()
-  }, [])
+  useEffect(() => { fetchVideos() }, [])
 
   const fetchVideos = async (force = false) => {
     try {
-      const url = force
-        ? '/api/variety-videos?force=true'
-        : '/api/variety-videos'
-      const response = await fetch(url)
-      if (response.ok) {
-        const data = await response.json()
-        setVideos(data.videos || [])
-      }
-    } catch (error) {
-      console.error('Error fetching videos:', error)
-    } finally {
-      setLoading(false)
-      setRefreshing(false)
-    }
+      const res = await fetch(force ? '/api/variety-videos?force=true' : '/api/variety-videos')
+      if (res.ok) { const d = await res.json(); setVideos(d.videos || []) }
+    } catch (e) { console.error(e) }
+    finally { setLoading(false); setRefreshing(false) }
   }
 
-  const handleRefresh = () => {
-    setRefreshing(true)
-    fetchVideos(true)
-  }
+  const toggleMember = (m: string) => setSelectedMembers(prev => prev.includes(m) ? prev.filter(x => x !== m) : [...prev, m])
 
-  const toggleMember = (member: string) => {
-    setSelectedMembers(prev =>
-      prev.includes(member)
-        ? prev.filter(m => m !== member)
-        : [...prev, member]
-    )
-  }
-
-  // Get unique years from videos
   const years = ['all', ...Array.from(new Set(videos.map(v => v.year))).sort((a, b) => b - a)]
 
-  // Filter videos
-  const filteredVideos = videos.filter(video => {
-    if (selectedYear !== 'all' && video.year !== parseInt(selectedYear)) return false
-    if (selectedEra !== 'All' && video.era !== selectedEra) return false
-    if (searchQuery && !video.title.toLowerCase().includes(searchQuery.toLowerCase())) return false
-
-    // Member filter
+  const filtered = videos.filter(v => {
+    if (selectedYear !== 'all' && v.year !== parseInt(selectedYear)) return false
+    if (selectedEra !== 'All' && v.era !== selectedEra) return false
+    if (searchQuery && !v.title.toLowerCase().includes(searchQuery.toLowerCase())) return false
     if (selectedMembers.length > 0) {
-      const videoMembers = video.featuredMembers.map(m => m.toLowerCase())
-      const hasAllSelected = selectedMembers.every(m =>
-        videoMembers.some(vm => vm.includes(m.toLowerCase()))
-      )
-      if (!hasAllSelected) return false
+      const vm = v.featuredMembers.map(m => m.toLowerCase())
+      if (!selectedMembers.every(m => vm.some(x => x.includes(m.toLowerCase())))) return false
     }
-
     return true
   })
 
-  // Group videos by category
-  const videosByCategory = CATEGORIES.map(category => ({
-    category,
-    videos: filteredVideos.filter(v => v.category === category)
-  }))
+  const byCategory = CATEGORIES.map(c => ({ category: c, videos: filtered.filter(v => v.category === c) }))
+  const activeFilters = (selectedYear !== 'all' ? 1 : 0) + (selectedEra !== 'All' ? 1 : 0) + selectedMembers.length
 
-  if (loading) {
-    return (
-      <>
-        <Navigation />
-        <div className="min-h-screen bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center pt-20">
-          <div className="text-center">
-            <Loader2 className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
-            <p className="text-white text-lg">Loading videos...</p>
-          </div>
+  if (loading) return (
+    <>
+      <Navigation />
+      <div style={{ background: "#0d1117", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", paddingTop: 80 }}>
+        <div style={{ textAlign: "center" }}>
+          <Loader2 style={{ width: 40, height: 40, color: "#58a6ff", animation: "spin 1s linear infinite", margin: "0 auto 16px" }} />
+          <p style={{ color: "#8b949e", fontSize: 14 }}>Loading videos...</p>
         </div>
-      </>
-    )
-  }
+      </div>
+    </>
+  )
 
   return (
     <>
       <Navigation />
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-black to-gray-900 pt-24 pb-16 px-4">
-        <div className="container mx-auto max-w-7xl">
+      <div style={{ background: "#0d1117", minHeight: "100vh" }}>
+
+        {/* Background atmosphere */}
+        <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }}>
+          <div style={{ position: "absolute", top: "8%", left: "20%", width: 600, height: 600, borderRadius: "50%", background: "rgba(31,111,235,0.04)", filter: "blur(120px)" }} />
+          <div style={{ position: "absolute", bottom: "15%", right: "10%", width: 400, height: 400, borderRadius: "50%", background: "rgba(88,166,255,0.03)", filter: "blur(100px)" }} />
+        </div>
+
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 1100, margin: "0 auto", padding: "88px 24px 56px" }}>
+
           {/* Header */}
-          <div className="text-center mb-10">
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 glow-text">
-              ATEEZ Media
-            </h1>
-            <p className="text-gray-400 text-lg mb-8">
-              Music Videos • Performances • Variety Shows
-            </p>
+          <div style={{ textAlign: "center", marginBottom: 32 }}>
+            <h1 style={{ color: "white", fontWeight: 900, fontSize: 36, margin: "0 0 8px", letterSpacing: "-0.01em", textShadow: "0 0 40px rgba(88,166,255,0.2)" }}>ATEEZ Media</h1>
+            <p style={{ color: "#8b949e", fontSize: 14, margin: "0 0 24px" }}>Music Videos · Performances · Variety Shows</p>
 
-            {/* Search Bar */}
-            <div className="max-w-2xl mx-auto">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search videos..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white/10 backdrop-blur border border-white/20 rounded-xl pl-12 pr-4 py-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                />
-              </div>
+            {/* Search */}
+            <div style={{ maxWidth: 520, margin: "0 auto", position: "relative" }}>
+              <Search style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", width: 16, height: 16, color: "#484f58" }} />
+              <input
+                type="text"
+                placeholder="Search videos..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                style={{ width: "100%", background: "rgba(22,32,56,0.85)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "11px 14px 11px 40px", color: "white", fontSize: 13, outline: "none", boxSizing: "border-box" }}
+              />
+              {searchQuery && <button onClick={() => setSearchQuery('')} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#484f58", cursor: "pointer", display: "flex" }}><X style={{ width: 14, height: 14 }} /></button>}
             </div>
           </div>
 
-          {/* Filters */}
-          <div className="glass-card p-6 mb-10 rounded-2xl">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <Filter className="w-5 h-5 text-blue-400" />
-                <h3 className="text-lg font-semibold text-white">Filters</h3>
+          {/* Filter bar */}
+          <div style={{ background: "rgba(22,32,56,0.85)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, marginBottom: 24, overflow: "hidden" }}>
+            <div style={{ padding: "12px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", borderBottom: filtersOpen ? "1px solid rgba(255,255,255,0.07)" : "none" }} onClick={() => setFiltersOpen(o => !o)}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <Filter style={{ width: 14, height: 14, color: "#58a6ff" }} />
+                <span style={{ color: "#e6edf3", fontWeight: 700, fontSize: 13 }}>Filters</span>
+                {activeFilters > 0 && <span style={{ background: "rgba(88,166,255,0.2)", color: "#58a6ff", fontSize: 10, fontWeight: 700, padding: "1px 7px", borderRadius: 10, border: "1px solid rgba(88,166,255,0.3)" }}>{activeFilters}</span>}
               </div>
-              <button
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 text-white rounded-lg transition text-sm font-semibold"
-              >
-                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-                Refresh
-              </button>
-            </div>
-
-            {/* Year Filter */}
-            <div className="mb-6">
-              <p className="text-sm font-semibold text-gray-300 mb-3">Year:</p>
-              <div className="flex flex-wrap gap-2">
-                {years.map(year => (
-                  <button
-                    key={year}
-                    onClick={() => setSelectedYear(year.toString())}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                      selectedYear === year.toString()
-                        ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/50'
-                        : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
-                    }`}
-                  >
-                    {year === 'all' ? 'All Years' : year}
-                  </button>
-                ))}
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <button onClick={e => { e.stopPropagation(); setRefreshing(true); fetchVideos(true) }} style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(88,166,255,0.1)", border: "1px solid rgba(88,166,255,0.2)", borderRadius: 7, padding: "4px 10px", color: "#58a6ff", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
+                  <RefreshCw style={{ width: 12, height: 12, animation: refreshing ? "spin 1s linear infinite" : "none" }} />
+                  Refresh
+                </button>
+                <span style={{ color: "#484f58", fontSize: 12 }}>{filtersOpen ? "▲" : "▼"}</span>
               </div>
             </div>
 
-            {/* Era Filter */}
-            <div className="mb-6">
-              <p className="text-sm font-semibold text-gray-300 mb-3">Era:</p>
-              <div className="flex flex-wrap gap-2">
-                {ERAS.map(era => (
-                  <button
-                    key={era}
-                    onClick={() => setSelectedEra(era)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition ${
-                      selectedEra === era
-                        ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/50'
-                        : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
-                    }`}
-                  >
-                    {era}
-                  </button>
-                ))}
-              </div>
-            </div>
+            {filtersOpen && (
+              <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
+                {/* Year */}
+                <div>
+                  <p style={{ color: "#8b949e", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", margin: "0 0 8px" }}>Year</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {years.map(y => (
+                      <button key={y} onClick={() => setSelectedYear(y.toString())} style={{ padding: "5px 12px", borderRadius: 7, fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", background: selectedYear === y.toString() ? "#58a6ff" : "rgba(255,255,255,0.05)", color: selectedYear === y.toString() ? "#0d1117" : "#8b949e", boxShadow: selectedYear === y.toString() ? "0 0 12px rgba(88,166,255,0.4)" : "none" }}>
+                        {y === 'all' ? 'All Years' : y}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-            {/* Member Filter */}
-            <div>
-              <p className="text-sm font-semibold text-gray-300 mb-3">Members:</p>
-              <div className="flex flex-wrap gap-2">
-                {MEMBERS.map(member => (
-                  <button
-                    key={member}
-                    onClick={() => toggleMember(member)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                      selectedMembers.includes(member)
-                        ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/50'
-                        : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
-                    }`}
-                  >
-                    {member}
-                  </button>
-                ))}
-                {selectedMembers.length > 0 && (
-                  <button
-                    onClick={() => setSelectedMembers([])}
-                    className="px-4 py-2 rounded-lg text-sm font-medium bg-red-500/20 text-red-400 hover:bg-red-500/30 transition"
-                  >
-                    Clear ({selectedMembers.length})
-                  </button>
-                )}
+                {/* Era */}
+                <div>
+                  <p style={{ color: "#8b949e", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", margin: "0 0 8px" }}>Era</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {ERAS.map(era => (
+                      <button key={era} onClick={() => setSelectedEra(era)} style={{ padding: "5px 12px", borderRadius: 7, fontSize: 11, fontWeight: 600, border: "none", cursor: "pointer", whiteSpace: "nowrap", background: selectedEra === era ? "rgba(168,85,247,0.3)" : "rgba(255,255,255,0.05)", color: selectedEra === era ? "#C084FC" : "#8b949e", boxShadow: selectedEra === era ? "0 0 12px rgba(168,85,247,0.3)" : "none" }}>
+                        {era}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Members */}
+                <div>
+                  <p style={{ color: "#8b949e", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", margin: "0 0 8px" }}>Members</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {MEMBERS.map(m => {
+                      const active = selectedMembers.includes(m)
+                      const col = MEMBER_COLORS[m]
+                      return (
+                        <button key={m} onClick={() => toggleMember(m)} style={{ padding: "5px 12px", borderRadius: 7, fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", background: active ? `${col}22` : "rgba(255,255,255,0.05)", color: active ? col : "#8b949e", boxShadow: active ? `0 0 10px ${col}33` : "none", outline: active ? `1px solid ${col}44` : "none" }}>
+                          {m}
+                        </button>
+                      )
+                    })}
+                    {selectedMembers.length > 0 && (
+                      <button onClick={() => setSelectedMembers([])} style={{ padding: "5px 12px", borderRadius: 7, fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", background: "rgba(239,68,68,0.1)", color: "#f87171" }}>
+                        Clear ({selectedMembers.length})
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
-          {/* Results Count */}
-          <p className="text-gray-400 text-sm mb-6 px-2">
-            Showing {filteredVideos.length} of {videos.length} videos
+          {/* Count */}
+          <p style={{ color: "#484f58", fontSize: 11, marginBottom: 20 }}>
+            Showing {filtered.length} of {videos.length} videos
           </p>
 
-          {/* Category Carousels */}
-          {videosByCategory.map(({ category, videos }) => (
-            <CategoryCarousel
-              key={category}
-              title={category}
-              videos={videos}
-            />
+          {/* Video carousels */}
+          {byCategory.map(({ category, videos }) => (
+            <CategoryCarousel key={category} title={category} videos={videos} />
           ))}
 
-          {/* No Results */}
-          {filteredVideos.length === 0 && (
-            <div className="text-center py-16">
-              <div className="text-6xl mb-4">🔍</div>
-              <p className="text-xl text-gray-400 mb-2">No videos found</p>
-              <p className="text-sm text-gray-500">Try adjusting your filters</p>
+          {filtered.length === 0 && (
+            <div style={{ textAlign: "center", padding: "60px 20px" }}>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
+              <p style={{ color: "#8b949e", fontSize: 16, margin: "0 0 6px" }}>No videos found</p>
+              <p style={{ color: "#484f58", fontSize: 12 }}>Try adjusting your filters</p>
             </div>
           )}
         </div>
       </div>
 
-      <style jsx global>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .glow-text {
-          text-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
-        }
+      <style>{`
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
     </>
   )
