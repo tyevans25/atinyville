@@ -263,6 +263,8 @@ export async function POST(request: Request) {
     const weekKey = getCurrentWeekKey()
     const now = Date.now()
 
+    console.log(`🗓️ Date debug: UTC=${new Date().toISOString()}, KST date=${today}, weekKey=${weekKey}`)
+
     console.log(`🚀 Cron started at ${new Date(now).toISOString()}`)
 
     await ensureDefaultGoals(today, weekKey)
