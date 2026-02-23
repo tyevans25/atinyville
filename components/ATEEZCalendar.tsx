@@ -115,6 +115,56 @@ function MemberInitial({ name }: { name: string }) {
   )
 }
 
+
+function downloadICS(event: CalendarEvent) {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const [year, month, day] = event.date.split('-').map(Number)
+
+  let dtStart: string
+  let dtEnd: string
+
+  if (event.timeKST) {
+    const [hours, minutes] = event.timeKST.split(':').map(Number)
+    // Convert KST (UTC+9) to UTC
+    const kstMs = Date.UTC(year, month - 1, day, hours, minutes) - 9 * 60 * 60 * 1000
+    const start = new Date(kstMs)
+    const end = new Date(kstMs + 60 * 60 * 1000) // default 1hr duration
+    const fmt = (d: Date) =>
+      `${d.getUTCFullYear()}${pad(d.getUTCMonth()+1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00Z`
+    dtStart = fmt(start)
+    dtEnd = fmt(end)
+  } else {
+    // All-day event
+    dtStart = `${year}${pad(month)}${pad(day)}`
+    const next = new Date(Date.UTC(year, month - 1, day + 1))
+    dtEnd = `${next.getUTCFullYear()}${pad(next.getUTCMonth()+1)}${pad(next.getUTCDate())}`
+  }
+
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'CALSCALE:GREGORIAN',
+    'BEGIN:VEVENT',
+    `SUMMARY:${event.title}`,
+    event.timeKST ? `DTSTART:${dtStart}` : `DTSTART;VALUE=DATE:${dtStart}`,
+    event.timeKST ? `DTEND:${dtEnd}`   : `DTEND;VALUE=DATE:${dtEnd}`,
+    event.description ? `DESCRIPTION:${event.description.replace(/,/g, '\,')}` : '',
+    event.link ? `URL:${event.link}` : '',
+    `CATEGORIES:${event.eventType}`,
+    `UID:atinytown-${event.date}-${Date.now()}@atinyville`,
+    'END:VEVENT',
+    'END:VCALENDAR',
+  ].filter(Boolean).join('\r\n')
+
+  const blob = new Blob([lines], { type: 'text/calendar;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${event.title.replace(/[^a-z0-9]/gi, '_')}.ics`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 function EventModal({ event, onClose }: { event: CalendarEvent; onClose: () => void }) {
   const c = getEventColors(event.eventType)
   const timeInfo = getTimeInfo(event.date, event.timeKST)
@@ -253,6 +303,35 @@ function EventModal({ event, onClose }: { event: CalendarEvent; onClose: () => v
                 Watch / View <ExternalLink className="w-3.5 h-3.5" />
               </a>
             )}
+            <button
+              onClick={() => downloadICS(event)}
+              className="group relative flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98] overflow-hidden"
+              style={{
+                background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15))',
+                border: '1px solid rgba(139,92,246,0.35)',
+                color: '#a78bfa',
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase' as const,
+                fontSize: 11,
+              }}
+            >
+              {/* animated shimmer sweep */}
+              <span style={{
+                position: 'absolute', inset: 0,
+                background: 'linear-gradient(105deg, transparent 40%, rgba(167,139,250,0.12) 50%, transparent 60%)',
+                backgroundSize: '200% 100%',
+                animation: 'calendarShimmer 2.5s linear infinite',
+              }} />
+              {/* icon: plus inside a tiny circle */}
+              <span style={{
+                width: 18, height: 18, borderRadius: '50%', flexShrink: 0,
+                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 13, fontWeight: 900, color: 'white', lineHeight: 1,
+                boxShadow: '0 0 8px rgba(139,92,246,0.6)',
+              }}>+</span>
+              <span style={{ position: 'relative' }}>Save to My Calendar</span>
+            </button>
           </div>
         </div>
       </div>
@@ -318,7 +397,6 @@ export default function ATEEZCalendar() {
 
   return (
     <div style={{ background: 'rgba(22,32,56,0.85)' }} className="p-4 md:p-6">
-      {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <h2 style={{ color: '#e6edf3', fontSize: 14, fontWeight: 700 }} className="flex items-center gap-2">
           <CalendarIcon className="w-5 h-5 md:w-6 md:h-6 text-blue-400 flex-shrink-0" />
@@ -328,8 +406,6 @@ export default function ATEEZCalendar() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        {/* LEFT: Calendar Grid */}
         <div>
           <div className="flex items-center justify-between mb-4">
             <button onClick={() => setCurrentDate(new Date(year, month - 1))}
@@ -437,7 +513,6 @@ export default function ATEEZCalendar() {
             })}
           </div>
 
-          {/* Legend */}
           <div className="mt-4 pt-3 border-t border-white/10 flex flex-wrap gap-x-3 gap-y-1">
             {Object.entries(EVENT_COLORS).map(([type, c]) => (
               <div key={type} className="flex items-center gap-1">
@@ -448,7 +523,6 @@ export default function ATEEZCalendar() {
           </div>
         </div>
 
-        {/* RIGHT: Upcoming Schedule */}
         <div>
           <h3 style={{ color: '#e6edf3', fontSize: 14, fontWeight: 700 }} className="mb-3 flex items-center gap-2">
             <List className="w-4 h-4 text-blue-400" />

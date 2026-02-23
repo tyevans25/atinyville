@@ -6,13 +6,13 @@ import { useUser } from "@clerk/nextjs"
 
 const MEMBERS = [
   { name: "Hongjoong", initials: "HJ", color: "#FF6B35", secondColor: "#FF9A6C", role: "Captain · Rapper · Producer · Vocalist", type: "LEADER",    birthdate: "Nov 7, 1998",  height: "172 cm", mbti: "INFP", zodiac: "Scorpio", age: 27, image: "/members/hongjoong.jpg", fact: "If you see a squirrel that looks just like him... run.",                    rarity: "LEGENDARY" as const, power: 1024, stage: 95, vocal: 82, dance: 90 },
-  { name: "Seonghwa",  initials: "SH", color: "#B48EE0", secondColor: "#D8B4FE", role: "Visual · Vocalist · Rapper ",           type: "VISUAL",   birthdate: "Apr 3, 1998",  height: "178 cm", mbti: "ENFJ", zodiac: "Aries", age: 27, image: "/members/seonghwa.jpg",  fact: "Prone to small bouts of (harmless) violence.",                                rarity: "LEGENDARY" as const, power: 1024, stage: 95, vocal: 92, dance: 92 },
+  { name: "Seonghwa",  initials: "SH", color: "#B48EE0", secondColor: "#D8B4FE", role: "Visual · Vocalist · Rapper ",           type: "VOCALIST",   birthdate: "Apr 3, 1998",  height: "178 cm", mbti: "ENFJ", zodiac: "Aries", age: 27, image: "/members/seonghwa.jpg",  fact: "Prone to small bouts of (harmless) violence.",                                rarity: "LEGENDARY" as const, power: 1024, stage: 95, vocal: 92, dance: 92 },
   { name: "Yunho",     initials: "YH", color: "#4FC3F7", secondColor: "#BAE6FD", role: "Main Dancer · Vocalist",      type: "DANCER",   birthdate: "Mar 23, 1999", height: "186 cm", mbti: "ENFJ", zodiac: "Aries", age: 26, image: "/members/yunho.jpg",     fact: "Gets away with anything becasue he's handsome and cute.",                   rarity: "LEGENDARY" as const, power: 1024, stage: 93, vocal: 90, dance: 96 },
-  { name: "Yeosang",   initials: "YS", color: "#81C784", secondColor: "#BBF7D0", role: "Vocalist · Dancer· Visual",           type: "VOCALIST", birthdate: "Jun 15, 1999", height: "175 cm", mbti: "ISFJ", zodiac: "Gemini", age: 26, image: "/members/yeosang.jpg",   fact: "Superpower:hehet. Allegedly a doberman, occasionally resembles a maltese.", rarity: "LEGENDARY" as const, power: 1024, stage: 90, vocal: 90, dance: 90 },
-  { name: "San",       initials: "SN", color: "#F06292", secondColor: "#FBCFE8", role: "Main Dancer · Vocalist",      type: "PERFORMER",birthdate: "Jul 10, 1999", height: "178 cm", mbti: "INFP", zodiac: "Cancer", age: 26, image: "/members/san.jpg",       fact: "WILL break the stage (metaphorically).. and 10 headsets (literally)",       rarity: "LEGENDARY" as const, power: 1024, stage: 99, vocal: 94, dance: 97 },
+  { name: "Yeosang",   initials: "YS", color: "#81C784", secondColor: "#BBF7D0", role: "Vocalist · Dancer · Visual",           type: "VOCALIST", birthdate: "Jun 15, 1999", height: "175 cm", mbti: "ISFJ", zodiac: "Gemini", age: 26, image: "/members/yeosang.jpg",   fact: "Superpower:hehet. Allegedly a doberman, occasionally resembles a maltese.", rarity: "LEGENDARY" as const, power: 1024, stage: 90, vocal: 90, dance: 90 },
+  { name: "San",       initials: "SN", color: "#F06292", secondColor: "#FBCFE8", role: "Main Dancer · Vocalist",      type: "VOCALIST",birthdate: "Jul 10, 1999", height: "178 cm", mbti: "INFP", zodiac: "Cancer", age: 26, image: "/members/san.jpg",       fact: "WILL break the stage (metaphorically).. and 10 headsets (literally)",       rarity: "LEGENDARY" as const, power: 1024, stage: 99, vocal: 94, dance: 97 },
   { name: "Mingi",     initials: "MG", color: "#FFD54F", secondColor: "#FEF08A", role: "Rapper · Dancer",        type: "RAPPER",   birthdate: "Aug 9, 1999",  height: "184 cm", mbti: "ENTP", zodiac: "Leo", age: 26, image: "/members/mingi.jpg",     fact: "CAUTION: Will mesmerise you with his hips and disarm you with cuteness.",   rarity: "LEGENDARY" as const, power: 1024, stage: 91, vocal: 84, dance: 90 },
-  { name: "Wooyoung",  initials: "WY", color: "#CE93D8", secondColor: "#E9D5FF", role: "Vocalist · Dancer",           type: "VOCALIST", birthdate: "Nov 26, 1999", height: "173 cm", mbti: "ISTJ", zodiac: "Sagittarius", age: 26, image: "/members/wooyoung.jpg",  fact: "He may bite. May also hiss. With the occasional purr.",                     rarity: "LEGENDARY" as const, power: 1024, stage: 92, vocal: 90, dance: 91 },
-  { name: "Jongho",    initials: "JH", color: "#4DD0E1", secondColor: "#A5F3FC", role: "Main Vocalist",               type: "VOCALIST", birthdate: "Oct 12, 2000", height: "176 cm", mbti: "ISFP", age: 25, image: "/members/jongho.jpg",    fact: "Will seranade you beautifully to distract you from the fact that he's selling you out for 10 dollars.", rarity: "LEGENDARY" as const, power: 1024, stage: 90, vocal: 99, dance: 90 },
+  { name: "Wooyoung",  initials: "WY", color: "#CE93D8", secondColor: "#E9D5FF", role: "Vocalist · Dancer",           type: "DANCER", birthdate: "Nov 26, 1999", height: "173 cm", mbti: "ISTJ", zodiac: "Sagittarius", age: 26, image: "/members/wooyoung.jpg",  fact: "He may bite. May also hiss. With the occasional purr.",                     rarity: "LEGENDARY" as const, power: 1024, stage: 92, vocal: 90, dance: 91 },
+  { name: "Jongho",    initials: "JH", color: "#4DD0E1", secondColor: "#A5F3FC", role: "Main Vocalist",               type: "VOCALIST", birthdate: "Oct 12, 2000", height: "176 cm", mbti: "ISFP", age: 25, zodiac: "Libra", image: "/members/jongho.jpg",    fact: "Will seranade you beautifully to distract you from the fact that he's selling you out for 10 dollars.", rarity: "LEGENDARY" as const, power: 1024, stage: 90, vocal: 99, dance: 90 },
 ]
 type Member = typeof MEMBERS[number]
 
@@ -52,7 +52,7 @@ function HoloCard({ member, isBias, children }: { member: Member; isBias: boolea
   )
 }
 
-function CardFront({ member, isBias }: { member: Member; isBias: boolean }) {
+function CardFront({ member, isBias, matchHeight }: { member: Member; isBias: boolean; matchHeight?: number }) {
   const rarity = RARITY[member.rarity]
   const idx = MEMBERS.findIndex(m => m.name === member.name)
   const [imgError, setImgError] = useState(false)
@@ -127,9 +127,9 @@ function CardFront({ member, isBias }: { member: Member; isBias: boolean }) {
   )
 }
 
-function CardBack({ member }: { member: Member }) {
+function CardBack({ member, height }: { member: Member; height: number }) {
   return (
-    <div style={{ width: 280, borderRadius: 20, background: "linear-gradient(160deg,#111827,#0d1117)", border: `2px solid ${member.color}44`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", aspectRatio: "3/5", gap: 16, position: "relative", overflow: "hidden" }}>
+    <div style={{ width: 280, height, borderRadius: 20, background: "linear-gradient(160deg,#111827,#0d1117)", border: `2px solid ${member.color}44`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, position: "relative", overflow: "hidden" }}>
       <div style={{ position: "absolute", inset: 0, opacity: .04, backgroundImage: `repeating-linear-gradient(45deg,${member.color} 0px,${member.color} 1px,transparent 1px,transparent 10px)` }} />
       <div style={{ position: "absolute", inset: 0, background: `radial-gradient(circle at center,${member.color}08,transparent 70%)` }} />
       <div style={{ width: 80, height: 80, borderRadius: "50%", background: `radial-gradient(circle at 35% 30%,${member.color},${member.color}77)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 900, color: "white", boxShadow: `0 0 40px ${member.color}66`, zIndex: 1 }}>{member.initials}</div>
@@ -144,6 +144,11 @@ function CardBack({ member }: { member: Member }) {
 
 function FlipCard({ member, isBias, onClose }: { member: Member; isBias: boolean; onClose: () => void }) {
   const [flipped, setFlipped] = useState(false)
+  const [frontHeight, setFrontHeight] = useState(0)
+  const frontRef = useCallback((node: HTMLDivElement | null) => {
+    if (node) setFrontHeight(node.offsetHeight)
+  }, [])
+
   useEffect(() => { const t = setTimeout(() => setFlipped(true), 300); return () => clearTimeout(t) }, [])
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose() }
@@ -155,12 +160,14 @@ function FlipCard({ member, isBias, onClose }: { member: Member; isBias: boolean
     <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "flex-start", justifyContent: "center", background: "rgba(0,0,0,.82)", backdropFilter: "blur(4px)", padding: 16, overflowY: "auto" }} onClick={onClose}>
       <div style={{ position: "fixed", width: 300, height: 300, borderRadius: "50%", background: `${member.color}18`, filter: "blur(60px)", pointerEvents: "none", top: "50%", left: "50%", transform: "translate(-50%,-50%)" }} />
       <div onClick={e => { e.stopPropagation(); setFlipped(f => !f) }} style={{ perspective: 1200, cursor: "pointer", zIndex: 1, marginTop: "max(16px, 5vh)", marginBottom: 16 }}>
-        <div style={{ position: "relative", transformStyle: "preserve-3d", transition: "transform 0.75s cubic-bezier(0.4,0,0.2,1)", transform: flipped ? "rotateY(0deg)" : "rotateY(180deg)" }}>
-          <div style={{ backfaceVisibility: "hidden" }}>
+        <div style={{ position: "relative", transformStyle: "preserve-3d", transition: "transform 0.75s cubic-bezier(0.4,0,0.2,1)", transform: flipped ? "rotateY(0deg)" : "rotateY(180deg)", width: 280, height: frontHeight || "auto" }}>
+          {/* Front */}
+          <div ref={frontRef} style={{ backfaceVisibility: "hidden", position: "absolute", top: 0, left: 0 }}>
             <HoloCard member={member} isBias={isBias}><CardFront member={member} isBias={isBias} /></HoloCard>
           </div>
-          <div style={{ position: "absolute", top: 0, left: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
-            <CardBack member={member} />
+          {/* Back — uses measured front height */}
+          <div style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)", position: "absolute", top: 0, left: 0 }}>
+            {frontHeight > 0 && <CardBack member={member} height={frontHeight} />}
           </div>
         </div>
         <p style={{ color: "#484f58", fontSize: 11, textAlign: "center", marginTop: 10 }}>Click to flip · Esc or click outside to close</p>
@@ -171,7 +178,6 @@ function FlipCard({ member, isBias, onClose }: { member: Member; isBias: boolean
 
 // ── Main export ───────────────────────────────────────────────
 export default function MemberDots() {
-  // ALL hooks must come before any early return
   const { isSignedIn, isLoaded } = useUser()
   const [selected, setSelected]       = useState<Member | null>(null)
   const [bias, setBias]               = useState<Member | null>(null)
@@ -234,9 +240,6 @@ export default function MemberDots() {
     if (holdTimer) clearTimeout(holdTimer)
     setHoldTimer(null); setHoldingName(null)
   }
-
-  // Don't render until Clerk is ready
-//   if (!isLoaded) return null
 
   return (
     <>

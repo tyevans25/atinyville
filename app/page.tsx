@@ -2,14 +2,15 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import Quiz from "@/components/Quiz"
-import { Trophy, ExternalLink } from "lucide-react"
+import { ExternalLink } from "lucide-react"
 import Navigation from "@/components/Navigation"
 import DailyGoalSlide from "@/components/DailyGoalSlide"
 import { useUser } from "@clerk/nextjs"
 import ATEEZCalendar from "@/components/ATEEZCalendar"
 import MVTracker from "@/components/MVTracker"
 import MemberDots from "@/components/MemberDots"
+import MilestoneCelebration from "@/components/MilestoneCelebration"
+import Link from "next/link"
 
 declare global {
   interface Window { twttr: any }
@@ -37,7 +38,7 @@ const campaignUpdates = [
     title: "ATEEZ on KBS 1N2D!",
     description: "ATEEZ returns to 1N2D and are hilarious as usual!",
     videoUrl: "https://www.youtube.com/embed/bfhzzSQ2YCI?si=tLnuRMqykmkKpaRT",
-    links: [{ url: "https://www.youtube.com/watch?v=bfhzzSQ2YCI", label: "Watch on YouTube", color: "orange" }],
+    links: [{ url: "https://www.youtube.com/watch?v=bfhzzSQ2YCI", label: "Watch on YouTube" }],
     urgent: false
   },
   {
@@ -45,7 +46,7 @@ const campaignUpdates = [
     title: '"Adrenaline" on Music Bank!',
     description: 'Watch ATEEZ put on an electrifying performance of "Adrenaline" on Music Bank.',
     videoUrl: "https://www.youtube.com/embed/0PeuZB1FniM?si=4yVEpQKVTIxgffW3",
-    links: [{ url: "https://www.youtube.com/watch?v=0PeuZB1FniM", label: "Watch on YouTube", color: "orange" }],
+    links: [{ url: "https://www.youtube.com/watch?v=0PeuZB1FniM", label: "Watch on YouTube" }],
     urgent: false
   },
   {
@@ -53,7 +54,7 @@ const campaignUpdates = [
     title: '"NASA" on Music Bank!',
     description: 'Watch ATEEZ mesmerise with their performance of "NASA" on Music Bank.',
     videoUrl: "https://www.youtube.com/embed/CN3vOi5wKCk?si=r8vajgtQYQ_Smj0Q",
-    links: [{ url: "https://www.youtube.com/watch?v=CN3vOi5wKCk", label: "Watch on YouTube", color: "orange" }],
+    links: [{ url: "https://www.youtube.com/watch?v=CN3vOi5wKCk", label: "Watch on YouTube" }],
     urgent: false
   },
   {
@@ -61,7 +62,7 @@ const campaignUpdates = [
     title: '"Adrenaline" on Music Core!',
     description: 'Watch ATEEZ put on an amazing performance of "Adrenaline" on Music Core.',
     videoUrl: "https://www.youtube.com/embed/tDuZLK78BEk?si=qGPDk8TS_ymtON66",
-    links: [{ url: "https://www.youtube.com/watch?v=tDuZLK78BEk", label: "Watch on YouTube", color: "orange" }],
+    links: [{ url: "https://www.youtube.com/watch?v=tDuZLK78BEk", label: "Watch on YouTube" }],
     urgent: false
   },
   {
@@ -69,7 +70,7 @@ const campaignUpdates = [
     title: '"NASA" on Music Core!',
     description: 'Watch ATEEZ mesmerise with their performance of "NASA" on Music Core.',
     videoUrl: "https://www.youtube.com/embed/mNLzeeTiYd8?si=d3RvFTthYEMK23d6",
-    links: [{ url: "https://www.youtube.com/watch?v=mNLzeeTiYd8", label: "Watch on YouTube", color: "orange" }],
+    links: [{ url: "https://www.youtube.com/watch?v=mNLzeeTiYd8", label: "Watch on YouTube" }],
     urgent: false
   },
   {
@@ -77,59 +78,15 @@ const campaignUpdates = [
     title: "YUNHO on Lee Mujin Service",
     description: "Watch Yunho shine on Lee Mujin Service!",
     videoUrl: "https://www.youtube.com/embed/p4Q221AMiss?si=x_7DlMMnfpj9LAjb",
-    links: [{ url: "https://www.youtube.com/watch?v=p4Q221AMiss", label: "Watch on YouTube", color: "orange" }],
+    links: [{ url: "https://www.youtube.com/watch?v=p4Q221AMiss", label: "Watch on YouTube" }],
     urgent: false
   },
-  {
-    id: 10,
-    title: "🏆 Daily ATEEZ Quiz",
-    description: "Can you top the leaderboard?",
-    links: [{ url: "#quiz", label: "Start Quiz", color: "purple" }],
-    urgent: false
-  }
 ]
 
 export default function Home() {
-  const { isSignedIn, user } = useUser()
-  const [quizStarted, setQuizStarted] = useState(false)
+  const { isSignedIn } = useUser()
   const [currentSlide, setCurrentSlide] = useState(0)
   const [carouselPaused, setCarouselPaused] = useState(false)
-  const [checkingPlayStatus, setCheckingPlayStatus] = useState(false)
-  const [hasPlayedToday, setHasPlayedToday] = useState(false)
-
-  useEffect(() => {
-    if (isSignedIn && user) checkIfPlayedToday()
-  }, [isSignedIn, user])
-
-  const checkIfPlayedToday = async () => {
-    if (!user?.id) return
-    setCheckingPlayStatus(true)
-    try {
-      const response = await fetch('/api/quiz/check-played', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id })
-      })
-      const data = await response.json()
-      setHasPlayedToday(data.hasPlayed)
-    } catch (error) {
-      console.error('Error checking play status:', error)
-    } finally {
-      setCheckingPlayStatus(false)
-    }
-  }
-
-  const handleQuizClick = () => {
-    if (!isSignedIn || hasPlayedToday) return
-    setQuizStarted(true)
-  }
-
-  const getQuizButtonText = () => {
-    if (!isSignedIn) return "Start Quiz"
-    if (checkingPlayStatus) return "Checking..."
-    if (hasPlayedToday) return "Come Back Tomorrow 🏴‍☠️"
-    return "Start Quiz"
-  }
 
   useEffect(() => {
     if (carouselPaused) return
@@ -145,8 +102,6 @@ export default function Home() {
 
   const slide = campaignUpdates[currentSlide]
 
-  if (quizStarted) return <Quiz />
-
   return (
     <>
       <Navigation />
@@ -160,8 +115,7 @@ export default function Home() {
 
         <div style={{ position: "relative", zIndex: 1, maxWidth: 1000, margin: "0 auto", padding: "76px 24px 48px" }}>
 
-          {/* Member dots — spans full container width */}
-          <div >
+          <div>
             <MemberDots />
           </div>
 
@@ -177,7 +131,6 @@ export default function Home() {
               onMouseEnter={() => setCarouselPaused(true)}
               onMouseLeave={() => setCarouselPaused(false)}
             >
-              {/* Header */}
               <div style={{
                 padding: "13px 22px", borderBottom: "1px solid rgba(255,255,255,0.07)",
                 display: "flex", alignItems: "center", gap: 10,
@@ -196,23 +149,15 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Slide area — auto height, fills naturally per device */}
               <div>
                 {slide.component ? (
-                  // DailyGoalSlide
                   <div style={{ minHeight: 260 }}>
                     {slide.component}
                   </div>
                 ) : (
-                  // Video / Spotify / Text slides — stack on mobile, side by side on desktop
                   <div className="flex flex-col md:flex-row" style={{ minHeight: 260 }}>
-
-                    {/* Video panel */}
                     {slide.videoUrl && (
-                      <div
-                        className="w-full md:w-[340px] md:flex-shrink-0"
-                        style={{ background: "#000", aspectRatio: "16/9" }}
-                      >
+                      <div className="w-full md:w-[340px] md:flex-shrink-0" style={{ background: "#000", aspectRatio: "16/9" }}>
                         <iframe
                           width="100%" height="100%"
                           src={slide.videoUrl}
@@ -223,13 +168,8 @@ export default function Home() {
                         />
                       </div>
                     )}
-
-                    {/* Spotify embed */}
                     {slide.spotifyUrl && (
-                      <div
-                        className="w-full md:w-[340px] md:flex-shrink-0"
-                        style={{ display: "flex", alignItems: "center", background: "rgba(0,0,0,0.3)", padding: "16px 0" }}
-                      >
+                      <div className="w-full md:w-[340px] md:flex-shrink-0" style={{ display: "flex", alignItems: "center", background: "rgba(0,0,0,0.3)", padding: "16px 0" }}>
                         <iframe
                           src={slide.spotifyUrl}
                           width="100%" height="152"
@@ -240,8 +180,6 @@ export default function Home() {
                         />
                       </div>
                     )}
-
-                    {/* Text content */}
                     <div style={{ flex: 1, padding: "24px 28px", display: "flex", flexDirection: "column", justifyContent: "center", minWidth: 0 }}>
                       {slide.urgent && (
                         <span style={{
@@ -260,10 +198,7 @@ export default function Home() {
                         {slide.links?.map((link, index) => (
                           <Button
                             key={index}
-                            onClick={() => {
-                              if (link.url === "#quiz") handleQuizClick()
-                              else window.open(link.url, '_blank')
-                            }}
+                            onClick={() => window.open(link.url, '_blank')}
                             style={{
                               background: "#e6edf3", color: "#0d1117",
                               fontSize: 13, fontWeight: 700, borderRadius: 8,
@@ -280,7 +215,6 @@ export default function Home() {
                 )}
               </div>
 
-              {/* Nav arrows */}
               {[
                 { fn: prevSlide, side: "left" as const, label: "‹" },
                 { fn: nextSlide, side: "right" as const, label: "›" },
@@ -313,54 +247,50 @@ export default function Home() {
               <MVTracker />
             </div>
 
-            {/* ── QUIZ CTA ── */}
+            {/* ── ATINYWORDLE CTA ── */}
             <div style={{
               borderRadius: 14, overflow: "hidden",
-              border: "1px solid rgba(255,255,255,0.08)",
+              border: "1px solid rgba(249,115,22,0.2)",
               background: "rgba(22,32,56,0.85)",
             }}>
-              <div style={{ height: 2, background: "linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899)" }} />
+              <div style={{ height: 2, background: "linear-gradient(90deg, transparent, #f97316, #ea580c, transparent)" }} />
               <div className="flex flex-col md:flex-row gap-6 items-start md:items-center p-6 md:p-7">
                 <div style={{ flex: 1 }}>
-                  <h3 style={{ color: "#e6edf3", fontSize: 20, fontWeight: 800, marginBottom: 8 }}>
-                    🎮 ATEEZ Streaming Quiz
+                  <h3 style={{ color: "#e6edf3", fontSize: 20, fontWeight: 800, marginBottom: 8, display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ display: "inline-grid", gridTemplateColumns: "repeat(3,7px)", gap: 2 }}>
+                      {["#f97316","#f97316","#262626","#854d0e","#f97316","#262626","#262626","#854d0e","#f97316"].map((c, i) => (
+                        <span key={i} style={{ width: 7, height: 7, background: c, borderRadius: 1, display: "block" }} />
+                      ))}
+                    </span>
+                    ATINYWORDLE
                   </h3>
                   <p style={{ color: "#8b949e", fontSize: 13, marginBottom: 14, lineHeight: 1.6 }}>
-                    Test your knowledge while streaming! Answer questions with embedded MVs
-                    and songs. Earn points, get speed bonuses, and challenge other ATINYs!
+                    Guess the daily 5-letter ATEEZ word in 6 tries. New word every day at midnight KST — can you keep your streak alive?
                   </p>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    {["Speed bonuses", "Share on Twitter"].map(tag => (
+                    {["Daily word", "Streak tracking", "Share results"].map(tag => (
                       <span key={tag} style={{
                         fontSize: 11, padding: "3px 12px", borderRadius: 999,
-                        background: "rgba(255,255,255,0.04)", color: "#8b949e",
-                        border: "1px solid rgba(255,255,255,0.08)"
+                        background: "rgba(249,115,22,0.08)", color: "#f97316",
+                        border: "1px solid rgba(249,115,22,0.2)"
                       }}>{tag}</span>
                     ))}
                   </div>
                 </div>
                 <div style={{ flexShrink: 0, textAlign: "center" }}>
-                  <button
-                    onClick={handleQuizClick}
-                    disabled={hasPlayedToday || checkingPlayStatus}
-                    style={{
+                  <Link href="/wordle">
+                    <button style={{
                       padding: "12px 28px", borderRadius: 12, fontSize: 14, fontWeight: 800,
-                      background: hasPlayedToday ? "#484f58" : "#e6edf3",
-                      color: hasPlayedToday ? "#8b949e" : "#0d1117",
-                      border: "none",
-                      cursor: hasPlayedToday ? "not-allowed" : "pointer",
+                      background: "#f97316", color: "white",
+                      border: "none", cursor: "pointer",
                       display: "flex", alignItems: "center", gap: 8,
-                      boxShadow: hasPlayedToday ? "none" : "0 0 24px rgba(255,255,255,0.07)"
-                    }}
-                  >
-                    <Trophy style={{ width: 16, height: 16 }} />
-                    {getQuizButtonText()}
-                  </button>
-                  {hasPlayedToday && (
-                    <p style={{ color: "#484f58", fontSize: 11, marginTop: 8 }}>You've already played today!</p>
-                  )}
+                      boxShadow: "0 0 24px rgba(249,115,22,0.3)"
+                    }}>
+                      🟠 Play Today
+                    </button>
+                  </Link>
                   {!isSignedIn && (
-                    <p style={{ color: "#484f58", fontSize: 11, marginTop: 8 }}>Sign in to play</p>
+                    <p style={{ color: "#484f58", fontSize: 11, marginTop: 8 }}>Sign in to save your streak</p>
                   )}
                 </div>
               </div>
@@ -375,6 +305,7 @@ export default function Home() {
           </div>
         </div>
       </div>
+      <MilestoneCelebration />
     </>
   )
 }
