@@ -559,6 +559,36 @@ export default function ATINYWordle() {
         <div style={S.gridBg} />
         <div style={S.glow} />
 
+        {/* Help banner — fixed top overlay, persists until ? clicked again */}
+        {showHelp && (
+          <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 300, background: "#0f0f0f", borderBottom: "2px solid #f97316", padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10, animation: "wordle-fadein 0.2s ease both", boxShadow: "0 4px 24px rgba(249,115,22,0.15)" }}>
+            <div style={{ maxWidth: 500, margin: "0 auto", width: "100%", display: "flex", flexDirection: "column", gap: 10 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 16, letterSpacing: "0.1em", color: "#f97316" }}>HOW TO PLAY</span>
+                <button onClick={() => setShowHelp(false)} style={{ background: "none", border: "none", color: "#555", cursor: "pointer", fontSize: 18, padding: "0 4px", lineHeight: 1 }}>✕</button>
+              </div>
+              <p style={{ color: "#8b949e", fontSize: 12, margin: 0, lineHeight: 1.6 }}>
+                Guess the 5-letter ATEEZ word in <strong style={{ color: "#f0f0f0" }}>6 tries</strong>. Tiles reveal how close you are:
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+                {[
+                  { color: "#f97316", border: "#f97316", letter: "A", label: "Right letter, right spot" },
+                  { color: "#854d0e", border: "#854d0e", letter: "T", label: "Right letter, wrong spot", textColor: "#fbbf24" },
+                  { color: "#262626", border: "#262626", letter: "Z", label: "Not in the word", textColor: "#444" },
+                ].map(({ color, border, letter, label, textColor }) => (
+                  <div key={letter} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 30, height: 30, borderRadius: 4, background: color, border: `2px solid ${border}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Bebas Neue', sans-serif", fontSize: 17, color: textColor || "white", flexShrink: 0 }}>{letter}</div>
+                    <span style={{ color: "#8b949e", fontSize: 12 }}>{label}</span>
+                  </div>
+                ))}
+              </div>
+              <p style={{ color: "#555", fontSize: 11, margin: 0, borderTop: "1px solid #2a2a2a", paddingTop: 8 }}>
+                Hint unlocks after 3 failed guesses · Resets midnight KST 🏴‍☠️
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Toast */}
         {toast && (
           <div style={{ position: "fixed", top: 80, left: "50%", transform: "translateX(-50%)", background: "#f0f0f0", color: "#0a0a0a", padding: "10px 20px", borderRadius: 8, fontWeight: 700, fontSize: 13, zIndex: 200, whiteSpace: "nowrap", animation: "wordle-toast 1.8s ease forwards" }}>
@@ -611,33 +641,6 @@ export default function ATINYWordle() {
             </div>
           </div>
 
-          {/* Help banner — persists until ? clicked again */}
-          {showHelp && (
-            <div style={{ marginTop: 12, width: "100%", background: "#141414", border: "1px solid #f97316", borderRadius: 10, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10, animation: "wordle-fadein 0.2s ease both" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 16, letterSpacing: "0.1em", color: "#f97316" }}>HOW TO PLAY</span>
-                <button onClick={() => setShowHelp(false)} style={{ background: "none", border: "none", color: "#555", cursor: "pointer", fontSize: 16, padding: 0 }}>✕</button>
-              </div>
-              <p style={{ color: "#8b949e", fontSize: 12, margin: 0, lineHeight: 1.6 }}>
-                Guess the 5-letter ATEEZ word in <strong style={{ color: "#f0f0f0" }}>6 tries</strong>. After each guess, tiles show how close you are:
-              </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {[
-                  { color: "#f97316", border: "#f97316", letter: "A", label: "Right letter, right spot" },
-                  { color: "#854d0e", border: "#854d0e", letter: "T", label: "Right letter, wrong spot", textColor: "#fbbf24" },
-                  { color: "#262626", border: "#262626", letter: "Z", label: "Letter not in the word", textColor: "#444" },
-                ].map(({ color, border, letter, label, textColor }) => (
-                  <div key={letter} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 32, height: 32, borderRadius: 4, background: color, border: `2px solid ${border}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, color: textColor || "white", flexShrink: 0 }}>{letter}</div>
-                    <span style={{ color: "#8b949e", fontSize: 12 }}>{label}</span>
-                  </div>
-                ))}
-              </div>
-              <p style={{ color: "#555", fontSize: 11, margin: 0, borderTop: "1px solid #2a2a2a", paddingTop: 8 }}>
-                A hint appears after 3 failed guesses. New word every day at midnight KST 🏴‍☠️
-              </p>
-            </div>
-          )}
         </header>
 
         <main style={{ width: "100%", maxWidth: 500, padding: "20px 20px", position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 18 }}>
