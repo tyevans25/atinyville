@@ -229,6 +229,7 @@ export default function ATINYWordle() {
   const [bounceRow, setBounceRow] = useState<number | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [showStats, setShowStats] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
   const [stats, setStats] = useState({ played: 0, won: 0, streak: 0, best: 0, dist: {} as Record<string, number> })
   const [alreadyPlayed, setAlreadyPlayed] = useState(false)
   const [isReturning, setIsReturning] = useState(false) // true if grid was restored from a previous session
@@ -584,8 +585,8 @@ export default function ATINYWordle() {
               <div style={S.logoTitle}>ATINYWORDLE</div>
             </div>
             <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={() => showToast("Guess the 5-letter ATEEZ word in 6 tries! 🟠 = right spot  🟤 = wrong spot  ⬛ = not in word", 3000)}
-                style={{ ...S.iconBtn, fontFamily: "'DM Sans',sans-serif", fontWeight: 700 }}>?</button>
+              <button onClick={() => setShowHelp(h => !h)}
+                style={{ ...S.iconBtn, fontFamily: "'DM Sans',sans-serif", fontWeight: 700, ...(showHelp ? { background: "#f97316", borderColor: "#f97316", color: "white" } : {}) }}>?</button>
               <button onClick={() => { loadStats(); setShowStats(true) }} style={S.iconBtn}>
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <rect x="1" y="8" width="3" height="7" fill="currentColor" rx="1"/>
@@ -609,6 +610,34 @@ export default function ATINYWordle() {
               <span>Resets midnight KST</span>
             </div>
           </div>
+
+          {/* Help banner — persists until ? clicked again */}
+          {showHelp && (
+            <div style={{ marginTop: 12, width: "100%", background: "#141414", border: "1px solid #f97316", borderRadius: 10, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10, animation: "wordle-fadein 0.2s ease both" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 16, letterSpacing: "0.1em", color: "#f97316" }}>HOW TO PLAY</span>
+                <button onClick={() => setShowHelp(false)} style={{ background: "none", border: "none", color: "#555", cursor: "pointer", fontSize: 16, padding: 0 }}>✕</button>
+              </div>
+              <p style={{ color: "#8b949e", fontSize: 12, margin: 0, lineHeight: 1.6 }}>
+                Guess the 5-letter ATEEZ word in <strong style={{ color: "#f0f0f0" }}>6 tries</strong>. After each guess, tiles show how close you are:
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {[
+                  { color: "#f97316", border: "#f97316", letter: "A", label: "Right letter, right spot" },
+                  { color: "#854d0e", border: "#854d0e", letter: "T", label: "Right letter, wrong spot", textColor: "#fbbf24" },
+                  { color: "#262626", border: "#262626", letter: "Z", label: "Letter not in the word", textColor: "#444" },
+                ].map(({ color, border, letter, label, textColor }) => (
+                  <div key={letter} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 4, background: color, border: `2px solid ${border}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, color: textColor || "white", flexShrink: 0 }}>{letter}</div>
+                    <span style={{ color: "#8b949e", fontSize: 12 }}>{label}</span>
+                  </div>
+                ))}
+              </div>
+              <p style={{ color: "#555", fontSize: 11, margin: 0, borderTop: "1px solid #2a2a2a", paddingTop: 8 }}>
+                A hint appears after 3 failed guesses. New word every day at midnight KST 🏴‍☠️
+              </p>
+            </div>
+          )}
         </header>
 
         <main style={{ width: "100%", maxWidth: 500, padding: "20px 20px", position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 18 }}>

@@ -1,6 +1,6 @@
 // ── app/api/wordle/stats/route.ts ─────────────────────────────
 // GET  /api/wordle/stats?userId=xxx  → returns user stats
-// POST /api/wordle/stats             → saves a result
+// POST /api/wordle/stats             → saves a result + grid snapshot
 
 import { Redis } from "@upstash/redis"
 import { NextRequest, NextResponse } from "next/server"
@@ -25,11 +25,15 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const { userId, win, guesses, date } = await req.json()
+  const { userId, win, guesses, date, grid, won } = await req.json()
   if (!userId || !date) return NextResponse.json({ error: "Missing fields" }, { status: 400 })
 
-  const key = `wordle:stats:${userId}`
-  const existing = await redis.get<WordleStats>(key) || { played: 0, won: 0, streak: 0, best: 0, dist: {}, lastPlayed: "" }
+  const statsKey  = `wordle:stats:${userId}`
+  const playedKey = `wordle:played:${userId}:${date}`
+
+  const existing = await redis.get<WordleStats>(statsKey) || {
+    played: 0, won: 0, streak: 0, best: 0, dist: {}, lastPlayed: ""
+  }
 
   // Prevent double submission for same day
   if (existing.lastPlayed === date) {
@@ -48,10 +52,14 @@ export async function POST(req: NextRequest) {
     existing.streak = 0
   }
 
-  await redis.set(key, existing)
+  await redis.set(statsKey, existing)
 
-  // Also mark as played for today
-  await redis.set(`wordle:played:${userId}:${date}`, true, { ex: 60 * 60 * 48 }) // expires after 48h
+  // Save played session WITH grid so played/route.ts can restore it
+  await redis.set(
+    playedKey,
+    { won: won ?? win, guesses, grid: grid ?? null },
+    { ex: 60 * 60 * 48 } // 48h expiry
+  )
 
   return NextResponse.json({ ok: true, stats: existing })
 }
