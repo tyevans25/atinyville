@@ -13,7 +13,7 @@ interface StreakModalProps {
 const getTierInfo = (streak: number) => {
   if (streak >= 30) return { image: '/tiers/cap_RH.svg', name: "Captain's Right Hand", description: "Standing closest to the helm as the Captain's most trusted advisor. Hold the course.", next: null, progress: 100, rank: 4 }
   if (streak >= 14) return { image: '/tiers/1st_mate.svg', name: 'First Mate', description: "You've survived treacherous paths and made the trusted circle. Maintain it.", next: "Captain's Right Hand", target: 30, progress: ((streak - 14) / 16) * 100, rank: 3 }
-  if (streak >= 7)  return { image: '/tiers/corsair.svg',  name: 'Corsair', description: "A daring pirate of the high seas. Keep moving forward.", next: 'First Mate', target: 14, progress: ((streak - 7) / 7) * 100, rank: 2 }
+  if (streak >= 7)  return { image: '/tiers/corsairs.svg',  name: 'Corsair', description: "A daring pirate of the high seas. Keep moving forward.", next: 'First Mate', target: 14, progress: ((streak - 7) / 7) * 100, rank: 2 }
   if (streak >= 1)  return { image: '/tiers/wayfinder.svg',name: 'Wayfinder', description: "You're navigating the vast ocean. Don't lose direction.", next: 'Corsair', target: 7, progress: ((streak - 1) / 6) * 100, rank: 1 }
   return { image: '/tiers/deckhand.svg', name: 'Deckhand', description: "You're just getting started. Earn your keep.", next: 'Wayfinder', target: 1, progress: 0, rank: 0 }
 }
