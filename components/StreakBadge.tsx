@@ -25,7 +25,7 @@ const getBadgeTier = (streak: number) => {
   }
   if (streak >= 7) {
     return {
-      image: '/tiers/corsair.svg',
+      image: '/tiers/corsairs.svg',
       label: 'Corsair',
       color: 'from-red-500 to-orange-500'
     }

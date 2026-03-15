@@ -10,7 +10,7 @@ import StreakModal from "@/components/StreakModal"
 const getBadgeTier = (streak: number) => {
   if (streak >= 30) return { image: '/tiers/cap_RH.svg', label: "Captain's Right Hand" }
   if (streak >= 14) return { image: '/tiers/1st_mate.svg', label: 'First Mate' }
-  if (streak >= 7)  return { image: '/tiers/corsair.svg',  label: 'Corsair' }
+  if (streak >= 7)  return { image: '/tiers/corsairs.svg',  label: 'Corsair' }
   if (streak >= 1)  return { image: '/tiers/wayfinder.svg',label: 'Wayfinder' }
   return { image: '/tiers/deckhand.svg', label: 'Deckhand' }
 }
