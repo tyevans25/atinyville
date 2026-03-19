@@ -123,7 +123,7 @@ export default function Home() {
   const [showGiftBanner, setShowGiftBanner] = useState(false)
   const [showWelcomeModal, setShowWelcomeModal] = useState(false)
   const [bannerDismissed, setBannerDismissed] = useState(false)
-  const [birthdayCard, setBirthdayCard] = useState<typeof BIRTHDAY_MEMBER_META[string] & { id: string } | null>(null)
+  const [birthdayCard, setBirthdayCard] = useState<{ id: string; memberId: string } | null>(null)
 
   // Check if user has unclaimed welcome card
   useEffect(() => {
