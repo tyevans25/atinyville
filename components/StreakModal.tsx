@@ -53,14 +53,14 @@ const COLLECTIONS: Collection[] = [
     id: "ghp4-concept", name: "Concept Photos",
     groupLabel: "GOLDEN HOUR Pt.4", groupId: "ghp4",
     rarity: "common", pool: "general",
-    folder: "photocards/golden-hour-pt4", versionId: "v1773266724",
+    folder: "photocards/golden-hour-pt4",
     cardCounts: { hj: 4, sh: 4, yh: 4, ys: 4, sn: 4, mg: 4, wy: 4, jh: 4 },
   },
   {
     id: "ghp4-apple", name: "Apple Music Exclusive",
     groupLabel: "GOLDEN HOUR Pt.4", groupId: "ghp4",
     rarity: "rare", pool: "general",
-    folder: "photocards/ghp4-apple-music", versionId: "v1773405992",
+    folder: "photocards/ghp4-apple-music",
     cardCounts: { hj: 1, sh: 1, yh: 1, ys: 1, sn: 1, mg: 1, wy: 1, jh: 1 },
   },
   {
@@ -97,7 +97,7 @@ const COLLECTIONS: Collection[] = [
     id: "welcome-ot8", name: "Welcome to ATINYTOWN",
     groupLabel: "Special", groupId: "special",
     rarity: "legendary", pool: "event",
-    folder: "photocards/welcome-ot8", versionId: "v0000000000", // ← update after upload
+    folder: "photocards/welcome-ot8", // ← update after upload
     cardCounts: { ot8: 1 },
     ext: "mp4",
   },
