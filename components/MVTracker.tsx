@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { TrendingUp, Eye, ExternalLink, Loader2, Flame } from 'lucide-react'
+import { TrendingUp, Eye, ExternalLink, Loader2, Flame, ChevronRight } from 'lucide-react'
+import Link from 'next/link'
 
 interface MVStats {
   videoId: string
@@ -87,11 +88,37 @@ export default function MVTracker() {
           <span style={{ color: "#e6edf3", fontWeight: 700, fontSize: 14 }}>MV Performance Tracker</span>
           <span style={{ color: "#484f58", fontSize: 11 }}>· Updated hourly</span>
         </div>
-        {lastUpdated && (
-          <span style={{ color: "#484f58", fontSize: 11 }}>
-            {new Date(lastUpdated).toLocaleTimeString()}
-          </span>
-        )}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          {lastUpdated && (
+            <span style={{ color: "#484f58", fontSize: 11 }}>
+              {new Date(lastUpdated).toLocaleTimeString()}
+            </span>
+          )}
+          {/* Dashboard arrow button */}
+          <Link href="/mvs" style={{ textDecoration: "none" }}>
+            <button style={{
+              display: "flex", alignItems: "center", gap: 5,
+              background: "rgba(249,115,22,0.08)",
+              border: "1px solid rgba(249,115,22,0.25)",
+              borderRadius: 8, padding: "5px 10px",
+              color: "#f97316", fontSize: 11, fontWeight: 700,
+              cursor: "pointer", fontFamily: "inherit",
+              transition: "all 0.15s",
+            }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLButtonElement).style.background = "rgba(249,115,22,0.15)"
+                ;(e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(249,115,22,0.5)"
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLButtonElement).style.background = "rgba(249,115,22,0.08)"
+                ;(e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(249,115,22,0.25)"
+              }}
+            >
+              Full Dashboard
+              <ChevronRight style={{ width: 13, height: 13 }} />
+            </button>
+          </Link>
+        </div>
       </div>
 
       {/* Body */}
@@ -173,9 +200,18 @@ export default function MVTracker() {
           </div>
         </div>
 
-        <p style={{ color: "#484f58", fontSize: 11, textAlign: "center", marginTop: 16 }}>
-          Tracking {videos.length} ATEEZ music videos
-        </p>
+        {/* Footer — tracking count + dashboard link */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16 }}>
+          <p style={{ color: "#484f58", fontSize: 11, margin: 0 }}>
+            Tracking {videos.length} ATEEZ music videos
+          </p>
+          <Link href="/mvs" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 4, color: "#484f58", fontSize: 11, transition: "color 0.15s" }}
+            onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.color = "#f97316"}
+            onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.color = "#484f58"}
+          >
+            View full dashboard <ChevronRight style={{ width: 12, height: 12 }} />
+          </Link>
+        </div>
       </div>
     </div>
   )

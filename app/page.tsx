@@ -10,6 +10,7 @@ import ATEEZCalendar from "@/components/ATEEZCalendar"
 import MVTracker from "@/components/MVTracker"
 import MemberDots from "@/components/MemberDots"
 import MilestoneCelebration from "@/components/MilestoneCelebration"
+import WelcomeCardModal from "@/components/WelcomeCardModal"
 import Link from "next/link"
 
 declare global {
@@ -83,11 +84,78 @@ const campaignUpdates = [
   },
 ]
 
+// Welcome card data — mirrors the welcome-ot8 collection in PhotocardGallery
+const WELCOME_CARD = {
+  id: "welcome-ot8-ot8-1",
+  collectionId: "welcome-ot8",
+  collectionName: "Welcome to ATINYville",
+  groupId: "special",
+  groupLabel: "Special",
+  rarity: "legendary" as const,
+  pool: "event" as const,
+  memberId: "ot8",
+  memberName: "OT8",
+  cardNumber: 1,
+  color: "#f97316",
+  secondColor: "#fbbf24",
+  imageUrl: "https://res.cloudinary.com/dbz7nif6b/video/upload/v1773436841/photocards/welcome-ot8/ot81.mp4", // ← update versionId after upload
+}
+
+const BIRTHDAY_MEMBER_META: Record<string, {
+  memberName: string; color: string; secondColor: string
+  collectionName: string; groupLabel: string; imageUrl: string
+}> = {
+  hj:  { memberName: "Hongjoong", color: "#FF6B35", secondColor: "#FF9A6C", collectionName: "Hongjoong's Birthday", groupLabel: "Birthdays", imageUrl: "https://res.cloudinary.com/dbz7nif6b/video/upload/photocards/birthdays/hj/hj1.mp4" },
+  sh:  { memberName: "Seonghwa",  color: "#B48EE0", secondColor: "#D8B4FE", collectionName: "Seonghwa's Birthday", groupLabel: "Birthdays", imageUrl: "https://res.cloudinary.com/dbz7nif6b/video/upload/photocards/birthdays/sh/sh1.mp4" },
+  yh:  { memberName: "Yunho",     color: "#4FC3F7", secondColor: "#BAE6FD", collectionName: "Yunho's Birthday", groupLabel: "Birthdays", imageUrl: "https://res.cloudinary.com/dbz7nif6b/video/upload/photocards/birthdays/yh/yh1.mp4" },
+  ys:  { memberName: "Yeosang",   color: "#81C784", secondColor: "#BBF7D0", collectionName: "Yeosang's Birthday", groupLabel: "Birthdays", imageUrl: "https://res.cloudinary.com/dbz7nif6b/video/upload/photocards/birthdays/ys/ys1.mp4" },
+  sn:  { memberName: "San",       color: "#F06292", secondColor: "#FBCFE8", collectionName: "San's Birthday", groupLabel: "Birthdays", imageUrl: "https://res.cloudinary.com/dbz7nif6b/video/upload/photocards/birthdays/sn/sn1.mp4" },
+  mg:  { memberName: "Mingi",     color: "#FFD54F", secondColor: "#FEF08A", collectionName: "Mingi's Birthday", groupLabel: "Birthdays", imageUrl: "https://res.cloudinary.com/dbz7nif6b/video/upload/photocards/birthdays/mg/mg1.mp4" },
+  wy:  { memberName: "Wooyoung",  color: "#CE93D8", secondColor: "#E9D5FF", collectionName: "Wooyoung's Birthday", groupLabel: "Birthdays", imageUrl: "https://res.cloudinary.com/dbz7nif6b/video/upload/photocards/birthdays/wy/wy1.mp4" },
+  jh:  { memberName: "Jongho",    color: "#4DD0E1", secondColor: "#A5F3FC", collectionName: "Jongho's Birthday", groupLabel: "Birthdays", imageUrl: "https://res.cloudinary.com/dbz7nif6b/video/upload/photocards/birthdays/jh/jh1.mp4" },
+  test: { memberName: "Test Member", color: "#f97316", secondColor: "#fbbf24", collectionName: "Test Member's Birthday", groupLabel: "Birthdays", imageUrl: "https://res.cloudinary.com/dbz7nif6b/video/upload/photocards/birthdays/test/test1.mp4" },
+}
+
 export default function Home() {
-  const { isSignedIn } = useUser()
+  const { isSignedIn, user, isLoaded } = useUser()
   const [currentSlide, setCurrentSlide] = useState(0)
   const [carouselPaused, setCarouselPaused] = useState(false)
+  const [showGiftBanner, setShowGiftBanner] = useState(false)
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false)
+  const [bannerDismissed, setBannerDismissed] = useState(false)
+  const [birthdayCard, setBirthdayCard] = useState<typeof BIRTHDAY_MEMBER_META[string] & { id: string } | null>(null)
 
+  // Check if user has unclaimed welcome card
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn || !user) return
+    async function checkWelcome() {
+      try {
+        const res = await fetch("/api/photocards/welcome")
+        if (res.ok) {
+          const data = await res.json()
+          if (data.unclaimed) setShowGiftBanner(true)
+        }
+      } catch {}
+    }
+    checkWelcome()
+  }, [isLoaded, isSignedIn, user])
+
+  // Check if today is a member's birthday
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn || !user) return
+    async function checkBirthday() {
+      try {
+        const res = await fetch("/api/photocards/birthday")
+        if (res.ok) {
+          const data = await res.json()
+          if (data.card) setBirthdayCard(data.card)
+        }
+      } catch {}
+    }
+    checkBirthday()
+  }, [isLoaded, isSignedIn, user])
+
+  // Auto-carousel
   useEffect(() => {
     if (carouselPaused) return
     const slideTime = currentSlide === 0 ? 10000 : 7000
@@ -102,6 +170,12 @@ export default function Home() {
 
   const slide = campaignUpdates[currentSlide]
 
+  function handleGiftClick() {
+    setBannerDismissed(true)
+    setShowGiftBanner(false)
+    setShowWelcomeModal(true)
+  }
+
   return (
     <>
       <Navigation />
@@ -113,7 +187,59 @@ export default function Home() {
           <div style={{ position: "absolute", bottom: "15%", right: "10%", width: 400, height: 400, borderRadius: "50%", background: "rgba(88,166,255,0.03)", filter: "blur(100px)" }} />
         </div>
 
-        <div style={{ position: "relative", zIndex: 1, maxWidth: 1000, margin: "0 auto", padding: "76px 24px 48px" }}>
+        {/* 🎁 Gift banner — thin bar below navbar */}
+        {showGiftBanner && !bannerDismissed && (
+          <>
+            <style>{`@keyframes slideDown { from{opacity:0;transform:translateY(-100%)} to{opacity:1;transform:translateY(0)} }`}</style>
+            <style>{`
+              @keyframes tickerScroll {
+                0% { transform: translateX(0) }
+                100% { transform: translateX(-50%) }
+              }
+            `}</style>
+            <div style={{
+              position: "fixed", top: 52, left: 0, right: 0, zIndex: 50,
+              background: "linear-gradient(90deg,#1e3a8a,#1d4ed8,#3b82f6,#60a5fa,#3b82f6,#1d4ed8,#1e3a8a)",
+              animation: "slideDown 0.35s cubic-bezier(0.22,1,0.36,1) both",
+              display: "flex", alignItems: "center",
+              height: 34, overflow: "hidden",
+              boxShadow: "0 2px 12px rgba(59,130,246,0.4)",
+            }}>
+              {/* scrolling ticker */}
+              <div style={{ flex: 1, overflow: "hidden", minWidth: 0 }}>
+                <div style={{
+                  display: "flex", gap: 0,
+                  animation: "tickerScroll 32s linear infinite",
+                  width: "max-content",
+                }}>
+                  {[...Array(6)].map((_, i) => (
+                    <span key={i} style={{ color: "white", fontWeight: 700, fontSize: 12, whiteSpace: "nowrap", paddingRight: 48 }}>
+                      🎁 You have a special gift waiting — a legendary photocard, yours to keep forever &nbsp;✦
+                    </span>
+                  ))}
+                </div>
+              </div>
+              {/* claim + dismiss — fixed right side */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 12px", flexShrink: 0, background: "linear-gradient(to right, transparent, #1d4ed8 30%)" }}>
+                <button
+                  onClick={handleGiftClick}
+                  style={{
+                    background: "rgba(255,255,255,0.2)", backdropFilter: "blur(4px)",
+                    border: "1px solid rgba(255,255,255,0.35)", borderRadius: 6, padding: "4px 12px",
+                    color: "white", fontWeight: 800, fontSize: 11,
+                    cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap",
+                  }}
+                >Claim →</button>
+                <button
+                  onClick={() => { setBannerDismissed(true); setShowGiftBanner(false) }}
+                  style={{ background: "none", border: "none", color: "rgba(255,255,255,0.6)", cursor: "pointer", fontSize: 14, padding: "0 2px", lineHeight: 1 }}
+                >✕</button>
+              </div>
+            </div>
+          </>
+        )}
+
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 1000, margin: "0 auto", padding: `${showGiftBanner && !bannerDismissed ? 108 : 76}px 24px 48px`, transition: "padding 0.3s ease" }}>
 
           <div>
             <MemberDots />
@@ -305,7 +431,40 @@ export default function Home() {
           </div>
         </div>
       </div>
+
       <MilestoneCelebration />
+      {showWelcomeModal && (
+        <WelcomeCardModal
+          card={WELCOME_CARD}
+          onClose={async () => {
+            try { await fetch("/api/photocards/welcome", { method: "POST" }) } catch {}
+            setShowWelcomeModal(false)
+          }}
+        />
+      )}
+
+      {birthdayCard && BIRTHDAY_MEMBER_META[birthdayCard.memberId] && (
+        <WelcomeCardModal
+          eyebrow={`Happy Birthday ${BIRTHDAY_MEMBER_META[birthdayCard.memberId].memberName}! 🎂`}
+          title="A Birthday Gift For You 🎁"
+          subtitle={`To celebrate ${BIRTHDAY_MEMBER_META[birthdayCard.memberId].memberName}'s birthday, every ATINY gets this limited legendary photocard — today only!`}
+          claimLabel="Claim Birthday Card →"
+          card={{
+            ...BIRTHDAY_MEMBER_META[birthdayCard.memberId],
+            id: birthdayCard.id,
+            collectionId: `bday-${birthdayCard.memberId}`,
+            groupId: "birthdays",
+            rarity: "legendary" as const,
+            pool: "event" as const,
+            cardNumber: 1,
+            memberId: birthdayCard.memberId,
+          }}
+          onClose={async () => {
+            try { await fetch("/api/photocards/birthday", { method: "POST" }) } catch {}
+            setBirthdayCard(null)
+          }}
+        />
+      )}
     </>
   )
 }

@@ -11,7 +11,7 @@ const getBadgeTier = (streak: number) => {
   if (streak >= 30) return { image: '/tiers/cap_RH.svg', label: "Captain's Right Hand" }
   if (streak >= 14) return { image: '/tiers/1st_mate.svg', label: 'First Mate' }
   if (streak >= 7)  return { image: '/tiers/corsairs.svg',  label: 'Corsair' }
-  if (streak >= 1)  return { image: '/tiers/wayfinder.svg',label: 'Wayfinder' }
+  if (streak >= 1)  return { image: '/tiers/wayfinder.svg', label: 'Wayfinder' }
   return { image: '/tiers/deckhand.svg', label: 'Deckhand' }
 }
 
@@ -24,6 +24,7 @@ const navItems = [
 ]
 
 export default function Navigation() {
+  const [mounted, setMounted]           = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [modalOpen, setModalOpen]           = useState(false)
   const [isMobile, setIsMobile]             = useState(false)
@@ -31,6 +32,7 @@ export default function Navigation() {
   const [streakData, setStreakData]         = useState<{ currentStreak: number } | null>(null)
 
   useEffect(() => {
+    setMounted(true)
     const check = () => setIsMobile(window.innerWidth < 768)
     check()
     window.addEventListener('resize', check)
@@ -79,8 +81,8 @@ export default function Navigation() {
               </span>
             </Link>
 
-            {/* Desktop nav links */}
-            {!isMobile && (
+            {/* Desktop nav links — only render after mount to avoid hydration mismatch */}
+            {mounted && !isMobile && (
               <div style={{ display: "flex", alignItems: "center", gap: 2, flex: 1, justifyContent: "center" }}>
                 {navItems.map(({ name, href, icon: Icon }) => (
                   <Link key={name} href={href} style={{ textDecoration: "none" }}>
@@ -101,7 +103,7 @@ export default function Navigation() {
             <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
 
               {/* Desktop auth */}
-              {!isMobile && (
+              {mounted && !isMobile && (
                 <div style={{ display: "flex", alignItems: "center", paddingLeft: 10, borderLeft: "1px solid rgba(255,255,255,0.08)" }}>
                   {isSignedIn ? (
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -139,7 +141,7 @@ export default function Navigation() {
               )}
 
               {/* Mobile: avatar + hamburger */}
-              {isMobile && (
+              {mounted && isMobile && (
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   {isSignedIn ? (
                     <UserButton afterSignOutUrl="/" appearance={{ elements: { avatarBox: "w-7 h-7" } }} />
@@ -164,7 +166,7 @@ export default function Navigation() {
           </div>
 
           {/* Mobile dropdown */}
-          {isMobile && mobileMenuOpen && (
+          {mounted && isMobile && mobileMenuOpen && (
             <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)", paddingBottom: 12 }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 2, paddingTop: 6 }}>
                 {navItems.map(({ name, href, icon: Icon }) => (

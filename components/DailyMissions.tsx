@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { CheckCircle, Circle, Music } from "lucide-react"
 import { useUser } from "@clerk/nextjs"
 import { useMissionStreak } from "@/hooks/useMissionStreak"
@@ -13,10 +13,15 @@ interface Mission {
   current: number
 }
 
-export default function DailyMissions() {
+interface DailyMissionsProps {
+  onAllComplete?: () => void
+}
+
+export default function DailyMissions({ onAllComplete }: DailyMissionsProps) {
   const { isSignedIn } = useUser()
   const [missions, setMissions] = useState<Mission[]>([])
   const [loading, setLoading]   = useState(true)
+  const [alreadyFired, setAlreadyFired] = useState(false)
   const { updateStreak, checkAllMissionsComplete } = useMissionStreak()
 
   useEffect(() => {
@@ -32,8 +37,12 @@ export default function DailyMissions() {
   useEffect(() => {
     if (missions.length > 0 && checkAllMissionsComplete(missions)) {
       updateStreak()
+      if (!alreadyFired && onAllComplete) {
+        setAlreadyFired(true)
+        onAllComplete()
+      }
     }
-  }, [missions, checkAllMissionsComplete, updateStreak])
+  }, [missions, checkAllMissionsComplete, updateStreak, onAllComplete, alreadyFired])
 
   const fetchMissions = async () => {
     try {
@@ -86,7 +95,7 @@ export default function DailyMissions() {
                 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ color: done ? "#22c55e" : "white", fontWeight: 600, fontSize: 13, margin: 0, textDecoration: done ? "line-through" : "none" }}>
-                      Stream "{mission.trackName}" {mission.target} {mission.target === 1 ? "time" : "times"}
+                      Stream \"{mission.trackName}\" {mission.target} {mission.target === 1 ? "time" : "times"}
                     </p>
                     <p style={{ color: done ? "#22c55e" : "#484f58", fontSize: 11, margin: "3px 0 0" }}>
                       {done ? "✓ Mission complete!" : `${progress} / ${mission.target} completed`}
