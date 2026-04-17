@@ -28,6 +28,7 @@ function secondsUntilEndOfNextKSTDay(): number {
 interface Mission {
   id: string
   trackId: number
+  trackIds?: number[]
   trackName: string
   target: number
 }
@@ -88,6 +89,13 @@ export async function POST(request: Request) {
       if (!mission.trackId || !mission.trackName || !mission.target) {
         return NextResponse.json(
           { error: 'Each mission must have trackId, trackName, and target' },
+          { status: 400 }
+        )
+      }
+
+      if (mission.trackIds && (!Array.isArray(mission.trackIds) || mission.trackIds.some((trackId: unknown) => typeof trackId !== 'number'))) {
+        return NextResponse.json(
+          { error: 'trackIds must be an array of numbers when provided' },
           { status: 400 }
         )
       }

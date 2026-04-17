@@ -11,15 +11,57 @@ interface SongEntry {
   source: 'auto' | 'manual' // Track how it was added
 }
 
+interface CatalogSong extends SongEntry {
+  trackIds?: number[]
+  variantCount?: number
+}
+
+function normalizeSongName(trackName: string): string {
+  return trackName
+    .toLowerCase()
+    .replace(/\s*\([^)]*\)/g, '')
+    .replace(/\s*\[[^\]]*\]/g, '')
+    .replace(/\s+-\s+(remaster(ed)?|mix|version|ver\.?|instrumental|live|japanese ver\.?|english ver\.?|sped up|slowed).*$/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+}
+
+function buildCatalogSongs(catalog: Record<string, SongEntry>): CatalogSong[] {
+  const grouped = new Map<string, SongEntry[]>()
+
+  for (const entry of Object.values(catalog)) {
+    const normalizedName = normalizeSongName(entry.trackName)
+    const existing = grouped.get(normalizedName) || []
+    existing.push(entry)
+    grouped.set(normalizedName, existing)
+  }
+
+  return Array.from(grouped.values())
+    .map((entries) => {
+      const sortedEntries = [...entries].sort((a, b) => {
+        if (a.source !== b.source) {
+          return a.source === 'manual' ? -1 : 1
+        }
+        return a.trackName.localeCompare(b.trackName)
+      })
+
+      const primary = sortedEntries[0]
+      const trackIds = Array.from(new Set(sortedEntries.map((entry) => Number(entry.trackId))))
+
+      return {
+        ...primary,
+        trackIds,
+        variantCount: trackIds.length
+      }
+    })
+    .sort((a, b) => a.trackName.localeCompare(b.trackName))
+}
+
 // GET: Fetch all songs in catalog
 export async function GET() {
   try {
     const catalog = await kv.get<Record<string, SongEntry>>(CATALOG_KEY) || {}
-    
-    // Convert to array and sort by name
-    const songs = Object.values(catalog).sort((a, b) => 
-      a.trackName.localeCompare(b.trackName)
-    )
+    const songs = buildCatalogSongs(catalog)
     
     return NextResponse.json({
       songs,
@@ -83,7 +125,7 @@ export async function POST(request: Request) {
       success: true,
       added,
       skipped,
-      total: Object.keys(catalog).length
+      total: buildCatalogSongs(catalog).length
     })
   } catch (error) {
     console.error('Error adding to catalog:', error)

@@ -21,6 +21,31 @@ function secondsUntilEndOfNextKSTDay(): number {
   return Math.floor((endOfNextDay.getTime() - now.getTime()) / 1000)
 }
 
+function normalizeSongName(trackName?: string): string {
+  if (!trackName) return ''
+
+  return trackName
+    .toLowerCase()
+    .replace(/\s*\([^)]*\)/g, '')
+    .replace(/\s*\[[^\]]*\]/g, '')
+    .replace(/\s+-\s+(remaster(ed)?|mix|version|ver\.?|instrumental|live|japanese ver\.?|english ver\.?|sped up|slowed).*$/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+}
+
+function matchesDailyGoalStream(stream: any, goal: any): boolean {
+  const goalTrackIds = new Set([
+    ...(goal?.trackIds || []),
+    ...(goal?.trackId ? [goal.trackId] : [])
+  ].map((trackId) => Number(trackId)))
+
+  if (goalTrackIds.size > 0 && goalTrackIds.has(Number(stream.trackId))) {
+    return true
+  }
+
+  return normalizeSongName(stream.trackName) === normalizeSongName(goal?.song)
+}
+
 export async function POST() {
   try {
     const today = getKSTDate()
@@ -59,7 +84,7 @@ export async function POST() {
           const streamDate = new Date(stream.endTime)
           const isToday = streamDate >= todayStartUTC  // ← here
           const isAteez = stream.artistIds?.includes(ATEEZ_ARTIST_ID)
-          const matchesSong = stream.trackName?.toLowerCase().includes(goal.song.toLowerCase())
+          const matchesSong = matchesDailyGoalStream(stream, goal)
           
           return isToday && isAteez && matchesSong
         }).length

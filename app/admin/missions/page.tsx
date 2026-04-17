@@ -8,14 +8,17 @@ import { Plus, Trash2, Edit2, Check, X, ChevronDown, RefreshCw, Database } from 
 interface Mission {
   id: string
   trackId: number
+  trackIds?: number[]
   trackName: string
   target: number
 }
 
 interface CatalogSong {
   trackId: number
+  trackIds?: number[]
   trackName: string
   albumId?: number
+  variantCount?: number
   addedAt: string
   source: 'auto' | 'manual'
 }
@@ -24,6 +27,7 @@ export default function AdminMissionsPage() {
   const [missions, setMissions] = useState<Mission[]>([])
   const [newSong, setNewSong] = useState('')
   const [newTrackId, setNewTrackId] = useState<number | null>(null)
+  const [newTrackIds, setNewTrackIds] = useState<number[]>([])
   const [newTarget, setNewTarget] = useState('1')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -158,6 +162,7 @@ export default function AdminMissionsPage() {
   const selectSong = (song: CatalogSong) => {
     setNewSong(song.trackName)
     setNewTrackId(song.trackId)
+    setNewTrackIds(song.trackIds && song.trackIds.length > 0 ? song.trackIds : [song.trackId])
     setShowDropdown(false)
   }
 
@@ -170,6 +175,7 @@ export default function AdminMissionsPage() {
     const mission: Mission = {
       id: `${newTrackId}`,
       trackId: newTrackId,
+      trackIds: newTrackIds.length > 0 ? newTrackIds : [newTrackId],
       trackName: newSong.trim(),
       target: parseInt(newTarget)
     }
@@ -177,6 +183,7 @@ export default function AdminMissionsPage() {
     setMissions([...missions, mission])
     setNewSong('')
     setNewTrackId(null)
+    setNewTrackIds([])
     setNewTarget('1')
   }
 
@@ -409,13 +416,16 @@ export default function AdminMissionsPage() {
                   <div className="absolute z-50 w-full mt-1 bg-gray-800 border border-white/20 rounded-lg shadow-xl max-h-60 overflow-y-auto">
                     {filteredSongs.map((song) => (
                       <button
-                        key={song.trackId}
+                        key={`${song.trackId}-${song.trackName}`}
                         type="button"
                         onClick={() => selectSong(song)}
                         className="w-full px-4 py-3 text-left text-white hover:bg-white/10 transition border-b border-white/5 last:border-0"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="block truncate">{song.trackName}</span>
+                          <span className="block truncate">
+                            {song.trackName}
+                            {song.variantCount && song.variantCount > 1 ? ` (${song.variantCount} versions)` : ''}
+                          </span>
                           <span className="text-xs text-gray-400 ml-2">
                             {song.source === 'manual' ? '✋' : '🤖'}
                           </span>
@@ -600,6 +610,7 @@ export default function AdminMissionsPage() {
             <h3 className="text-white font-semibold mb-2">ℹ️ How Missions Work</h3>
             <ul className="text-sm text-gray-300 space-y-1">
               <li>• Missions use track IDs for perfect matching</li>
+              <li>• Same-name song variants are grouped and counted together</li>
               <li>• Catalog auto-syncs from your stats.fm streams</li>
               <li>• Manually add songs not in your recent history</li>
               <li>• Progress updates every 30 minutes when cron runs</li>

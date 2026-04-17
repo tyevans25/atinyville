@@ -34,6 +34,7 @@ export async function GET() {
     const goal = await kv.get<{
       song: string
       trackId?: number
+      trackIds?: number[]
       target: number
       current: number
     }>(goalKey)
@@ -52,6 +53,7 @@ export async function GET() {
     return NextResponse.json({
       song: goal.song,
       trackId: goal.trackId,  // ← Add this!
+      trackIds: goal.trackIds || (goal.trackId ? [goal.trackId] : []),
       target: goal.target,
       current: goal.current,
       userStreams
@@ -69,11 +71,18 @@ export async function GET() {
 // POST: Set today's goal (admin only - you'll call this manually or via admin panel)
 export async function POST(request: Request) {
   try {
-    const { song, trackId, target } = await request.json()
+    const { song, trackId, trackIds, target } = await request.json()
 
     if (!song || !target) {
       return NextResponse.json(
         { error: 'Song and target are required' },
+        { status: 400 }
+      )
+    }
+
+    if (trackIds && (!Array.isArray(trackIds) || trackIds.some((value: unknown) => typeof value !== 'number'))) {
+      return NextResponse.json(
+        { error: 'trackIds must be an array of numbers when provided' },
         { status: 400 }
       )
     }
@@ -85,12 +94,18 @@ export async function POST(request: Request) {
     const existingGoal = await kv.get(goalKey)
     const current = existingGoal ? (existingGoal as any).current : 0
 
+    const normalizedTrackIds = Array.from(new Set([
+      ...(Array.isArray(trackIds) ? trackIds : []),
+      ...(trackId ? [trackId] : [])
+    ].map((value) => Number(value)).filter((value) => Number.isFinite(value))))
+
     const ttl = secondsUntilEndOfNextKSTDay()
 
     // Keep goal through next-day rollover so carry-over can read yesterday reliably.
     await kv.set(goalKey, {
       song,
       trackId,  // ← Add this!
+      trackIds: normalizedTrackIds,
       target,
       current
     }, { ex: ttl })
@@ -99,6 +114,7 @@ export async function POST(request: Request) {
       success: true,
       song,
       trackId,  // ← Add this!
+      trackIds: normalizedTrackIds,
       target,
       current
     })

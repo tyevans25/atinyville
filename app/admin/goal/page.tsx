@@ -7,8 +7,10 @@ import { Music, ChevronDown, RefreshCw, Plus, Database, X } from "lucide-react"
 
 interface CatalogSong {
   trackId: number
+  trackIds?: number[]
   trackName: string
   albumId?: number
+  variantCount?: number
   addedAt: string
   source: 'auto' | 'manual'
 }
@@ -16,6 +18,7 @@ interface CatalogSong {
 export default function AdminDailySongGoalPage() {
   const [selectedSong, setSelectedSong] = useState('')
   const [selectedTrackId, setSelectedTrackId] = useState<number | null>(null)
+  const [selectedTrackIds, setSelectedTrackIds] = useState<number[]>([])
   const [target, setTarget] = useState(5000)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -136,6 +139,7 @@ export default function AdminDailySongGoalPage() {
   const selectSong = (song: CatalogSong) => {
     setSelectedSong(song.trackName)
     setSelectedTrackId(song.trackId)
+    setSelectedTrackIds(song.trackIds && song.trackIds.length > 0 ? song.trackIds : [song.trackId])
     setShowDropdown(false)
   }
 
@@ -155,6 +159,7 @@ export default function AdminDailySongGoalPage() {
         body: JSON.stringify({ 
           song: selectedSong,
           trackId: selectedTrackId,  // ← Add this!
+          trackIds: selectedTrackIds.length > 0 ? selectedTrackIds : [selectedTrackId],
           target 
         })
       })
@@ -324,13 +329,16 @@ export default function AdminDailySongGoalPage() {
                   <div className="absolute z-50 w-full mt-1 bg-gray-800 border border-white/20 rounded-lg shadow-xl max-h-60 overflow-y-auto">
                     {filteredSongs.map((song) => (
                       <button
-                        key={song.trackId}
+                        key={`${song.trackId}-${song.trackName}`}
                         type="button"
                         onClick={() => selectSong(song)}
                         className="w-full px-4 py-3 text-left text-white hover:bg-white/10 transition border-b border-white/5 last:border-0"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="block truncate">{song.trackName}</span>
+                          <span className="block truncate">
+                            {song.trackName}
+                            {song.variantCount && song.variantCount > 1 ? ` (${song.variantCount} versions)` : ''}
+                          </span>
                           <span className="text-xs text-gray-400 ml-2">
                             {song.source === 'manual' ? '✋' : '🤖'}
                           </span>
@@ -417,7 +425,7 @@ export default function AdminDailySongGoalPage() {
             <ul className="text-sm text-gray-300 space-y-1">
               <li>• This is the main goal displayed on the homepage</li>
               <li>• Tracks ONE specific song across all users</li>
-              <li>• Uses track ID for perfect matching (no typos!)</li>
+              <li>• Groups same-name song variants so alternate versions count too</li>
               <li>• Automatically resets at midnight KST</li>
               <li>• Progress updates every 30 minutes when cron runs</li>
             </ul>

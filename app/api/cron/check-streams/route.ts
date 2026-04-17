@@ -10,6 +10,7 @@ const DEFAULT_SONG_GOAL_TARGET = 5000
 interface Mission {
   id: string
   trackId: number
+  trackIds?: number[]
   trackName: string
   target: number
 }
@@ -40,6 +41,40 @@ function secondsUntilEndOfNextKSTDay(): number {
     0, 0, 0
   ) - 9 * 60 * 60 * 1000)
   return Math.floor((endOfNextDay.getTime() - now.getTime()) / 1000)
+}
+
+function normalizeSongName(trackName?: string): string {
+  if (!trackName) return ""
+
+  return trackName
+    .toLowerCase()
+    .replace(/\s*\([^)]*\)/g, "")
+    .replace(/\s*\[[^\]]*\]/g, "")
+    .replace(/\s+-\s+(remaster(ed)?|mix|version|ver\.?|instrumental|live|japanese ver\.?|english ver\.?|sped up|slowed).*$/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+}
+
+function matchesMissionStream(stream: any, mission: Mission): boolean {
+  const missionTrackIds = new Set([mission.trackId, ...(mission.trackIds || [])].map((trackId) => Number(trackId)))
+  if (missionTrackIds.has(Number(stream.trackId))) {
+    return true
+  }
+
+  return normalizeSongName(stream.trackName) === normalizeSongName(mission.trackName)
+}
+
+function matchesDailyGoalStream(stream: any, dailySongGoal: any): boolean {
+  const goalTrackIds = new Set([
+    ...(dailySongGoal?.trackIds || []),
+    ...(dailySongGoal?.trackId ? [dailySongGoal.trackId] : [])
+  ].map((trackId) => Number(trackId)))
+
+  if (goalTrackIds.size > 0 && goalTrackIds.has(Number(stream.trackId))) {
+    return true
+  }
+
+  return normalizeSongName(stream.trackName) === normalizeSongName(dailySongGoal?.song)
 }
 
 function getCurrentWeekKey(): string {
@@ -127,6 +162,7 @@ async function ensureDefaultGoals(today: string, weekKey: string) {
       await kv.set(`daily:goal:${today}`, {
         song: yesterdayGoal.song,
         trackId: yesterdayGoal.trackId,
+        trackIds: yesterdayGoal.trackIds || (yesterdayGoal.trackId ? [yesterdayGoal.trackId] : []),
         target: yesterdayGoal.target || DEFAULT_SONG_GOAL_TARGET,
         current: 0
       }, { ex: secondsUntilEndOfNextKSTDay() })
@@ -196,7 +232,7 @@ async function processSingleUser(
   if (dailySongGoal?.trackId) {
     const songStreams = newStreams.filter((s: any) => {
       const kstDate = new Date(new Date(s.endTime).getTime() + 9 * 60 * 60 * 1000)
-      return kstDate.toISOString().split("T")[0] === today && s.trackId === dailySongGoal.trackId
+        return kstDate.toISOString().split("T")[0] === today && matchesDailyGoalStream(s, dailySongGoal)
     })
     if (songStreams.length > 0) {
       const userSongKey = `daily:streams:${userId}:${today}`
@@ -246,7 +282,7 @@ async function processSingleUser(
     for (const mission of missions) {
       const missionStreams = newStreams.filter((s: any) => {
         const kstDate = new Date(new Date(s.endTime).getTime() + 9 * 60 * 60 * 1000)
-        return kstDate.toISOString().split("T")[0] === today && s.trackId === mission.trackId
+        return kstDate.toISOString().split("T")[0] === today && matchesMissionStream(s, mission)
       })
       if (missionStreams.length > 0) {
         const progressKey = `mission:progress:${userId}:${today}:${mission.id}`
@@ -360,7 +396,7 @@ export async function POST(request: Request) {
         if (dailySongGoal?.trackId) {
           const songStreams = newStreams.filter((s: any) => {
             const kstDate = new Date(new Date(s.endTime).getTime() + 9 * 60 * 60 * 1000)
-            return kstDate.toISOString().split("T")[0] === today && s.trackId === dailySongGoal.trackId
+            return kstDate.toISOString().split("T")[0] === today && matchesDailyGoalStream(s, dailySongGoal)
           })
           if (songStreams.length > 0) {
             newDailySongStreams += songStreams.length
@@ -413,7 +449,7 @@ export async function POST(request: Request) {
           for (const mission of missions) {
             const missionStreams = newStreams.filter((s: any) => {
               const kstDate = new Date(new Date(s.endTime).getTime() + 9 * 60 * 60 * 1000)
-              return kstDate.toISOString().split("T")[0] === today && s.trackId === mission.trackId
+              return kstDate.toISOString().split("T")[0] === today && matchesMissionStream(s, mission)
             })
             if (missionStreams.length > 0) {
               const progressKey = `mission:progress:${userId}:${today}:${mission.id}`
