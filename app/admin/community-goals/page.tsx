@@ -163,7 +163,7 @@ export default function AdminCommunityGoals() {
           </CardHeader>
           <CardContent className="p-6 space-y-4">
             <p className="text-gray-300 text-sm">
-              Track combined streams from ALL ATINYs for ANY ATEEZ song. Resets weekly on Sunday.
+              Track combined streams from ALL ATINYs for ANY ATEEZ song. Resets weekly on Thursday 12AM KST.
             </p>
 
             <div>
@@ -204,7 +204,7 @@ export default function AdminCommunityGoals() {
 
             <div className="bg-blue-500/10 border border-blue-400/20 rounded-lg p-4">
               <p className="text-sm text-blue-300">
-                💡 <strong>Week runs Monday-Sunday.</strong> This tracks ANY ATEEZ song streamed 
+                💡 <strong>Week runs Thursday-Wednesday (KST).</strong> This tracks ANY ATEEZ song streamed 
                 by any user with stats.fm linked.
               </p>
             </div>

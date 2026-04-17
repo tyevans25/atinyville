@@ -30,6 +30,18 @@ function getYesterdayKST(): string {
   return yesterday.toISOString().split("T")[0]
 }
 
+function secondsUntilEndOfNextKSTDay(): number {
+  const now = new Date()
+  const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000)
+  const endOfNextDay = new Date(Date.UTC(
+    kstNow.getUTCFullYear(),
+    kstNow.getUTCMonth(),
+    kstNow.getUTCDate() + 2,
+    0, 0, 0
+  ) - 9 * 60 * 60 * 1000)
+  return Math.floor((endOfNextDay.getTime() - now.getTime()) / 1000)
+}
+
 function getCurrentWeekKey(): string {
   const now = new Date()
   const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000)
@@ -78,7 +90,7 @@ async function recalculateGoalTotals(
     for (const key of userSongKeys) {
       total += (await kv.get<number>(key)) || 0
     }
-    await kv.set(`daily:goal:${today}`, { ...dailySongGoal, current: total }, { ex: 86400 })
+    await kv.set(`daily:goal:${today}`, { ...dailySongGoal, current: total }, { ex: secondsUntilEndOfNextKSTDay() })
     console.log(`✅ Song goal recalculated: ${total} streams`)
   }
 
@@ -117,7 +129,7 @@ async function ensureDefaultGoals(today: string, weekKey: string) {
         trackId: yesterdayGoal.trackId,
         target: yesterdayGoal.target || DEFAULT_SONG_GOAL_TARGET,
         current: 0
-      }, { ex: 86400 })
+      }, { ex: secondsUntilEndOfNextKSTDay() })
     }
   }
 
@@ -125,7 +137,7 @@ async function ensureDefaultGoals(today: string, weekKey: string) {
     const yesterdayMissions = await kv.get<Mission[]>(`daily:missions:${yesterday}`)
     if (yesterdayMissions?.length) {
       const todayMissions = yesterdayMissions.map(m => ({ ...m, id: `${m.trackId}-${today}` }))
-      await kv.set(`daily:missions:${today}`, todayMissions, { ex: 86400 })
+      await kv.set(`daily:missions:${today}`, todayMissions, { ex: secondsUntilEndOfNextKSTDay() })
     }
   }
 }

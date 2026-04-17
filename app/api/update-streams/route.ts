@@ -9,6 +9,18 @@ function getKSTDate(): string {
   return kstTime.toISOString().split('T')[0]
 }
 
+function secondsUntilEndOfNextKSTDay(): number {
+  const now = new Date()
+  const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000)
+  const endOfNextDay = new Date(Date.UTC(
+    kstNow.getUTCFullYear(),
+    kstNow.getUTCMonth(),
+    kstNow.getUTCDate() + 2,
+    0, 0, 0
+  ) - 9 * 60 * 60 * 1000)
+  return Math.floor((endOfNextDay.getTime() - now.getTime()) / 1000)
+}
+
 export async function POST() {
   try {
     const today = getKSTDate()
@@ -59,11 +71,13 @@ export async function POST() {
       }
     }
 
-    // Update the goal with new count
+    const ttl = secondsUntilEndOfNextKSTDay()
+
+    // Keep goal available across midnight rollover checks.
     await kv.set(goalKey, {
       ...goal,
       current: totalStreams
-    }, { ex: 86400 })
+    }, { ex: ttl })
 
     return NextResponse.json({ 
       success: true, 

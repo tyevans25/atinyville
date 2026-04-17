@@ -2,6 +2,11 @@ import { kv } from '@vercel/kv'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 
+/**
+ * @deprecated This route is kept for backward compatibility.
+ * Use /api/community-weekly-goal for all new reads/writes.
+ */
+
 // Helper to get current week key (e.g., "2026-W05")
 function getCurrentWeekKey(): string {
   const now = new Date()
@@ -48,6 +53,8 @@ export async function GET() {
     }
 
     return NextResponse.json({
+      deprecated: true,
+      replacement: '/api/community-weekly-goal',
       song: goal.song,
       target: goal.target,
       current: goal.current,
@@ -91,6 +98,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
+      deprecated: true,
+      replacement: '/api/community-weekly-goal',
       song,
       target,
       current,

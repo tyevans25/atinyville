@@ -9,6 +9,20 @@ function getKSTDate(): string {
   return kstTime.toISOString().split('T')[0]
 }
 
+// Helper: Seconds until end of NEXT KST day (gives ~24-48h buffer)
+function secondsUntilEndOfNextKSTDay(): number {
+  const now = new Date()
+  const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000)
+  // End of next KST day = start of day after tomorrow in KST
+  const endOfNextDay = new Date(Date.UTC(
+    kstNow.getUTCFullYear(),
+    kstNow.getUTCMonth(),
+    kstNow.getUTCDate() + 2,
+    0, 0, 0
+  ) - 9 * 60 * 60 * 1000)
+  return Math.floor((endOfNextDay.getTime() - now.getTime()) / 1000)
+}
+
 // GET: Fetch today's goal and user's streams
 export async function GET() {
   try {
@@ -71,13 +85,15 @@ export async function POST(request: Request) {
     const existingGoal = await kv.get(goalKey)
     const current = existingGoal ? (existingGoal as any).current : 0
 
-    // Set today's goal (expires in 24 hours) - now includes trackId
+    const ttl = secondsUntilEndOfNextKSTDay()
+
+    // Keep goal through next-day rollover so carry-over can read yesterday reliably.
     await kv.set(goalKey, {
       song,
       trackId,  // ← Add this!
       target,
       current
-    }, { ex: 86400 })
+    }, { ex: ttl })
 
     return NextResponse.json({
       success: true,
