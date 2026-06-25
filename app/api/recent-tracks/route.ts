@@ -42,14 +42,12 @@ export async function GET() {
     }
 
     const data = await response.json()
-    const recentStreams: any[] = []
+    const rawStreams: any[] = []
 
     if (data.items && Array.isArray(data.items)) {
       data.items.forEach((stream: any) => {
-        const isAteez = stream.artistIds?.includes(ATEEZ_ARTIST_ID)
-        
-        if (isAteez) {
-          recentStreams.push({
+        if (stream.artistIds?.includes(ATEEZ_ARTIST_ID)) {
+          rawStreams.push({
             trackId: stream.trackId,
             trackName: stream.trackName,
             albumId: stream.albumId,
@@ -60,8 +58,38 @@ export async function GET() {
       })
     }
 
+    const top20 = rawStreams.slice(0, 20)
+
+    // Fetch album images for unique albumIds
+    const uniqueAlbumIds = [...new Set(top20.map(s => s.albumId).filter(Boolean))]
+    const albumImageMap: Record<number, string> = {}
+
+    await Promise.all(
+      uniqueAlbumIds.map(async (albumId) => {
+        try {
+          const albumRes = await fetch(
+            `https://api.stats.fm/api/v1/albums/${albumId}`,
+            { headers: { 'Accept': 'application/json' } }
+          )
+          if (albumRes.ok) {
+            const albumData = await albumRes.json()
+            if (albumData.item?.image) {
+              albumImageMap[albumId] = albumData.item.image
+            }
+          }
+        } catch {
+          // silently skip — album art is non-critical
+        }
+      })
+    )
+
+    const recentStreams = top20.map(s => ({
+      ...s,
+      albumImage: albumImageMap[s.albumId] || null
+    }))
+
     return NextResponse.json({
-      recentStreams: recentStreams.slice(0, 20),
+      recentStreams,
       username: statsfmUsername
     })
 

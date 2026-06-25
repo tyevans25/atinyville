@@ -19,33 +19,25 @@ export async function triggerCronJob() {
     console.log('🔍 Triggering cron at:', `${baseUrl}/api/cron/check-streams`)
     console.log('🔑 Secret exists:', !!cronSecret, 'Length:', cronSecret.length)
 
-    const res = await fetch(`${baseUrl}/api/cron/check-streams`, {
+    // Fire and forget — cron can take several minutes, don't block waiting for it
+    fetch(`${baseUrl}/api/cron/check-streams`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${cronSecret}`,
         'Content-Type': 'application/json'
       },
       cache: 'no-store'
+    }).then(res => {
+      console.log('📡 Cron completed with status:', res.status)
+    }).catch(err => {
+      console.error('💥 Cron background error:', err)
     })
 
-    console.log('📡 Response status:', res.status)
+    console.log('✅ Cron triggered in background')
 
-    if (!res.ok) {
-      const text = await res.text()
-      console.error('❌ Error response:', text.substring(0, 200))
-      
-      return {
-        success: false,
-        error: `HTTP ${res.status}: Check Vercel function logs for details`
-      }
-    }
-
-    const data = await res.json()
-    console.log('✅ Success:', data)
-    
     return {
       success: true,
-      data
+      data: { message: 'Cron triggered — processing in background (check server logs for progress)' }
     }
 
   } catch (err) {

@@ -6,7 +6,7 @@ import { useUser } from "@clerk/nextjs"
 import Confetti from 'react-confetti'
 import { useWindowSize } from 'react-use'
 
-interface GoalData { target?: unknown; current?: unknown; userStreams?: unknown }
+interface GoalData { target?: unknown; current?: unknown; userStreams?: unknown; platformStats?: { spotify: number; apple_music: number } }
 const safe = (v: unknown, f = 0) => typeof v === "number" && !Number.isNaN(v) ? v : f
 
 const celebrationGifs = ['/gifs/complete/hongjoong.GIF','/gifs/complete/jongho.gif','/gifs/complete/mingi.GIF','/gifs/complete/minig-san.GIF','/gifs/complete/san.GIF','/gifs/complete/seonghwa.GIF','/gifs/complete/wooyoung.GIF','/gifs/complete/yeosang.GIF','/gifs/complete/yunho.GIF','/gifs/complete/yunho2.GIF']
@@ -34,7 +34,7 @@ export function DailyGoalCard() {
   const [hasPlayedSound, setHasPlayedSound] = useState(false)
   const { width, height } = useWindowSize()
 
-  useEffect(() => { fetchGoalData(); const i = setInterval(fetchGoalData, 5*60*1000); return () => clearInterval(i) }, [isSignedIn])
+  useEffect(() => { fetchGoalData(); const i = setInterval(fetchGoalData, 60*1000); return () => clearInterval(i) }, [isSignedIn])
 
   useEffect(() => {
     const tick = () => {
@@ -101,6 +101,13 @@ export function DailyGoalCard() {
             <span style={{ color: "#484f58", fontSize: 11 }}>{Math.max(tar-cur,0) > 0 ? `${Math.max(tar-cur,0).toLocaleString()} to go` : '🎉 Complete!'}</span>
             <span style={{ color: "#22c55e", fontSize: 11, fontWeight: 600 }}>{Math.round(pct)}%</span>
           </div>
+
+          {goalData.platformStats && (goalData.platformStats.spotify > 0 || goalData.platformStats.apple_music > 0) && (
+            <div style={{ display: "flex", gap: 16 }}>
+              <span style={{ fontSize: 11, color: "#484f58" }}><span style={{ color: "#1DB954", fontWeight: 700 }}>{goalData.platformStats.spotify.toLocaleString()}</span> Spotify</span>
+              <span style={{ fontSize: 11, color: "#484f58" }}><span style={{ color: "#FC3C44", fontWeight: 700 }}>{goalData.platformStats.apple_music.toLocaleString()}</span> Apple Music</span>
+            </div>
+          )}
 
           {currentGif && !gifError && (
             <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: "14px", textAlign: "center" }}>

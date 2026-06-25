@@ -11,6 +11,7 @@ interface DailyGoalData {
   target?: unknown
   current?: unknown
   userStreams?: unknown
+  platformStats?: { spotify: number; apple_music: number }
 }
 
 const safeNumber = (value: unknown, fallback = 0): number =>
@@ -43,7 +44,7 @@ export default function DailyGoalSlide() {
 
   useEffect(() => {
     fetchGoalData()
-    const interval = setInterval(fetchGoalData, 5 * 60 * 1000)
+    const interval = setInterval(fetchGoalData, 60 * 1000)
     return () => clearInterval(interval)
   }, [isSignedIn])
 
@@ -111,7 +112,7 @@ export default function DailyGoalSlide() {
     <div style={{ minHeight: 260, display: "flex", padding: "16px 20px", gap: 16, overflow: "hidden" }}>
 
       {/* LEFT: GIF */}
-      <div style={{ width: 130, flexShrink: 0, position: "relative", borderRadius: 10, overflow: "hidden", border: "1px solid rgba(255,255,255,0.1)" }}>
+      <div className="daily-goal-gif" style={{ width: 130, flexShrink: 0, position: "relative", borderRadius: 10, overflow: "hidden", border: "1px solid rgba(255,255,255,0.1)" }}>
         {currentGif && (
           <>
             <Image
@@ -211,6 +212,12 @@ export default function DailyGoalSlide() {
               {remaining > 0 ? `${remaining.toLocaleString()} to go` : "🎉 Goal reached!"}
             </span>
           </div>
+          {goalData.platformStats && (goalData.platformStats.spotify > 0 || goalData.platformStats.apple_music > 0) && (
+            <div style={{ display: "flex", gap: 12, marginTop: 5 }}>
+              <span style={{ fontSize: 10, color: "#484f58" }}><span style={{ color: "#1DB954", fontWeight: 700 }}>{goalData.platformStats.spotify.toLocaleString()}</span> Spotify</span>
+              <span style={{ fontSize: 10, color: "#484f58" }}><span style={{ color: "#FC3C44", fontWeight: 700 }}>{goalData.platformStats.apple_music.toLocaleString()}</span> Apple Music</span>
+            </div>
+          )}
         </div>
 
         {/* Bottom row: contribution + reset time */}

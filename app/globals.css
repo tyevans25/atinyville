@@ -68,6 +68,22 @@
   }
 }
 
+@media (max-width: 640px) {
+  .stream-header-row {
+    justify-content: center !important;
+  }
+  .stream-header-row > div {
+    width: 100%;
+    justify-content: center;
+  }
+  .stream-header-counts {
+    justify-content: center !important;
+  }
+  .daily-goal-gif {
+    display: none;
+  }
+}
+
 /* ===== Golden Hour Theme ===== */
 /* ADD THIS SECTION BELOW */
 

@@ -9,23 +9,24 @@ export default function CronCountdown() {
   useEffect(() => {
     const updateCountdown = () => {
       const now = new Date()
-      const currentMinute = now.getMinutes()
-      
-      // Calculate next 30-minute mark
-      const nextRun = new Date(now)
-      nextRun.setHours(nextRun.getHours() + 1, 0, 0, 0)
+      // Cron fires at :00/:15/:30/:45 and takes ~5 min to process.
+      // Count to the actual update marks: :05/:20/:35/:50
+      const PROCESSING_OFFSET = 5 * 60 // seconds
+      const CYCLE = 15 * 60            // seconds
+      const totalSeconds = now.getMinutes() * 60 + now.getSeconds()
+      const adjustedSeconds = ((totalSeconds - PROCESSING_OFFSET) + 3600) % CYCLE
+      const secondsUntilUpdate = adjustedSeconds === 0 ? 0 : CYCLE - adjustedSeconds
 
-      const diff = nextRun.getTime() - now.getTime()
-      const minutes = Math.floor(diff / (1000 * 60))
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+      const minutes = Math.floor(secondsUntilUpdate / 60)
+      const seconds = secondsUntilUpdate % 60
 
       setTimeLeft(`${minutes}m ${seconds}s`)
 
-      // AUTO-REFRESH when countdown hits 0
+      // AUTO-REFRESH right when the update mark hits
       if (minutes === 0 && seconds === 0) {
         setTimeout(() => {
           window.location.reload()
-        }, 2000) // Wait 2 seconds for cron to complete
+        }, 3000)
       }
     }
 

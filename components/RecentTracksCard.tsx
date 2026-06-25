@@ -8,6 +8,7 @@ interface Stream {
   trackId: number
   trackName: string
   albumId: number
+  albumImage: string | null
   endTime: string
   playedMs: number
 }
@@ -92,12 +93,15 @@ export default function RecentTracksCard() {
               }}>
                 {/* Album art */}
                 <div style={{ width: 44, height: 44, borderRadius: 7, background: "rgba(255,255,255,0.06)", overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <img
-                    src={`https://cdn.stats.fm/file/statsfm/images/albums/${s.albumId}/default`}
-                    alt={s.trackName}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none" }}
-                  />
+                  {s.albumImage
+                    ? <img
+                        src={s.albumImage}
+                        alt={s.trackName}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none" }}
+                      />
+                    : <Music style={{ width: 20, height: 20, color: "rgba(255,255,255,0.2)" }} />
+                  }
                 </div>
                 {/* Track info */}
                 <div style={{ flex: 1, minWidth: 0 }}>

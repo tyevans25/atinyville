@@ -50,13 +50,19 @@ export async function GET() {
       userStreams = await kv.get<number>(userStreamsKey) || 0
     }
 
+    const [spotifyStreams, appleMusicStreams] = await Promise.all([
+      kv.get<number>(`platform:song:spotify:${today}`),
+      kv.get<number>(`platform:song:apple_music:${today}`)
+    ])
+
     return NextResponse.json({
       song: goal.song,
       trackId: goal.trackId,  // ← Add this!
       trackIds: goal.trackIds || (goal.trackId ? [goal.trackId] : []),
       target: goal.target,
       current: goal.current,
-      userStreams
+      userStreams,
+      platformStats: { spotify: spotifyStreams || 0, apple_music: appleMusicStreams || 0 }
     })
 
   } catch (error) {

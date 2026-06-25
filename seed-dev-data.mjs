@@ -63,6 +63,8 @@ async function seed() {
   console.log('🃏 Setting photocard collection...')
   await redisPipeline([['DEL', `photocards:collection:${USER_ID}`]])
   const cards = [
+    'ghp5-concept-hj-1', 'ghp5-concept-hj-2',
+    'ghp5-concept-sh-1',
     'ghp4-concept-hj-1', 'ghp4-concept-hj-2', 'ghp4-concept-hj-4',
     'ghp4-concept-sh-1',
     'ghp4-concept-yh-3',
@@ -73,7 +75,11 @@ async function seed() {
     'ghp4-concept-jh-2',
     'ghp4-apple-hj-1', 'ghp4-apple-sh-1', 'ghp4-apple-yh-1',
     'ghp4-target-ys-1',
+    'ghp4-makestar-sn-1',
+    'ghp4-polaroids-mg-1',
+    'ghp4-soundwave-wy-1',
     'welcome-ot8-ot8-1',
+    'bday-sh-sh-2', 'bday-ys-ys-2', 'bday-sn-sn-2', 'bday-yh-yh-2',
   ]
   await redisPipeline(cards.map(id => ['SADD', `photocards:collection:${USER_ID}`, id]))
   console.log(`   ✓ Photocards: ${cards.length} cards seeded`)
@@ -81,7 +87,7 @@ async function seed() {
   // 3. Complete existing missions for dev user only
   // Reads today's missions and sets progress to target for each — does NOT modify the shared missions key
   console.log('🎯 Completing today\'s missions for dev user...')
-  const missionsRaw = await redisGet(`daily:missions:${kstDate}`)
+  const missionsRaw = await redisGet(`dev:daily:missions:${kstDate}`)
   if (missionsRaw) {
     const missions = typeof missionsRaw === 'string' ? JSON.parse(missionsRaw) : missionsRaw
     const progressCommands = missions.map(m => [

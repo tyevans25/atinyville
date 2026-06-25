@@ -1,6 +1,8 @@
 import { kv } from '@vercel/kv'
 import { NextResponse } from 'next/server'
 
+const KV_PREFIX = process.env.NODE_ENV === 'development' ? 'dev:' : ''
+
 // Helper: Get current date in KST
 function getKSTDate(): string {
   const now = new Date()
@@ -32,8 +34,8 @@ export async function POST(request: Request) {
       // Delete today's daily goals
       await kv.del(`community:daily:${today}`)
       await kv.del(`daily:goal:${today}`)
-      await kv.del(`daily:missions:${today}`)
-      deleted.push(`community:daily:${today}`, `daily:goal:${today}`, `daily:missions:${today}`)
+      await kv.del(`${KV_PREFIX}daily:missions:${today}`)
+      deleted.push(`community:daily:${today}`, `daily:goal:${today}`, `${KV_PREFIX}daily:missions:${today}`)
       
       // Delete user daily progress
       const userKeys = await kv.keys("user:*:statsfm")

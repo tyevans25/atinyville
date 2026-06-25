@@ -2,6 +2,7 @@ import {
   clerkMiddleware,
   createRouteMatcher,
 } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
 const isPublicRoute = createRouteMatcher([
   "/",
@@ -27,17 +28,29 @@ const isPublicRoute = createRouteMatcher([
   "/api/community-daily-goal",
   "/api/community-weekly-goal",
   "/api/mission-progress",
-  "/api/daily-goal"
+  "/api/daily-goal",
+  "/api/admin/auth",   // login/logout endpoint must be public
+  "/admin/login",      // login page must be public
 ]);
 
+const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
+
 export default clerkMiddleware(async (auth, req) => {
+  // Admin routes: only require ADMIN_PASSWORD cookie, not Clerk auth
+  if (isAdminRoute(req)) {
+    if (isPublicRoute(req)) return; // /admin/login passes through
+    const cookie = req.cookies.get("admin_session");
+    const expected = process.env.ADMIN_PASSWORD;
+    if (!expected || cookie?.value !== expected) {
+      return NextResponse.redirect(new URL("/admin/login", req.url));
+    }
+    return; // valid admin session — no Clerk required
+  }
+
   if (isPublicRoute(req)) return;
 
   const { userId, redirectToSignIn } = await auth();
-
-  if (!userId) {
-    return redirectToSignIn();
-  }
+  if (!userId) return redirectToSignIn();
 });
 
 export const config = {

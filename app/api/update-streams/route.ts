@@ -31,6 +31,7 @@ function normalizeSongName(trackName?: string): string {
     .replace(/\s+-\s+(remaster(ed)?|mix|version|ver\.?|instrumental|live|japanese ver\.?|english ver\.?|sped up|slowed).*$/g, '')
     .replace(/[^a-z0-9]+/g, ' ')
     .trim()
+    .replace(/ version$/, '')
 }
 
 function matchesDailyGoalStream(stream: any, goal: any): boolean {

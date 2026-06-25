@@ -112,12 +112,23 @@ export default function StreamingHub() {
   const [goalStreams, setGoalStreams]   = useState<number | null>(null)
   const [loading, setLoading]          = useState(true)
   const [earnedCard, setEarnedCard]    = useState<EarnedCard | null>(null)
+  const [platform, setPlatform] = useState<'spotify' | 'apple_music' | null>(null)
+  const [communityStats, setCommunityStats] = useState({ spotify: 0, apple_music: 0 })
 
   useEffect(() => { setStationheadLive(Math.random() > 0.7) }, [])
 
   useEffect(() => {
-    if (isSignedIn) fetchTodayStreams()
-    else setLoading(false)
+    if (isSignedIn) {
+      fetchTodayStreams()
+      fetchPlatform()
+      const interval = setInterval(() => {
+        fetchTodayStreams()
+        fetchPlatform()
+      }, 60 * 1000)
+      return () => clearInterval(interval)
+    } else {
+      setLoading(false)
+    }
   }, [isSignedIn])
 
   const fetchTodayStreams = async () => {
@@ -130,6 +141,28 @@ export default function StreamingHub() {
       }
     } catch { setTodayStreams(null); setGoalStreams(null) }
     finally { setLoading(false) }
+  }
+
+  const fetchPlatform = async () => {
+    try {
+      const res = await fetch("/api/user-platform")
+      if (res.ok) {
+        const data = await res.json()
+        if (data.platform) setPlatform(data.platform)
+        setCommunityStats(data.communityStats)
+      }
+    } catch {}
+  }
+
+  const savePlatform = async (p: 'spotify' | 'apple_music') => {
+    setPlatform(p)
+    try {
+      await fetch("/api/user-platform", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ platform: p })
+      })
+    } catch {}
   }
 
   const handleMissionsComplete = async () => {
@@ -184,7 +217,7 @@ export default function StreamingHub() {
 
             {isSignedIn && (
               <div style={card}>
-                <div style={{ padding: "18px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
+                <div className="stream-header-row" style={{ padding: "18px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                     <div style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(88,166,255,0.12)", border: "1px solid rgba(88,166,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                       <TrendingUp style={{ width: 18, height: 18, color: "#58a6ff" }} />
@@ -194,7 +227,7 @@ export default function StreamingHub() {
                       <p style={{ color: "#8b949e", fontSize: 12, margin: 0 }}>Keep streaming to reach today's goal!</p>
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
+                  <div className="stream-header-counts" style={{ display: "flex", gap: 24, alignItems: "center" }}>
                     {loading ? (
                       <span style={{ color: "#484f58", fontSize: 13 }}>Loading...</span>
                     ) : todayStreams !== null ? (
@@ -216,6 +249,43 @@ export default function StreamingHub() {
                       >Link stats.fm</button>
                     )}
                   </div>
+                </div>
+                {/* Platform selector */}
+                <div style={{ padding: "11px 24px", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                  <div style={{ flexShrink: 0 }}>
+                    <p style={{ color: "#484f58", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, margin: 0 }}>Your Platform</p>
+                    <p style={{ color: "#30363d", fontSize: 10, margin: "2px 0 0" }}>Tracks community streams by platform</p>
+                  </div>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <button
+                      onClick={() => savePlatform('spotify')}
+                      style={{
+                        background: platform === 'spotify' ? "#1DB954" : "rgba(29,185,84,0.08)",
+                        border: `1px solid ${platform === 'spotify' ? "#1DB954" : "rgba(29,185,84,0.25)"}`,
+                        borderRadius: 6, padding: "4px 13px", color: platform === 'spotify' ? "white" : "#1DB954",
+                        fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s"
+                      }}
+                    >Spotify</button>
+                    <button
+                      onClick={() => savePlatform('apple_music')}
+                      style={{
+                        background: platform === 'apple_music' ? "#FC3C44" : "rgba(252,60,68,0.08)",
+                        border: `1px solid ${platform === 'apple_music' ? "#FC3C44" : "rgba(252,60,68,0.25)"}`,
+                        borderRadius: 6, padding: "4px 13px", color: platform === 'apple_music' ? "white" : "#FC3C44",
+                        fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s"
+                      }}
+                    >Apple Music</button>
+                  </div>
+                  {(communityStats.spotify > 0 || communityStats.apple_music > 0) && (
+                    <div style={{ marginLeft: "auto", display: "flex", gap: 16, flexShrink: 0 }}>
+                      <span style={{ fontSize: 11, color: "#1DB954" }}>
+                        <strong>{communityStats.spotify.toLocaleString()}</strong>{" "}Spotify
+                      </span>
+                      <span style={{ fontSize: 11, color: "#FC3C44" }}>
+                        <strong>{communityStats.apple_music.toLocaleString()}</strong>{" "}Apple Music
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

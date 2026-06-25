@@ -34,6 +34,25 @@ const campaignUpdates = [
 
 ### Adding a New Campaign:
 
+### Adding an Image Slide:
+
+```typescript
+{
+  id: 4,
+  title: "📸 Teaser Poster Out Now",
+  description: "New teaser image just dropped - share it everywhere!",
+  imageUrl: "https://your-cdn.com/path/to/poster.jpg",
+  imageAlt: "ATEEZ teaser poster",
+  links: [{ url: "https://x.com/...", label: "View Post" }],
+  urgent: true
+}
+```
+
+Notes:
+- Use `imageUrl` for jpg/png/webp/gif campaign art.
+- `imageAlt` is optional but recommended for accessibility.
+- If a slide has `videoUrl`, that still takes priority over `imageUrl`.
+
 ```typescript
 {
   id: 5,  // Increment this number

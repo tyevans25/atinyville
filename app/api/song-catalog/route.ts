@@ -8,7 +8,8 @@ interface SongEntry {
   trackName: string
   albumId?: number
   addedAt: string
-  source: 'auto' | 'manual' // Track how it was added
+  source: 'auto' | 'manual'
+  titleTrack?: boolean
 }
 
 interface CatalogSong extends SongEntry {
@@ -48,10 +49,13 @@ function buildCatalogSongs(catalog: Record<string, SongEntry>): CatalogSong[] {
       const primary = sortedEntries[0]
       const trackIds = Array.from(new Set(sortedEntries.map((entry) => Number(entry.trackId))))
 
+      const isTitleTrack = sortedEntries.some(e => (e as any).titleTrack === true)
+
       return {
         ...primary,
         trackIds,
-        variantCount: trackIds.length
+        variantCount: trackIds.length,
+        titleTrack: isTitleTrack
       }
     })
     .sort((a, b) => a.trackName.localeCompare(b.trackName))
@@ -133,6 +137,31 @@ export async function POST(request: Request) {
       { error: 'Failed to add songs' },
       { status: 500 }
     )
+  }
+}
+
+// PATCH: Update a song's titleTrack flag
+export async function PATCH(request: Request) {
+  try {
+    const { trackId, titleTrack } = await request.json()
+
+    if (trackId === undefined || titleTrack === undefined) {
+      return NextResponse.json({ error: 'trackId and titleTrack required' }, { status: 400 })
+    }
+
+    const catalog = await kv.get<Record<string, SongEntry>>(CATALOG_KEY) || {}
+
+    if (!catalog[trackId]) {
+      return NextResponse.json({ error: 'Song not found' }, { status: 404 })
+    }
+
+    catalog[trackId] = { ...catalog[trackId], titleTrack: Boolean(titleTrack) }
+    await kv.set(CATALOG_KEY, catalog)
+
+    return NextResponse.json({ success: true, trackId, titleTrack })
+  } catch (error) {
+    console.error('Error updating song:', error)
+    return NextResponse.json({ error: 'Failed to update song' }, { status: 500 })
   }
 }
 

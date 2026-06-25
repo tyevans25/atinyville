@@ -27,7 +27,7 @@ export default function DailyMissions({ onAllComplete }: DailyMissionsProps) {
   useEffect(() => {
     if (isSignedIn) {
       fetchMissions()
-      const interval = setInterval(fetchMissions, 5 * 60 * 1000)
+      const interval = setInterval(fetchMissions, 60 * 1000)
       return () => clearInterval(interval)
     } else {
       setLoading(false)
@@ -95,7 +95,7 @@ export default function DailyMissions({ onAllComplete }: DailyMissionsProps) {
                 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ color: done ? "#22c55e" : "white", fontWeight: 600, fontSize: 13, margin: 0, textDecoration: done ? "line-through" : "none" }}>
-                      Stream \"{mission.trackName}\" {mission.target} {mission.target === 1 ? "time" : "times"}
+                      Stream "{mission.trackName}" {mission.target} {mission.target === 1 ? "time" : "times"}
                     </p>
                     <p style={{ color: done ? "#22c55e" : "#484f58", fontSize: 11, margin: "3px 0 0" }}>
                       {done ? "✓ Mission complete!" : `${progress} / ${mission.target} completed`}

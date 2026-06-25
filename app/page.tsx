@@ -17,71 +17,123 @@ declare global {
   interface Window { twttr: any }
 }
 
+interface CampaignLink {
+  url: string
+  label: string
+}
+
+interface CampaignUpdate {
+  id: number
+  component?: JSX.Element
+  title?: string
+  description?: string
+  videoUrl?: string
+  spotifyUrl?: string
+  imageUrl?: string
+  imageAlt?: string
+  links?: CampaignLink[]
+  urgent?: boolean
+  urgentLabel?: string
+}
+
 /* ── CAMPAIGN DATA ───────────────────────────────── */
-const campaignUpdates = [
-  { id: 1, component: <DailyGoalSlide /> },
-  {
-    id: 2,
-    title: '"Adrenaline" Music Video Out Now!',
-    description: 'ATEEZ\'s new music video for "Adrenaline" is here. Watch it now!',
-    videoUrl: "https://www.youtube.com/embed/vqkfEUqjl6Y?si=N-36Jk4xkZN8bGas",
+const campaignUpdates: CampaignUpdate[] = [
+  //     {
+  //   id: 1,
+  //   title: "Vote for ATEEZ for the AMAs!",
+  //   description: "Show your support for ATEEZ by voting for them at the American Music Awards! Vote on Instagram and on the AMAs website.",
+  //   imageUrl: "https://pbs.twimg.com/media/HF6yVa9bQAACsDU.jpg",
+  //       links: [
+  //         { url: "https://vote.theamas.com/best-male-k-pop-artist", label: "Vote Now on AMAs Site" },
+  //         { url: "https://www.instagram.com/p/DXHH2kplOBV/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==", label: "Vote on Instagram" }
+  //       ],
+  //   urgent: true,
+  //       urgentLabel: "Vote Now"
+  // },
+    { id: 2, component: <DailyGoalSlide /> },
+        {
+    id: 7,
+    title: 'Check out the "BAD" Music Video Teaser 2!',
+    description: 'ATEEZ\'s new music video for "BAD" is on the way. Check out the teaser now!',
+    videoUrl: "https://www.youtube.com/embed/4rQY6IlwSh8?si=ncXIyc-gSbCwsQ_P",
     urgent: true
   },
+      {
+    id: 6,
+    title: 'Check out the "BAD" Music Video Teaser 1!',
+    description: 'ATEEZ\'s new music video for "BAD" is on the way. Check out the teaser now!',
+    videoUrl: "https://www.youtube.com/embed/4Xlmkx7Tv_s?si=oR-O0uOi0CRKQk76",
+    urgent: true
+  },
+    {
+    id: 1,
+    title: 'Check out the "BAD" Music Video Trailer!',
+    description: 'ATEEZ\'s new music video for "BAD" is on the way. Check out the trailer now!',
+    videoUrl: "https://www.youtube.com/embed/JDYI_S4WnQ8?si=nS4clXbJiwPXSw7R",
+    urgent: true
+  },
+    {
+    id: 5,
+    title: '"GOLDEN HOUR: Part.5" Preview',
+    description: 'ATEEZ\'s preview for their upcoming album "GOLDEN HOUR: Part.5" available. Check it out!',
+    videoUrl: "https://www.youtube.com/embed/i7B6lefO93Y?si=3w-xQkooePJ30nkW",
+    urgent: true
+  },
+
   {
     id: 3,
-    title: "🫧 Listen GOLDEN HOUR: Part.4 Album Now",
-    description: "Listen to ATEEZ's highly anticipated album on Spotify & Apple Music!",
-    spotifyUrl: "https://open.spotify.com/embed/album/1FBxW4I6azDVjGallQ4wQk?utm_source=generator",
-    urgent: true
+    title: '"Adrenaline" Music Video!',
+    description: 'Check out ATEEZ\'s most recent music video, "Adrenaline".',
+    videoUrl: "https://www.youtube.com/embed/vqkfEUqjl6Y?si=N-36Jk4xkZN8bGas",
+    urgent: false
   },
   {
     id: 4,
-    title: "ATEEZ on KBS 1N2D!",
-    description: "ATEEZ returns to 1N2D and are hilarious as usual!",
-    videoUrl: "https://www.youtube.com/embed/bfhzzSQ2YCI?si=tLnuRMqykmkKpaRT",
-    links: [{ url: "https://www.youtube.com/watch?v=bfhzzSQ2YCI", label: "Watch on YouTube" }],
+    title: "🫧 Listen to GOLDEN HOUR: Part.4 Album",
+    description: "Listen to ATEEZ's most recent album on Spotify & Apple Music!",
+    spotifyUrl: "https://open.spotify.com/embed/album/1FBxW4I6azDVjGallQ4wQk?utm_source=generator",
     urgent: false
-  },
-  {
-    id: 5,
-    title: '"Adrenaline" on Music Bank!',
-    description: 'Watch ATEEZ put on an electrifying performance of "Adrenaline" on Music Bank.',
-    videoUrl: "https://www.youtube.com/embed/0PeuZB1FniM?si=4yVEpQKVTIxgffW3",
-    links: [{ url: "https://www.youtube.com/watch?v=0PeuZB1FniM", label: "Watch on YouTube" }],
-    urgent: false
-  },
-  {
-    id: 6,
-    title: '"NASA" on Music Bank!',
-    description: 'Watch ATEEZ mesmerise with their performance of "NASA" on Music Bank.',
-    videoUrl: "https://www.youtube.com/embed/CN3vOi5wKCk?si=r8vajgtQYQ_Smj0Q",
-    links: [{ url: "https://www.youtube.com/watch?v=CN3vOi5wKCk", label: "Watch on YouTube" }],
-    urgent: false
-  },
-  {
-    id: 7,
-    title: '"Adrenaline" on Music Core!',
-    description: 'Watch ATEEZ put on an amazing performance of "Adrenaline" on Music Core.',
-    videoUrl: "https://www.youtube.com/embed/tDuZLK78BEk?si=qGPDk8TS_ymtON66",
-    links: [{ url: "https://www.youtube.com/watch?v=tDuZLK78BEk", label: "Watch on YouTube" }],
-    urgent: false
-  },
-  {
-    id: 8,
-    title: '"NASA" on Music Core!',
-    description: 'Watch ATEEZ mesmerise with their performance of "NASA" on Music Core.',
-    videoUrl: "https://www.youtube.com/embed/mNLzeeTiYd8?si=d3RvFTthYEMK23d6",
-    links: [{ url: "https://www.youtube.com/watch?v=mNLzeeTiYd8", label: "Watch on YouTube" }],
-    urgent: false
-  },
-  {
-    id: 9,
-    title: "YUNHO on Lee Mujin Service",
-    description: "Watch Yunho shine on Lee Mujin Service!",
-    videoUrl: "https://www.youtube.com/embed/p4Q221AMiss?si=x_7DlMMnfpj9LAjb",
-    links: [{ url: "https://www.youtube.com/watch?v=p4Q221AMiss", label: "Watch on YouTube" }],
-    urgent: false
-  },
+  }
+  // {
+  //   id: 5,
+  //   title: '"Adrenaline" on Music Bank!',
+  //   description: 'Watch ATEEZ put on an electrifying performance of "Adrenaline" on Music Bank.',
+  //   videoUrl: "https://www.youtube.com/embed/0PeuZB1FniM?si=4yVEpQKVTIxgffW3",
+  //   links: [{ url: "https://www.youtube.com/watch?v=0PeuZB1FniM", label: "Watch on YouTube" }],
+  //   urgent: false
+  // },
+  // {
+  //   id: 6,
+  //   title: '"NASA" on Music Bank!',
+  //   description: 'Watch ATEEZ mesmerise with their performance of "NASA" on Music Bank.',
+  //   videoUrl: "https://www.youtube.com/embed/CN3vOi5wKCk?si=r8vajgtQYQ_Smj0Q",
+  //   links: [{ url: "https://www.youtube.com/watch?v=CN3vOi5wKCk", label: "Watch on YouTube" }],
+  //   urgent: false
+  // },
+  // {
+  //   id: 7,
+  //   title: '"Adrenaline" on Music Core!',
+  //   description: 'Watch ATEEZ put on an amazing performance of "Adrenaline" on Music Core.',
+  //   videoUrl: "https://www.youtube.com/embed/tDuZLK78BEk?si=qGPDk8TS_ymtON66",
+  //   links: [{ url: "https://www.youtube.com/watch?v=tDuZLK78BEk", label: "Watch on YouTube" }],
+  //   urgent: false
+  // },
+  // {
+  //   id: 8,
+  //   title: '"NASA" on Music Core!',
+  //   description: 'Watch ATEEZ mesmerise with their performance of "NASA" on Music Core.',
+  //   videoUrl: "https://www.youtube.com/embed/mNLzeeTiYd8?si=d3RvFTthYEMK23d6",
+  //   links: [{ url: "https://www.youtube.com/watch?v=mNLzeeTiYd8", label: "Watch on YouTube" }],
+  //   urgent: false
+  // },
+  // {
+  //   id: 9,
+  //   title: "YUNHO on Lee Mujin Service",
+  //   description: "Watch Yunho shine on Lee Mujin Service!",
+  //   videoUrl: "https://www.youtube.com/embed/p4Q221AMiss?si=x_7DlMMnfpj9LAjb",
+  //   links: [{ url: "https://www.youtube.com/watch?v=p4Q221AMiss", label: "Watch on YouTube" }],
+  //   urgent: false
+  // },
 ]
 
 // Welcome card data — mirrors the welcome-ot8 collection in PhotocardGallery
@@ -294,6 +346,15 @@ export default function Home() {
                         />
                       </div>
                     )}
+                    {slide.imageUrl && !slide.videoUrl && !slide.spotifyUrl && (
+                      <div className="w-full md:w-[340px] md:flex-shrink-0" style={{ background: "#0b1220", aspectRatio: "16/9", overflow: "hidden" }}>
+                        <img
+                          src={slide.imageUrl}
+                          alt={slide.imageAlt || slide.title || "Campaign update image"}
+                          style={{ display: "block", width: "100%", height: "100%", objectFit: "cover" }}
+                        />
+                      </div>
+                    )}
                     {slide.spotifyUrl && (
                       <div className="w-full md:w-[340px] md:flex-shrink-0" style={{ display: "flex", alignItems: "center", background: "rgba(0,0,0,0.3)", padding: "16px 0" }}>
                         <iframe
@@ -312,7 +373,7 @@ export default function Home() {
                           background: "#ef4444", color: "white", fontSize: 9, fontWeight: 800,
                           padding: "2px 8px", borderRadius: 4, textTransform: "uppercase",
                           letterSpacing: "0.05em", display: "inline-block", marginBottom: 10, width: "fit-content"
-                        }}>Out Now</span>
+                        }}>{slide.urgentLabel || "Out Now"}</span>
                       )}
                       <h3 style={{ color: "#e6edf3", fontSize: 19, fontWeight: 800, marginBottom: 8, lineHeight: 1.3 }}>
                         {slide.title}

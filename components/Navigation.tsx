@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useState, useEffect } from "react"
-import { Menu, X, Trophy, TrendingUp, ShoppingBag, Map, Play } from "lucide-react"
+import { Menu, X, Trophy, TrendingUp, ShoppingBag, Map, Play, Vote } from "lucide-react"
 import { UserButton, SignInButton, useUser } from "@clerk/nextjs"
 import StreakModal from "@/components/StreakModal"
 
@@ -17,6 +17,7 @@ const getBadgeTier = (streak: number) => {
 
 const navItems = [
   { name: "Streaming Hub", href: "/streaming",  icon: TrendingUp },
+  { name: "Voting",        href: "/voting",     icon: Vote },
   { name: "Shop",          href: "/shop",        icon: ShoppingBag },
   { name: "Lore",          href: "/lore",        icon: Map },
   { name: "Variety",       href: "/variety",     icon: Play },

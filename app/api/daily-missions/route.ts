@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 
 const CATALOG_KEY = 'ateez:songs:catalog'
+const KV_PREFIX = process.env.NODE_ENV === 'development' ? 'dev:' : ''
 
 // Helper: Get current date in KST
 function getKSTDate(): string {
@@ -50,7 +51,7 @@ export async function GET() {
   try {
     const { userId } = await auth()
     const today = getKSTDate()
-    const missionsKey = `daily:missions:${today}`
+    const missionsKey = `${KV_PREFIX}daily:missions:${today}`
     
     const missions = await kv.get<Mission[]>(missionsKey) || []
     
@@ -102,7 +103,7 @@ export async function POST(request: Request) {
     }
     
     const today = getKSTDate()
-    const missionsKey = `daily:missions:${today}`
+    const missionsKey = `${KV_PREFIX}daily:missions:${today}`
     const ttl = secondsUntilEndOfNextKSTDay()
     
     // Store missions until end of next KST day (prevents gap at midnight rollover)

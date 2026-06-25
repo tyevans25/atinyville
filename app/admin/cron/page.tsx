@@ -3,13 +3,15 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { RefreshCw, CheckCircle, XCircle } from 'lucide-react'
+import { RefreshCw, CheckCircle, XCircle, RotateCcw } from 'lucide-react'
 import { triggerCronJob } from './actions'
 
 export default function AdminCronTrigger() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
+  const [resetLoading, setResetLoading] = useState(false)
+  const [resetMsg, setResetMsg] = useState<string | null>(null)
 
   const handleTrigger = async () => {
     setLoading(true)
@@ -31,6 +33,24 @@ export default function AdminCronTrigger() {
       setError('Unexpected error occurred')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleResetMissions = async () => {
+    setResetLoading(true)
+    setResetMsg(null)
+    try {
+      const res = await fetch('/api/admin/reset-missions', { method: 'POST' })
+      const data = await res.json()
+      if (res.ok) {
+        setResetMsg(data.message)
+      } else {
+        setResetMsg(data.error || 'Failed to clear missions')
+      }
+    } catch {
+      setResetMsg('Error clearing missions')
+    } finally {
+      setResetLoading(false)
     }
   }
 
@@ -98,6 +118,24 @@ export default function AdminCronTrigger() {
                 💡 Refresh the streaming page to see updated community goals!
               </p>
             </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Auto-Mission Controls</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-gray-600">
+            Clear today's missions so the next cron run auto-generates them from your title track settings.
+          </p>
+          <Button onClick={handleResetMissions} disabled={resetLoading} variant="outline" className="w-full">
+            {resetLoading ? <><RotateCcw className="w-4 h-4 mr-2 animate-spin" />Clearing...</> : <><RotateCcw className="w-4 h-4 mr-2" />Clear Today's Missions</>}
+          </Button>
+          {resetMsg && <p className="text-sm text-gray-700 bg-gray-50 border rounded p-3">{resetMsg}</p>}
+          {resetMsg && !resetMsg.includes('Error') && (
+            <p className="text-xs text-gray-500">Now click "Trigger Cron Now" above to regenerate missions from your title tracks.</p>
           )}
         </CardContent>
       </Card>
