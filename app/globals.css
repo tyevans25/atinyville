@@ -82,6 +82,18 @@
   .daily-goal-gif {
     display: none;
   }
+  .sh-banner {
+    justify-content: center !important;
+    text-align: center;
+  }
+  .sh-banner > div {
+    width: 100%;
+    justify-content: center;
+  }
+  .sh-banner-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* ===== Golden Hour Theme ===== */
