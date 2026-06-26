@@ -1,6 +1,6 @@
 import { kv } from "@vercel/kv"
 import { NextResponse } from "next/server"
-import { appendFocusMVSnapshot } from "@/app/api/focus-mv/route"
+import { appendFocusMVSnapshot } from "@/lib/focus-mv-snapshot"
 
 const ATEEZ_ARTIST_ID = 164828
 
