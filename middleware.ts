@@ -35,15 +35,19 @@ const isPublicRoute = createRouteMatcher([
   "/admin/login",      // login page must be public
 ]);
 
-const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
+const isAdminRoute = createRouteMatcher(["/admin(.*)", "/api/admin(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
   // Admin routes: only require ADMIN_PASSWORD cookie, not Clerk auth
   if (isAdminRoute(req)) {
-    if (isPublicRoute(req)) return; // /admin/login passes through
+    if (isPublicRoute(req)) return; // /admin/login and /api/admin/auth pass through
     const cookie = req.cookies.get("admin_session");
     const expected = process.env.ADMIN_PASSWORD;
     if (!expected || cookie?.value !== expected) {
+      // API routes: return 401 JSON instead of redirect
+      if (req.nextUrl.pathname.startsWith("/api/")) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
       return NextResponse.redirect(new URL("/admin/login", req.url));
     }
     return; // valid admin session — no Clerk required
