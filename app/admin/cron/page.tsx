@@ -26,6 +26,7 @@ export default function AdminCronTrigger() {
   const [goalEdit72, setGoalEdit72] = useState('')
   const [goalEditTrending, setGoalEditTrending] = useState('')
   const [goalLoading, setGoalLoading] = useState(false)
+  const [trendingRefreshing, setTrendingRefreshing] = useState(false)
 
   useEffect(() => {
     fetch('/api/focus-mv').then(r => r.json()).then(d => {
@@ -282,6 +283,19 @@ export default function AdminCronTrigger() {
             </Button>
             <Button onClick={handleClearFocus} disabled={focusLoading} size="sm" variant="outline">
               <X className="w-4 h-4" />
+            </Button>
+            <Button
+              size="sm" variant="outline"
+              disabled={trendingRefreshing || !currentFocus}
+              onClick={async () => {
+                setTrendingRefreshing(true)
+                const r = await fetch('/api/admin/refresh-trending', { method: 'POST' })
+                const d = await r.json()
+                setFocusMsg(r.ok ? `Trending refreshed — rank: ${d.rank ?? 'not in top 200'}` : (d.error || 'Refresh failed'))
+                setTrendingRefreshing(false)
+              }}
+            >
+              {trendingRefreshing ? <RefreshCw className="w-3 h-3 animate-spin" /> : '↺ Trending'}
             </Button>
           </div>
           <div className="grid grid-cols-4 gap-2">
