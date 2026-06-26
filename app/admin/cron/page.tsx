@@ -297,6 +297,20 @@ export default function AdminCronTrigger() {
             >
               {trendingRefreshing ? <RefreshCw className="w-3 h-3 animate-spin" /> : '↺ Trending'}
             </Button>
+            <Button
+              size="sm" variant="outline"
+              disabled={focusLoading || !currentFocus}
+              onClick={async () => {
+                if (!confirm('Clear all view history for this video? The chart will rebuild from the next cron run.')) return
+                setFocusLoading(true)
+                const r = await fetch('/api/admin/clear-focus-history', { method: 'POST' })
+                const d = await r.json()
+                setFocusMsg(r.ok ? 'View history cleared. Chart will rebuild hourly from next cron run.' : (d.error || 'Failed'))
+                setFocusLoading(false)
+              }}
+            >
+              Clear History
+            </Button>
           </div>
           <div className="grid grid-cols-4 gap-2">
             <div>
