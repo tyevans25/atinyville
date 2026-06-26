@@ -24,6 +24,7 @@ export default function StationheadAdminPage() {
   const [liveSet, setLiveSet] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [toggling, setToggling] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/admin/stationhead-live')
@@ -38,6 +39,7 @@ export default function StationheadAdminPage() {
   const toggle = async (username: string) => {
     const nowLive = !liveSet.has(username)
     setToggling(username)
+    setError(null)
     try {
       const res = await fetch('/api/admin/stationhead-live', {
         method: 'POST',
@@ -50,7 +52,12 @@ export default function StationheadAdminPage() {
           nowLive ? next.add(username) : next.delete(username)
           return next
         })
+      } else {
+        const data = await res.json().catch(() => ({}))
+        setError(`Failed (${res.status}): ${data.error ?? 'Unknown error'}`)
       }
+    } catch (e: any) {
+      setError(`Network error: ${e?.message ?? e}`)
     } finally {
       setToggling(null)
     }
@@ -139,6 +146,12 @@ export default function StationheadAdminPage() {
       <p className="text-xs text-gray-400">
         Live status expires automatically after 4 hours — turn off manually when the party ends to keep the banner accurate.
       </p>
+
+      {error && (
+        <div className="rounded-lg px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm font-medium">
+          ⚠️ {error}
+        </div>
+      )}
     </div>
   )
 }

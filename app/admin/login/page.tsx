@@ -23,7 +23,7 @@ export default function AdminLogin() {
       })
 
       if (res.ok) {
-        router.push("/admin/cron")
+        router.push("/admin/stationhead")
         router.refresh()
       } else {
         setError("Incorrect password")

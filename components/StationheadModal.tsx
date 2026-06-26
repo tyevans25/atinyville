@@ -14,7 +14,7 @@ export function StationheadModal({ stations, onClose }: { stations: Station[]; o
 
   return (
     <div
-      style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
+      style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "72px 16px 16px" }}
       onClick={onClose}
     >
       {/* Backdrop */}
@@ -22,7 +22,7 @@ export function StationheadModal({ stations, onClose }: { stations: Station[]; o
 
       {/* Modal */}
       <div
-        style={{ position: "relative", background: "#161b22", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16, width: "100%", maxWidth: 480, padding: 24, maxHeight: "85vh", overflowY: "auto" }}
+        style={{ position: "relative", background: "#161b22", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16, width: "100%", maxWidth: 440, padding: 18, maxHeight: "calc(100vh - 88px)", overflowY: "auto" }}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -54,7 +54,7 @@ export function StationheadModal({ stations, onClose }: { stations: Station[]; o
                 background: station.isLive ? "rgba(239,68,68,0.06)" : "rgba(255,255,255,0.03)",
                 border: `1px solid ${station.isLive ? "rgba(239,68,68,0.2)" : "rgba(255,255,255,0.07)"}`,
                 borderRadius: 12,
-                padding: "14px 16px",
+                padding: "10px 12px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",

@@ -15,18 +15,26 @@ export interface FocusMV {
   thumbnail: string
   channelTitle: string
   setAt: string
+  publishedAt?: string
+  goal24h?: number
+  goal48h?: number
+  goal72h?: number
+  trendingGoal?: number // target trending rank (lower = better)
 }
 
 export async function GET() {
   try {
     const focus = await kv.get<FocusMV>('focus:mv')
-    if (!focus) return NextResponse.json({ focus: null, history: [] })
+    if (!focus) return NextResponse.json({ focus: null, history: [], trending: null })
 
-    const history = (await kv.get<FocusMVEntry[]>(`focus:mv:history:${focus.videoId}`)) || []
+    const [history, trending] = await Promise.all([
+      kv.get<FocusMVEntry[]>(`focus:mv:history:${focus.videoId}`),
+      kv.get<{ rank: number | null; updatedAt: string }>('focus:mv:trending'),
+    ])
 
-    return NextResponse.json({ focus, history })
+    return NextResponse.json({ focus, history: history || [], trending: trending || null })
   } catch {
-    return NextResponse.json({ focus: null, history: [] })
+    return NextResponse.json({ focus: null, history: [], trending: null })
   }
 }
 
@@ -37,7 +45,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { videoId } = await request.json()
+  const { videoId, goal24h, goal48h, goal72h, trendingGoal } = await request.json()
   if (!videoId || typeof videoId !== 'string') {
     return NextResponse.json({ error: 'videoId required' }, { status: 400 })
   }
@@ -65,19 +73,59 @@ export async function POST(request: Request) {
     thumbnail: video.snippet.thumbnails.maxres?.url || video.snippet.thumbnails.high?.url || '',
     channelTitle: video.snippet.channelTitle,
     setAt: new Date().toISOString(),
+    publishedAt: video.snippet.publishedAt || undefined,
+    ...(goal24h  ? { goal24h: Number(goal24h)  } : {}),
+    ...(goal48h  ? { goal48h: Number(goal48h)  } : {}),
+    ...(goal72h  ? { goal72h: Number(goal72h)  } : {}),
+    ...(trendingGoal ? { trendingGoal: Number(trendingGoal) } : {}),
   }
 
-  // Seed the first history entry
+  // Preserve existing history if same video is being re-set (e.g. updating goals)
   const currentViews = parseInt(video.statistics.viewCount) || 0
   const hourStr = new Date().toISOString().slice(0, 13)
-  const history: FocusMVEntry[] = [{ t: hourStr, v: currentViews }]
+  const existingHistory = await kv.get<FocusMVEntry[]>(`focus:mv:history:${cleanId}`)
+  let history: FocusMVEntry[]
+  if (existingHistory && existingHistory.length > 0) {
+    // Keep existing history; append current snapshot if this hour isn't already there
+    const lastEntry = existingHistory.at(-1)!
+    if (lastEntry.t === hourStr) {
+      history = existingHistory
+    } else {
+      history = [...existingHistory, { t: hourStr, v: currentViews }].slice(-HISTORY_MAX)
+    }
+  } else {
+    history = [{ t: hourStr, v: currentViews }]
+  }
 
   await Promise.all([
     kv.set('focus:mv', focus),
-    kv.set(`focus:mv:history:${cleanId}`, history, { ex: 60 * 60 * 24 * 30 }), // 30 days
+    kv.set(`focus:mv:history:${cleanId}`, history, { ex: 60 * 60 * 24 * 30 }),
   ])
 
   return NextResponse.json({ success: true, focus, currentViews })
+}
+
+export async function PATCH(request: Request) {
+  const { userId } = await auth()
+  const adminId = process.env.ADMIN_CLERK_USER_ID
+  if (!userId || userId !== adminId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const current = await kv.get<FocusMV>('focus:mv')
+  if (!current) return NextResponse.json({ error: 'No focus MV set' }, { status: 404 })
+
+  const { goal24h, goal48h, goal72h, trendingGoal } = await request.json()
+  const updated: FocusMV = {
+    ...current,
+    ...(goal24h      !== undefined ? { goal24h:      goal24h      ? Number(goal24h)      : undefined } : {}),
+    ...(goal48h      !== undefined ? { goal48h:      goal48h      ? Number(goal48h)      : undefined } : {}),
+    ...(goal72h      !== undefined ? { goal72h:      goal72h      ? Number(goal72h)      : undefined } : {}),
+    ...(trendingGoal !== undefined ? { trendingGoal: trendingGoal ? Number(trendingGoal) : undefined } : {}),
+  }
+
+  await kv.set('focus:mv', updated)
+  return NextResponse.json({ success: true, focus: updated })
 }
 
 export async function DELETE() {
@@ -92,7 +140,7 @@ export async function DELETE() {
     if (focus?.videoId) {
       await kv.del(`focus:mv:history:${focus.videoId}`)
     }
-    await kv.del('focus:mv')
+    await Promise.all([kv.del('focus:mv'), kv.del('focus:mv:trending')])
 
     return NextResponse.json({ success: true })
   } catch {
