@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { RefreshCw, CheckCircle, XCircle, RotateCcw } from 'lucide-react'
+import { RefreshCw, CheckCircle, XCircle, RotateCcw, Youtube, X } from 'lucide-react'
 import { triggerCronJob } from './actions'
 
 export default function AdminCronTrigger() {
@@ -12,6 +12,10 @@ export default function AdminCronTrigger() {
   const [error, setError] = useState<string | null>(null)
   const [resetLoading, setResetLoading] = useState(false)
   const [resetMsg, setResetMsg] = useState<string | null>(null)
+  const [focusUrl, setFocusUrl] = useState('')
+  const [focusLoading, setFocusLoading] = useState(false)
+  const [focusMsg, setFocusMsg] = useState<string | null>(null)
+  const [focusError, setFocusError] = useState<string | null>(null)
 
   const handleTrigger = async () => {
     setLoading(true)
@@ -51,6 +55,46 @@ export default function AdminCronTrigger() {
       setResetMsg('Error clearing missions')
     } finally {
       setResetLoading(false)
+    }
+  }
+
+  const handleSetFocus = async () => {
+    if (!focusUrl.trim()) return
+    setFocusLoading(true)
+    setFocusMsg(null)
+    setFocusError(null)
+    try {
+      const res = await fetch('/api/focus-mv', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoId: focusUrl.trim() })
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setFocusMsg(`✅ Focus MV set: "${data.focus.title}"`)
+        setFocusUrl('')
+      } else {
+        setFocusError(data.error || 'Failed to set focus MV')
+      }
+    } catch {
+      setFocusError('Network error')
+    } finally {
+      setFocusLoading(false)
+    }
+  }
+
+  const handleClearFocus = async () => {
+    setFocusLoading(true)
+    setFocusMsg(null)
+    setFocusError(null)
+    try {
+      const res = await fetch('/api/focus-mv', { method: 'DELETE' })
+      if (res.ok) setFocusMsg('Focus MV cleared.')
+      else setFocusError('Failed to clear')
+    } catch {
+      setFocusError('Network error')
+    } finally {
+      setFocusLoading(false)
     }
   }
 
@@ -119,6 +163,38 @@ export default function AdminCronTrigger() {
               </p>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Youtube className="w-4 h-4 text-red-500" />
+            Focus MV
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-gray-600">
+            Set a YouTube MV to track hourly views. The chart will appear above the calendar on the home page.
+          </p>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={focusUrl}
+              onChange={e => setFocusUrl(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSetFocus()}
+              placeholder="YouTube URL or video ID"
+              className="flex-1 border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <Button onClick={handleSetFocus} disabled={focusLoading || !focusUrl.trim()} size="sm">
+              {focusLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Set'}
+            </Button>
+            <Button onClick={handleClearFocus} disabled={focusLoading} size="sm" variant="outline">
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+          {focusMsg && <p className="text-sm text-gray-700 bg-gray-50 border rounded p-3">{focusMsg}</p>}
+          {focusError && <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded p-3">{focusError}</p>}
         </CardContent>
       </Card>
 

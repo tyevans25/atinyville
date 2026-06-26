@@ -1,13 +1,12 @@
 "use client"
 
-import { X, Radio, Users } from "lucide-react"
+import { X, Radio } from "lucide-react"
 
 interface Station {
   username: string
   displayName: string
   description: string
   isLive: boolean
-  listenerCount: number
 }
 
 export function StationheadModal({ stations, onClose }: { stations: Station[]; onClose: () => void }) {
@@ -81,10 +80,6 @@ export function StationheadModal({ stations, onClose }: { stations: Station[]; o
                     {station.isLive ? (
                       <>
                         <span style={{ background: "#22c55e", color: "white", fontSize: 9, fontWeight: 800, padding: "1px 6px", borderRadius: 4, letterSpacing: "0.06em" }}>LIVE</span>
-                        <span style={{ color: "#8b949e", fontSize: 11, display: "flex", alignItems: "center", gap: 3 }}>
-                          <Users style={{ width: 10, height: 10 }} />
-                          {station.listenerCount.toLocaleString()} listening
-                        </span>
                       </>
                     ) : (
                       <span style={{ color: "#484f58", fontSize: 11 }}>Offline</span>

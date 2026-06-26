@@ -1,5 +1,6 @@
 import { kv } from "@vercel/kv"
 import { NextResponse } from "next/server"
+import { appendFocusMVSnapshot } from "@/app/api/focus-mv/route"
 
 const ATEEZ_ARTIST_ID = 164828
 
@@ -567,6 +568,9 @@ export async function POST(request: Request) {
     }
 
     console.log(`📊 Done: ${usersProcessed} processed, ${usersSkipped} skipped, ${streaksUpdated} streaks updated`)
+
+    // Snapshot focus MV views (once per hour, de-duped inside)
+    await appendFocusMVSnapshot()
 
     return NextResponse.json({
       success: true,

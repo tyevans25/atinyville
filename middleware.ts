@@ -29,6 +29,8 @@ const isPublicRoute = createRouteMatcher([
   "/api/community-weekly-goal",
   "/api/mission-progress",
   "/api/daily-goal",
+  "/api/focus-mv",
+  "/api/stationhead-live",
   "/api/admin/auth",   // login/logout endpoint must be public
   "/admin/login",      // login page must be public
 ]);

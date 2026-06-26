@@ -11,7 +11,6 @@ interface Station {
   displayName: string
   description: string
   isLive: boolean
-  listenerCount: number
 }
 
 export function StationheadLiveBanner() {

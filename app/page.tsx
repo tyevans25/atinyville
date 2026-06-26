@@ -7,6 +7,7 @@ import Navigation from "@/components/Navigation"
 import DailyGoalSlide from "@/components/DailyGoalSlide"
 import { useUser } from "@clerk/nextjs"
 import ATEEZCalendar from "@/components/ATEEZCalendar"
+import FocusMVCard from "@/components/FocusMVCard"
 import MVTracker from "@/components/MVTracker"
 import MemberDots from "@/components/MemberDots"
 import MilestoneCelebration from "@/components/MilestoneCelebration"
@@ -417,6 +418,9 @@ export default function Home() {
                 }}>{label}</button>
               ))}
             </div>
+
+            {/* ── FOCUS MV ── */}
+            <FocusMVCard />
 
             {/* ── CALENDAR ── */}
             <div style={{
