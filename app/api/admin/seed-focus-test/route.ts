@@ -8,6 +8,9 @@ async function isAuthorized() {
 }
 
 export async function POST() {
+  if (process.env.VERCEL_ENV === 'production') {
+    return NextResponse.json({ error: 'Seed disabled on production' }, { status: 403 })
+  }
   if (!await isAuthorized()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const focus = await kv.get<{ videoId: string; title: string; publishedAt?: string }>('focus:mv')

@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server'
 import { kv } from '@vercel/kv'
-import { auth } from '@clerk/nextjs/server'
+import { cookies } from 'next/headers'
 
 const HISTORY_MAX = 168 // 7 days of hourly snapshots
+
+async function isAuthorized() {
+  const jar = await cookies()
+  return jar.get('admin_session')?.value === process.env.ADMIN_PASSWORD
+}
 
 export interface FocusMVEntry {
   t: string  // ISO hour string e.g. "2026-06-25T14"
@@ -39,11 +44,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { userId } = await auth()
-  const adminId = process.env.ADMIN_CLERK_USER_ID
-  if (!userId || userId !== adminId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  if (!await isAuthorized()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { videoId, goal24h, goal48h, goal72h, trendingGoal } = await request.json()
   if (!videoId || typeof videoId !== 'string') {
@@ -106,11 +107,7 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const { userId } = await auth()
-  const adminId = process.env.ADMIN_CLERK_USER_ID
-  if (!userId || userId !== adminId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  if (!await isAuthorized()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const current = await kv.get<FocusMV>('focus:mv')
   if (!current) return NextResponse.json({ error: 'No focus MV set' }, { status: 404 })
@@ -130,11 +127,7 @@ export async function PATCH(request: Request) {
 
 export async function DELETE() {
   try {
-    const { userId } = await auth()
-    const adminId = process.env.ADMIN_CLERK_USER_ID
-    if (!userId || userId !== adminId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    if (!await isAuthorized()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const focus = await kv.get<{ videoId: string }>('focus:mv')
     if (focus?.videoId) {

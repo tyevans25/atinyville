@@ -309,7 +309,8 @@ export default function AdminCronTrigger() {
           {focusMsg && <p className="text-sm text-gray-700 bg-gray-50 border rounded p-3">{focusMsg}</p>}
           {focusError && <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded p-3">{focusError}</p>}
           <div className="border-t pt-3">
-            <p className="text-xs text-gray-400 mb-2">Preview mode — fills 48h of fake history + demo goals so you can see the full card layout.</p>
+            <p className="text-xs text-gray-400 mb-2">Preview mode — fills 48h of fake history + demo goals so you can see the full card layout. <strong className="text-orange-500">Dev only.</strong></p>
+            {process.env.NODE_ENV !== 'production' && (
             <Button
               size="sm" variant="outline"
               className="text-xs text-gray-500"
@@ -322,6 +323,7 @@ export default function AdminCronTrigger() {
             >
               Seed Demo Data
             </Button>
+            )}
           </div>
         </CardContent>
       </Card>
