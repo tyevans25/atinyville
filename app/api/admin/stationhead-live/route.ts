@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { kv } from '@vercel/kv'
 import { cookies } from 'next/headers'
+import { STATIONS } from '@/lib/stationhead-stations'
 
 const LIVE_KEY = (username: string) => `stationhead:manual:live:${username}`
 const TTL = 60 * 60 * 4 // 4 hours auto-expire
@@ -14,7 +15,6 @@ function isAuthorized() {
 export async function GET() {
   if (!isAuthorized()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { STATIONS } = await import('@/app/api/stationhead-live/route')
   const keys = STATIONS.map(s => LIVE_KEY(s.username))
   const values = await kv.mget<boolean[]>(...keys)
   const live = STATIONS.filter((_, i) => values[i]).map(s => s.username)

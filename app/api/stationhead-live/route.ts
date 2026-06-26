@@ -1,23 +1,6 @@
 import { NextResponse } from 'next/server'
 import { kv } from '@vercel/kv'
-
-// Add more ATEEZ fan stations here as needed
-export const STATIONS = [
-  { username: 'ateez',            displayName: 'ATEEZ Official',     description: 'Official ATEEZ Stationhead account' },
-  { username: 'bluebirdfm',       displayName: 'BlueBird FM',        description: 'Main ATINY streaming station' },
-  { username: '9024fm',           displayName: '9024FM',             description: 'ATINY streaming station' },
-  { username: '1117am',           displayName: '1117AM',             description: 'ATINY streaming station' },
-  { username: 'ateezdimension',   displayName: 'Ateez Dimension',    description: 'ATINY streaming station' },
-  { username: 'barangay1117',     displayName: 'Barangay 1117',      description: 'ATINY streaming station' },
-  { username: 'jtinystation',     displayName: 'Jtiny Station',      description: 'ATINY streaming station' },
-  { username: 'cracktiny',        displayName: 'Cracktiny',          description: 'ATINY streaming station' },
-  { username: 'djbluebird1117',   displayName: 'DJ Bluebird',        description: 'ATINY streaming station' },
-  { username: 'djkraken',         displayName: 'DJ Kraken',          description: 'ATINY streaming station' },
-  { username: 'atinymovementarg', displayName: 'ATINY Movement ARG', description: 'ATINY Station — Argentina' },
-  { username: 'argentinyfm',      displayName: 'Argentiny FM',       description: 'ATINY Station — Argentina' },
-  { username: 'ateezlatam',       displayName: 'ATEEZ Latam',        description: 'ATINY Station — Latin America' },
-  { username: 'startinyarg',      displayName: 'Startiny ARG',       description: 'ATINY Station — Argentina' },
-]
+import { STATIONS } from '@/lib/stationhead-stations'
 
 export async function GET() {
   // Read manual live overrides from KV
