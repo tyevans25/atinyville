@@ -6,14 +6,15 @@ import { STATIONS } from '@/lib/stationhead-stations'
 const LIVE_KEY = (username: string) => `stationhead:manual:live:${username}`
 const TTL = 60 * 60 * 4 // 4 hours auto-expire
 
-function isAuthorized() {
-  const cookie = cookies().get('admin_session')
+async function isAuthorized() {
+  const jar = await cookies()
+  const cookie = jar.get('admin_session')
   return cookie?.value === process.env.ADMIN_PASSWORD
 }
 
 // GET: returns array of usernames currently manually marked live
 export async function GET() {
-  if (!isAuthorized()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!await isAuthorized()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const keys = STATIONS.map(s => LIVE_KEY(s.username))
   const values = await kv.mget<boolean[]>(...keys)
@@ -23,7 +24,7 @@ export async function GET() {
 
 // POST: { username, live: true|false }
 export async function POST(request: Request) {
-  if (!isAuthorized()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!await isAuthorized()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { username, live } = await request.json()
   if (!username || typeof username !== 'string') {
