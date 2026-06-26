@@ -124,14 +124,14 @@ export default function FocusMVCard() {
         </span>
       </div>
 
-      <div style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: 18 }}>
+      <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 20 }}>
 
         {/* Video embed + info */}
-        <div style={{ display: "flex", gap: 16, alignItems: "stretch" }}>
+        <div className="fmv-row" style={{ display: "flex", gap: 20, alignItems: "stretch" }}>
           {/* Autoplaying muted embed with YouTube click-through overlay */}
-          <div style={{
+          <div className="fmv-embed" style={{
             flexShrink: 0, position: "relative",
-            width: 200, height: 113, borderRadius: 10, overflow: "hidden",
+            width: 280, height: 158, borderRadius: 10, overflow: "hidden",
             border: "1px solid rgba(255,255,255,0.08)",
             boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
             background: "#000",
@@ -166,7 +166,7 @@ export default function FocusMVCard() {
           </div>
 
           {/* Title + stats */}
-          <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <div className="fmv-stats" style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center", gap: 10 }}>
             <div>
               <p style={{
                 color: "#e6edf3", fontWeight: 800, fontSize: 15,
@@ -178,7 +178,7 @@ export default function FocusMVCard() {
             </div>
 
             {/* Stat pills */}
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               {/* Total */}
               <div style={{
                 background: "rgba(88,166,255,0.07)", border: "1px solid rgba(88,166,255,0.15)",
@@ -271,6 +271,16 @@ export default function FocusMVCard() {
           </div>
         )}
       </div>
+      <style>{`
+        @media (max-width: 640px) {
+          .fmv-row { flex-direction: column !important; align-items: stretch !important; }
+          .fmv-embed { width: 100% !important; height: 0 !important; padding-bottom: 56.25% !important; }
+          .fmv-embed iframe { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+          .fmv-stats { align-items: center !important; text-align: center; }
+          .fmv-stats p { text-align: center; }
+          .fmv-stats > div:last-child { justify-content: center !important; }
+        }
+      `}</style>
     </div>
   )
 }
